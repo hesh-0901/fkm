@@ -80,6 +80,61 @@
 
   </main>
 </div>
+<!-- MODAL : NOUVEAU PRODUIT -->
+<div class="modal fade" id="productModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Nouveau produit</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="productForm">
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Nom du produit</label>
+              <input type="text" class="form-control" id="pName" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Catégorie</label>
+              <input type="text" class="form-control" id="pCategory" required>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Quantité</label>
+              <input type="number" class="form-control" id="pQty" min="0" required>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Prix unitaire (USD)</label>
+              <input type="number" class="form-control" id="pUsd" min="0">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Prix unitaire (CDF)</label>
+              <input type="number" class="form-control" id="pCdf" min="0">
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">
+          Annuler
+        </button>
+        <button class="btn btn-success" id="saveProductBtn">
+          Enregistrer
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
 
 <!-- JS -->
 <script type="module" src="../js/inventaire.js"></script>
