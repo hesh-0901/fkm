@@ -1,6 +1,6 @@
 import { auth, db } from "./firebase.config.js";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 
 const form = document.getElementById("loginForm");
 const errorBox = document.getElementById("loginError");
@@ -8,40 +8,60 @@ const errorBox = document.getElementById("loginError");
 const passwordInput = document.getElementById("password");
 const togglePassword = document.getElementById("togglePassword");
 
-// Toggle password visibility
+/* Toggle password visibility */
 togglePassword.addEventListener("click", () => {
-  const isPassword = passwordInput.type === "password";
-  passwordInput.type = isPassword ? "text" : "password";
+  const visible = passwordInput.type === "text";
+  passwordInput.type = visible ? "password" : "text";
   togglePassword.classList.toggle("bi-eye");
   togglePassword.classList.toggle("bi-eye-slash");
 });
 
+/* Login */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   errorBox.textContent = "";
 
+  const username = document.getElementById("username").value.trim();
+  const password = passwordInput.value;
+
   try {
-    const email = document.getElementById("email").value;
-    const password = passwordInput.value;
+    // 1. Get user by username
+    const q = query(
+      collection(db, "users"),
+      where("username", "==", username)
+    );
 
-    const cred = await signInWithEmailAndPassword(auth, email, password);
-    const uid = cred.user.uid;
+    const snap = await getDocs(q);
 
-    const userRef = doc(db, "users", uid);
-    const snap = await getDoc(userRef);
+    if (snap.empty) {
+      throw new Error("Identifiant incorrect.");
+    }
 
-    if (!snap.exists()) throw new Error("Accès non autorisé.");
+    const userDoc = snap.docs[0];
+    const userData = userDoc.data();
 
-    const user = snap.data();
-
-    if (user.status === "suspended") {
+    if (userData.status === "suspended") {
       throw new Error("Compte suspendu.");
     }
 
-    if (user.role === "operateur") {
-      window.location.href = "index.html";
-    } else {
-      window.location.href = "admin/dashboard.html";
+    // 2. Firebase Auth login (email interne)
+    const cred = await signInWithEmailAndPassword(
+      auth,
+      userData.email,
+      password
+    );
+
+    // 3. Redirect by role
+    switch (userData.role) {
+      case "operateur":
+        window.location.href = "index.html";
+        break;
+      case "admin":
+      case "directeur":
+        window.location.href = "admin/dashboard.html";
+        break;
+      default:
+        throw new Error("Rôle non valide.");
     }
 
   } catch (err) {
