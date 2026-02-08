@@ -1,41 +1,31 @@
+/* ======================================================
+   Firebase configuration – CDN (Browser compatible)
+   Compatible GitHub Pages / Static Hosting
+   ====================================================== */
+
 // Firebase core
-import { initializeApp } from "firebase/app";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 
 // Firebase services
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getAnalytics, isSupported } from "firebase/analytics";
+import { getAuth } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// Configuration Firebase
+// Firebase project configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCbq46M1-H2Kwdu0m7ICA-LNhLAh8f5n_I",
   authDomain: "fkmenergy-e3a8d.firebaseapp.com",
   projectId: "fkmenergy-e3a8d",
-  storageBucket: "fkmenergy-e3a8d.firebasestorage.app",
+  storageBucket: "fkmenergy-e3a8d.appspot.com",
   messagingSenderId: "675632578749",
-  appId: "1:675632578749:web:8c18eca8e000ea9d37b7d4",
-  measurementId: "G-2ZWZ834H10"
+  appId: "1:675632578749:web:8c18eca8e000ea9d37b7d4"
 };
 
-// Initialisation Firebase
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Services exportés
+// Initialize services
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Analytics (uniquement si supporté par le navigateur)
-let analytics = null;
-isSupported().then((supported) => {
-  if (supported) {
-    analytics = getAnalytics(app);
-  }
-});
-
-// Exports
-export {
-  app,
-  auth,
-  db,
-  analytics
-};
+// Export services
+export { auth, db };
