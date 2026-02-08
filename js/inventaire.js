@@ -21,11 +21,15 @@ const userRoleEl = document.getElementById("userRole");
 const logoutBtn = document.getElementById("logoutBtn");
 
 const modalEl = document.getElementById("productModal");
-const modal = new Modal(modalEl);
-
 const saveBtn = document.getElementById("saveProductBtn");
 
-/* Current user profile (GLOBAL) */
+/* Bootstrap modal (global) */
+let modal = null;
+if (window.bootstrap) {
+  modal = new bootstrap.Modal(modalEl);
+}
+
+/* Current user */
 let currentUser = null;
 
 /* ================= AUTH GUARD ================= */
@@ -38,25 +42,27 @@ onAuthStateChanged(auth, async (user) => {
   const snap = await getDoc(doc(db, "users", user.uid));
   if (!snap.exists()) return;
 
+  const data = snap.data();
+
   currentUser = {
     uid: user.uid,
-    username: snap.data().username,
-    role: snap.data().role,
-    fonction: snap.data().fonction
+    username: data.username,
+    role: data.role,
+    fonction: data.fonction
   };
 
   userNameEl.textContent = currentUser.username || "—";
   userRoleEl.textContent = currentUser.fonction || currentUser.role;
 
-  if (currentUser.role === "admin" || currentUser.role === "directeur") {
-    addBtn.classList.remove("d-none");
+  if (["admin", "directeur"].includes(currentUser.role)) {
+    addBtn.style.display = "inline-flex";
   }
 
   loadInventory();
 });
 
 /* ================= LOGOUT ================= */
-logoutBtn?.addEventListener("click", async () => {
+logoutBtn.addEventListener("click", async () => {
   await signOut(auth);
   window.location.href = "../login.html";
 });
@@ -65,9 +71,7 @@ logoutBtn?.addEventListener("click", async () => {
 async function loadInventory() {
   table.innerHTML = `
     <tr>
-      <td colspan="6" class="text-center text-muted">
-        Chargement...
-      </td>
+      <td colspan="6" class="text-center text-muted">Chargement...</td>
     </tr>
   `;
 
@@ -96,9 +100,7 @@ async function loadInventory() {
         <td>${p.unitPriceUSD ?? "—"}</td>
         <td>${p.unitPriceCDF ?? "—"}</td>
         <td>
-          <button class="btn btn-sm btn-outline-secondary">
-            Détails
-          </button>
+          <button class="btn btn-sm btn-outline-secondary">Détails</button>
         </td>
       </tr>
     `;
@@ -106,12 +108,12 @@ async function loadInventory() {
 }
 
 /* ================= MODAL ================= */
-addBtn?.addEventListener("click", () => {
-  modal.show();
+addBtn.addEventListener("click", () => {
+  modal?.show();
 });
 
 /* ================= SAVE PRODUCT ================= */
-saveBtn?.addEventListener("click", async () => {
+saveBtn.addEventListener("click", async () => {
   if (!currentUser) return;
 
   const name = document.getElementById("pName").value.trim();
