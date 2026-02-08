@@ -4,25 +4,34 @@ fetch("../partials/sidebar.html")
     return res.text();
   })
   .then(html => {
-    const container = document.getElementById("sidebar-container");
-    container.innerHTML = html;
+    document.getElementById("sidebar-container").innerHTML = html;
 
+    const app = document.querySelector(".app");
     const sidebar = document.getElementById("sidebar");
-    const openBtn = document.getElementById("openSidebar");
+    const toggleBtn = document.getElementById("toggleSidebar");
     const closeBtn = document.getElementById("closeSidebar");
 
-    // Mobile toggle
-    openBtn?.addEventListener("click", () => {
-      sidebar.classList.remove("collapsed");
+    /* Toggle sidebar (desktop & mobile) */
+    toggleBtn?.addEventListener("click", () => {
+      if (window.innerWidth >= 768) {
+        // Desktop: push layout
+        app.classList.toggle("sidebar-hidden");
+      } else {
+        // Mobile: overlay
+        sidebar.classList.remove("collapsed");
+      }
     });
 
+    /* Close sidebar (mobile) */
     closeBtn?.addEventListener("click", () => {
       sidebar.classList.add("collapsed");
     });
 
-    // Desktop safety: sidebar visible by default
-    if (window.innerWidth >= 768) {
-      sidebar.classList.remove("collapsed");
+    /* Initial state */
+    if (window.innerWidth < 768) {
+      sidebar.classList.add("collapsed");
+    } else {
+      app.classList.remove("sidebar-hidden");
     }
   })
   .catch(err => {
