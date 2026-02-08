@@ -1,14 +1,13 @@
-/* =========================================================
-   FKM ENERGY – DESIGN SYSTEM
-   ========================================================= */
+/* ==========================================================================
+   login.css — FKM ENERGY — Corporate minimaliste split-screen ERP
+   ========================================================================== */
 
-/* ---------- Palette (logo-based) ---------- */
 :root {
   --blue-main: #0B5C6B;     /* Bleu pétrole */
   --blue-dark: #083F4A;     /* Bleu profond */
-  --green-main: #2E7D32;    /* Vert énergie */
+  --green-main: #2E7D32;
   --green-light: #6FBF73;
-  --gold-main: #D4A017;     /* Or premium */
+  --gold-main: #D4A017;
   --bg-light: #F5F7FA;
   --bg-white: #FFFFFF;
   --text-dark: #1F2937;
@@ -16,242 +15,202 @@
   --border-soft: #E5E7EB;
 }
 
-/* ---------- Global ---------- */
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
 
-body {
-  background-color: var(--bg-light);
-  color: var(--text-dark);
-  font-size: 0.95rem;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-               Roboto, "Helvetica Neue", Arial, sans-serif;
-  margin: 0;
+body, html {
+  height: 100%;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
-/* =========================================================
-   LAYOUT
-   ========================================================= */
-
-.app {
-  display: flex;
+.login-fullpage {
+  position: relative;
   min-height: 100vh;
-}
-
-/* =========================================================
-   SIDEBAR
-   ========================================================= */
-
-.sidebar {
-  width: 260px;
-  background: linear-gradient(180deg, var(--blue-main), var(--blue-dark));
+  overflow: hidden;
   color: #fff;
-  transition: width 0.25s ease;
-  overflow-x: hidden;
 }
 
-.sidebar.collapsed {
-  width: 80px;
+.bg-image {
+  position: absolute;
+  inset: 0;
+  background: url('https://images.unsplash.com/photo-1569261676778-2a018b8d959e?auto=format&fit=crop&q=90&w=2400') center/cover no-repeat fixed;
+  /* Remplace par ton image réelle : port, conteneurs, cargo, avion cargo, etc. */
+  z-index: 1;
 }
 
-.sidebar-header {
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(11, 92, 107, 0.82) 0%, rgba(8, 63, 74, 0.70) 40%, rgba(0, 0, 0, 0.50) 100%);
+  z-index: 2;
+}
+
+.container-split {
+  position: relative;
+  z-index: 3;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
-  border-bottom: 1px solid rgba(255,255,255,0.15);
+  min-height: 100vh;
+  padding: 40px 5vw;
+  max-width: 1600px;
+  margin: 0 auto;
+  gap: 60px;
 }
 
-.brand {
+@media (max-width: 992px) {
+  .container-split {
+    flex-direction: column;
+    text-align: center;
+    padding: 30px 20px;
+    gap: 50px;
+  }
+}
+
+/* Branding gauche */
+.branding-side {
+  flex: 1;
+  max-width: 55%;
+}
+
+.brand-title {
+  font-size: 3.8rem;
+  font-weight: 800;
+  line-height: 1.05;
+  margin-bottom: 1.2rem;
+  color: #fff;
+  letter-spacing: -0.015em;
+  text-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+
+.brand-subtitle {
+  font-size: 1.35rem;
+  font-weight: 400;
+  opacity: 0.92;
+  line-height: 1.45;
+}
+
+/* Formulaire droit */
+.form-side {
+  flex: 0 0 420px;
+  max-width: 420px;
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.975);
+  border-radius: 12px;
+  padding: 2.6rem 2.3rem;
+  box-shadow: 0 14px 50px rgba(0, 0, 0, 0.30);
+  color: var(--text-dark);
+}
+
+.card-title {
+  font-size: 1.8rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  font-size: 0.75rem;
-  white-space: nowrap;
+  color: var(--blue-dark);
+  text-align: center;
+  margin-bottom: 2.2rem;
 }
 
-.toggle-btn {
+/* Champs */
+.form-label {
+  font-weight: 500;
+  color: var(--text-dark);
+  margin-bottom: 0.55rem;
+  font-size: 0.97rem;
+}
+
+.form-control {
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  padding: 0.8rem 1.1rem;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus {
+  border-color: var(--blue-main);
+  box-shadow: 0 0 0 3px rgba(11, 92, 107, 0.14);
+  outline: none;
+}
+
+/* Toggle œil */
+.password-group {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
-  color: #fff;
-  font-size: 1.2rem;
-  cursor: pointer;
-}
-
-/* Sections */
-.sidebar-section {
-  padding: 0.75rem 1rem 0.25rem;
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: rgba(255,255,255,0.6);
-}
-
-/* Links */
-.sidebar .nav-link {
-  color: #E0F2F1;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.6rem 1rem;
-  margin: 0.15rem 0.5rem;
-  border-radius: 0.45rem;
-  white-space: nowrap;
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.sidebar .nav-link:hover {
-  background-color: rgba(255,255,255,0.12);
-  color: #ffffff;
-}
-
-.sidebar .nav-link.active {
-  background-color: var(--green-main);
-  color: #ffffff;
-  font-weight: 500;
-}
-
-/* Collapsed behavior */
-.sidebar.collapsed .brand,
-.sidebar.collapsed .sidebar-section,
-.sidebar.collapsed .nav-text {
-  display: none;
-}
-
-/* =========================================================
-   MAIN CONTENT
-   ========================================================= */
-
-.main {
-  flex: 1;
-  padding: 1.5rem;
-}
-
-/* =========================================================
-   TOPBAR
-   ========================================================= */
-
-.topbar {
-  background-color: var(--bg-white);
-  padding: 1rem 1.25rem;
-  border-radius: 0.85rem;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.75rem;
-}
-
-.page-title {
+  color: var(--text-muted);
   font-size: 1.4rem;
-  margin: 0;
-  font-weight: 600;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s;
 }
 
-.page-subtitle {
-  font-size: 0.8rem;
-  color: var(--text-muted);
+.password-toggle:hover {
+  color: var(--blue-main);
+  background: rgba(11, 92, 107, 0.08);
 }
 
-/* User box */
-.user-name {
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.user-role {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-}
-
-/* =========================================================
-   KPI CARDS
-   ========================================================= */
-
-.kpi-card {
+/* Bouton */
+.btn-primary {
+  background-color: var(--blue-main);
   border: none;
-  border-radius: 1rem;
-  color: #ffffff;
-  box-shadow: 0 10px 22px rgba(0,0,0,0.08);
+  border-radius: 8px;
+  padding: 0.9rem;
+  font-size: 1.07rem;
+  font-weight: 600;
+  transition: all 0.25s ease;
 }
 
-.kpi-label {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+.btn-primary:hover {
+  background-color: var(--blue-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(11, 92, 107, 0.28);
+}
+
+/* Erreur + liens */
+.login-error {
+  color: #dc2626;
+  font-size: 0.93rem;
+  text-align: center;
+  margin-top: 1.1rem;
+  min-height: 1.3rem;
+}
+
+.extra-links a.forgot-link {
+  color: var(--blue-main);
+  font-size: 0.96rem;
+  text-decoration: none;
+}
+
+.extra-links a.forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* Footer */
+.login-footer {
+  text-align: center;
+  margin-top: 2rem;
+  color: var(--text-muted);
+  font-size: 0.87rem;
   opacity: 0.9;
 }
 
-.kpi-value {
-  font-size: 1.8rem;
-  font-weight: 700;
-}
-
-/* KPI Themes */
-.kpi-blue {
-  background: linear-gradient(135deg, var(--blue-main), var(--blue-dark));
-}
-
-.kpi-green {
-  background: linear-gradient(135deg, var(--green-main), var(--green-light));
-}
-
-.kpi-gold {
-  background: linear-gradient(135deg, var(--gold-main), #B38915);
-}
-
-/* =========================================================
-   CARDS & GRAPHS
-   ========================================================= */
-
-.graph-card {
-  border: none;
-  border-radius: 1rem;
-  background-color: var(--bg-white);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.07);
-}
-
-.graph-card strong {
-  font-weight: 600;
-}
-
-/* Placeholder */
-.chart-placeholder {
-  height: 320px;
-  border: 2px dashed var(--border-soft);
-  border-radius: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #9CA3AF;
-  font-size: 0.85rem;
-  background-color: #FAFAFA;
-}
-
-/* =========================================================
-   BUTTON TUNING
-   ========================================================= */
-
-.btn-outline-danger {
-  border-width: 1.5px;
-}
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media (max-width: 991px) {
-  .sidebar {
-    position: fixed;
-    z-index: 1050;
-    height: 100vh;
-  }
-
-  .main {
-    margin-left: 80px;
-  }
-
-  .sidebar:not(.collapsed) + .main {
-    margin-left: 260px;
-  }
+/* Responsive */
+@media (max-width: 768px) {
+  .brand-title { font-size: 2.9rem; }
+  .brand-subtitle { font-size: 1.25rem; }
+  .form-side { max-width: 100%; }
+  .login-card { padding: 2.2rem 1.8rem; }
 }
