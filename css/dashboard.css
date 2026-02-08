@@ -139,6 +139,17 @@ body {
 
 .app {
   transition: all 0.25s ease;
+    display: flex;
+  min-height: 100vh; /* 👈 important */
+}
+/* ===== SIDEBAR FULL HEIGHT ===== */
+.sidebar {
+  background: linear-gradient(180deg, var(--blue-main), var(--blue-dark));
+  width: 260px;
+  min-height: 100vh;      /* 👈 clé */
+  height: 100vh;          /* 👈 clé */
+  display: flex;
+  flex-direction: column; /* 👈 pour empiler proprement */
 }
 
 /* Desktop default */
