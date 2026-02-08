@@ -1,0 +1,145 @@
+:root {
+  --blue-main: #0B5C6B;
+  --blue-dark: #083F4A;
+  --green-main: #2E7D32;
+  --green-light: #6FBF73;
+  --gold: #D4A017;
+  --bg-light: #F5F7FA;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-light);
+  font-size: 0.95rem;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Layout */
+.app {
+  display: flex;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  background: linear-gradient(180deg, var(--blue-main), var(--blue-dark));
+  width: 260px;
+  color: #fff;
+  transition: transform 0.25s ease;
+}
+
+.sidebar.collapsed {
+  transform: translateX(-100%);
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  font-size: 0.8rem;
+}
+
+.sidebar-section {
+  padding: 0.75rem 1rem 0.25rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.6);
+}
+
+.nav-link {
+  color: #e0f2f1;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+}
+
+.nav-link.active {
+  background-color: var(--green-main);
+  color: #fff;
+}
+
+/* Main */
+.main {
+  flex: 1;
+  padding: 1rem;
+}
+
+/* Topbar */
+.topbar {
+  background: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.page-title {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.user-name {
+  font-weight: 600;
+}
+
+.user-role {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+/* KPI */
+.kpi-card {
+  border: none;
+  border-radius: 0.75rem;
+  color: #fff;
+}
+
+.kpi-blue { background: var(--blue-main); }
+.kpi-green { background: var(--green-main); }
+.kpi-gold { background: var(--gold); }
+
+.kpi-label {
+  font-size: 0.75rem;
+  opacity: 0.9;
+}
+
+.kpi-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+/* Graph placeholder */
+.chart-placeholder {
+  height: 200px;
+  border: 2px dashed #d0d7de;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9aa0a6;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 1050;
+  }
+}
