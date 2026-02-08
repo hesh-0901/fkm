@@ -1,5 +1,5 @@
 /* ==========================================================================
-   login.css — FKM ENERGY - Page de connexion
+   login.css — FKM ENERGY — Style corporate minimaliste ERP/Logistique
    ========================================================================== */
 
 * {
@@ -8,160 +8,177 @@
   box-sizing: border-box;
 }
 
-body {
-  min-height: 100vh;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  color: #e2e8f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+body, html {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Conteneur principal centré */
-.login-container {
-  width: 100%;
+.login-page {
+  position: relative;
+  min-height: 100vh;
+  background: url('https://images.unsplash.com/photo-1569261676778-2a018b8d959e?auto=format&fit=crop&q=80&w=2400') center/cover no-repeat fixed;
+  color: #ffffff;
+  overflow: hidden;
+}
+
+/* Overlay sombre subtil pour lisibilité */
+.background-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(0, 47, 108, 0.68) 0%, rgba(0, 47, 108, 0.42) 50%, rgba(0, 0, 0, 0.55) 100%);
+  z-index: 1;
+}
+
+/* Contenu principal */
+.content-wrapper {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 100vh;
+  padding: 40px 5vw;
+  gap: 60px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+@media (max-width: 992px) {
+  .content-wrapper {
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    padding: 30px 20px;
+    gap: 40px;
+  }
+}
+
+/* Section gauche — Hero / Slogan */
+.hero-section {
+  flex: 1;
+  max-width: 50%;
+}
+
+.hero-section h1 {
+  font-size: 3.2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.hero-section p {
+  font-size: 1.25rem;
+  opacity: 0.9;
+  max-width: 480px;
+}
+
+.logo {
+  margin-bottom: 2.5rem;
+}
+
+.logo img {
+  height: 60px;
+  width: auto;
+}
+
+/* Panneau login à droite */
+.login-panel {
+  flex: 0 0 420px;
   max-width: 420px;
 }
 
-/* Carte de connexion */
 .login-card {
-  background: rgba(30, 41, 59, 0.72);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 16px;
-  padding: 2.5rem 2rem;
-  box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.6),
-              0 0 0 1px rgba(255, 255, 255, 0.06) inset;
-  transition: transform 0.25s ease, box-shadow 0.35s ease;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 12px;
+  padding: 2.5rem 2.2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  color: #1e293b;
 }
 
-.login-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 28px 80px -20px rgba(0, 0, 0, 0.65),
-              0 0 0 1px rgba(255, 255, 255, 0.08) inset;
-}
-
-/* Titres */
-.login-title {
-  font-size: 1.95rem;
-  font-weight: 700;
-  color: #f1f5f9;
+.login-card h2 {  /* si tu ajoutes un titre dans le card */
+  font-size: 1.6rem;
+  margin-bottom: 1.8rem;
+  color: #0f172a;
   text-align: center;
-  margin-bottom: 0.5rem;
-  letter-spacing: -0.025em;
 }
 
-.login-subtitle {
-  color: #94a3b8;
-  text-align: center;
-  font-size: 0.95rem;
-  margin-bottom: 2.2rem;
-}
-
-/* Champs de formulaire */
+/* Champs Bootstrap adaptés */
 .form-label {
-  font-size: 0.92rem;
   font-weight: 500;
-  color: #cbd5e1;
-  margin-bottom: 0.45rem;
-  display: block;
+  color: #334155;
+  margin-bottom: 0.5rem;
 }
 
 .form-control {
-  background: rgba(51, 65, 85, 0.55);
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  color: #f1f5f9;
-  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
   padding: 0.75rem 1rem;
   font-size: 1rem;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-control:focus {
-  background: rgba(51, 65, 85, 0.75);
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
   outline: none;
-  color: #ffffff;
 }
 
-/* Groupe mot de passe + œil */
-.password-group {
-  position: relative;
-}
-
-.password-toggle {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-12%);
-  background: none;
-  border: none;
-  color: #94a3b8;
-  font-size: 1.3rem;
-  cursor: pointer;
-  padding: 0.4rem;
-  border-radius: 6px;
-  transition: all 0.2s;
-}
-
-.password-toggle:hover,
-.password-toggle:focus {
-  color: #cbd5e1;
-  background: rgba(148, 163, 184, 0.15);
-}
-
-/* Bouton principal */
+/* Bouton */
 .btn-primary {
-  background: linear-gradient(90deg, #2563eb, #3b82f6);
+  background-color: #2563eb;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 0.85rem;
-  font-weight: 600;
   font-size: 1.05rem;
-  color: white;
-  transition: all 0.28s ease;
-  box-shadow: 0 6px 16px -6px rgba(59, 130, 246, 0.45);
+  font-weight: 600;
+  transition: background-color 0.2s, transform 0.2s;
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  background: linear-gradient(90deg, #1d4ed8, #2563eb);
-  box-shadow: 0 12px 24px -8px rgba(59, 130, 246, 0.55);
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
 }
 
 .btn-primary:active {
   transform: translateY(0);
 }
 
-/* Message d'erreur */
-.login-error {
-  color: #f87171;
-  font-size: 0.9rem;
-  text-align: center;
-  margin-top: 1rem;
-  min-height: 1.2rem;
+/* Lien mot de passe oublié */
+.forgot-password {
+  color: #2563eb;
+  font-size: 0.95rem;
+  text-align: right;
+  display: block;
+  margin-top: 0.5rem;
+  text-decoration: none;
 }
 
-/* Footer */
+.forgot-password:hover {
+  text-decoration: underline;
+}
+
+/* Footer bas de page (optionnel) */
 .login-footer {
-  text-align: center;
-  color: #64748b;
-  font-size: 0.82rem;
-  margin-top: 1.8rem;
-  opacity: 0.9;
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,0.7);
+  font-size: 0.85rem;
+  z-index: 2;
 }
 
-/* Responsive léger */
-@media (max-width: 480px) {
-  .login-card {
-    padding: 2rem 1.4rem;
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-section h1 {
+    font-size: 2.4rem;
   }
-  
-  .login-title {
-    font-size: 1.75rem;
+  .login-panel {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  .login-card {
+    padding: 2rem 1.5rem;
   }
 }
