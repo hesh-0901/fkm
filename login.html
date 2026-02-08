@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Connexion sécurisée | FKM ENERGY</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <title>Connexion | FKM ENERGY</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Bootstrap -->
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 
-  <!-- Bootstrap Icons -->
+  <!-- Icons -->
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
@@ -18,56 +18,70 @@
 
 <body>
 
-<div class="login-layout">
+<div class="erp-layout">
 
-  <div class="login-visual"></div>
+  <!-- LEFT (branding discret) -->
+  <aside class="erp-left">
+    <div class="erp-brand">
+      <strong>FKM ENERGY</strong>
+      <span>Système de gestion interne</span>
+    </div>
+  </aside>
 
-  <div class="login-panel">
-    <div class="login-box">
+  <!-- RIGHT (login) -->
+  <main class="erp-right">
+    <section class="erp-login">
 
-      <h1 class="login-title">Connexion sécurisée</h1>
-      <p class="login-subtitle">Accès réservé au personnel autorisé</p>
+      <h1>Connexion sécurisée</h1>
+      <p>Accès réservé au personnel autorisé</p>
 
       <form id="loginForm" novalidate>
 
         <div class="mb-3">
-          <label class="form-label">Nom d’utilisateur</label>
-          <input type="text" id="username" class="form-control" required>
+          <label class="form-label">Identifiant</label>
+          <input
+            type="text"
+            id="username"
+            class="form-control"
+            autocomplete="username"
+            required
+          >
         </div>
 
-        <div class="mb-4 password-group">
+        <div class="mb-3 password-group">
           <label class="form-label">Mot de passe</label>
-
           <input
             type="password"
             id="password"
             class="form-control"
+            autocomplete="current-password"
             required
           >
-
           <button
             type="button"
             class="password-toggle"
             id="togglePassword"
+            tabindex="-1"
             aria-label="Afficher le mot de passe"
           >
             <i class="bi bi-eye"></i>
           </button>
         </div>
 
-        <button type="submit" class="btn btn-success w-100">
+        <button type="submit" class="btn btn-primary w-100">
           Se connecter
         </button>
 
-        <div id="loginError" class="login-error"></div>
+        <div id="loginError" class="erp-error"></div>
+
       </form>
 
-      <div class="login-footer">
-        © FKM ENERGY · Système interne
-      </div>
+      <footer class="erp-footer">
+        © FKM ENERGY · Accès contrôlé
+      </footer>
 
-    </div>
-  </div>
+    </section>
+  </main>
 
 </div>
 
