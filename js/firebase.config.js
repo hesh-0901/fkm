@@ -1,31 +1,26 @@
-/* ======================================================
-   Firebase configuration – CDN (Browser compatible)
-   Compatible GitHub Pages / Static Hosting
-   ====================================================== */
+import { initializeApp } from
+  "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
-// Firebase core
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAuth } from
+  "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-// Firebase services
-import { getAuth } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getFirestore } from
+  "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// Firebase project configuration
+/* Firebase config */
 const firebaseConfig = {
   apiKey: "AIzaSyCbq46M1-H2Kwdu0m7ICA-LNhLAh8f5n_I",
   authDomain: "fkmenergy-e3a8d.firebaseapp.com",
   projectId: "fkmenergy-e3a8d",
-  storageBucket: "fkmenergy-e3a8d.appspot.com",
+  storageBucket: "fkmenergy-e3a8d.firebasestorage.app",
   messagingSenderId: "675632578749",
-  appId: "1:675632578749:web:8c18eca8e000ea9d37b7d4"
+  appId: "1:675632578749:web:8c18eca8e000ea9d37b7d4",
+  measurementId: "G-2ZWZ834H10"
 };
 
-// Initialize Firebase
+/* Init Firebase */
 const app = initializeApp(firebaseConfig);
 
-// Initialize services
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-// Export services
-export { auth, db };
+/* EXPORTS */
+export const auth = getAuth(app);
+export const db = getFirestore(app);
