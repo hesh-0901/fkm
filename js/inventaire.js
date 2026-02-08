@@ -1,16 +1,20 @@
-import {
-  addDoc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { auth, db } from "./firebase.config.js";
-import { onAuthStateChanged, signOut } from
-  "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
 import {
   collection,
   getDocs,
   doc,
-  getDoc
+  getDoc,
+  addDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+import { Modal } from
+  "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.esm.min.js";
 
 /* DOM */
 const table = document.getElementById("inventoryTable");
@@ -19,36 +23,47 @@ const userNameEl = document.getElementById("userName");
 const userRoleEl = document.getElementById("userRole");
 const logoutBtn = document.getElementById("logoutBtn");
 
-/* Auth guard */
+const modalEl = document.getElementById("productModal");
+const modal = new Modal(modalEl);
+const saveBtn = document.getElementById("saveProductBtn");
+
+/* Current user profile (GLOBAL) */
+let currentUser = null;
+
+/* ================= AUTH GUARD ================= */
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "../login.html";
     return;
   }
 
-  // Charger profil utilisateur
-  const userSnap = await getDoc(doc(db, "users", user.uid));
-  if (!userSnap.exists()) return;
+  const snap = await getDoc(doc(db, "users", user.uid));
+  if (!snap.exists()) return;
 
-  const profile = userSnap.data();
-  userNameEl.textContent = profile.username || "—";
-  userRoleEl.textContent = profile.fonction || profile.role;
+  currentUser = {
+    uid: user.uid,
+    username: snap.data().username,
+    role: snap.data().role,
+    fonction: snap.data().fonction
+  };
 
-  // Rôles autorisés à ajouter
-  if (profile.role === "admin" || profile.role === "directeur") {
+  userNameEl.textContent = currentUser.username || "—";
+  userRoleEl.textContent = currentUser.fonction || currentUser.role;
+
+  if (currentUser.role === "admin" || currentUser.role === "directeur") {
     addBtn.classList.remove("d-none");
   }
 
   loadInventory();
 });
 
-/* Logout */
+/* ================= LOGOUT ================= */
 logoutBtn?.addEventListener("click", async () => {
   await signOut(auth);
   window.location.href = "../login.html";
 });
 
-/* Load inventory */
+/* ================= LOAD INVENTORY ================= */
 async function loadInventory() {
   table.innerHTML = `
     <tr>
@@ -91,22 +106,16 @@ async function loadInventory() {
     `;
   });
 }
-import { Modal } from
-  "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.esm.min.js";
 
-/* Modal */
-const modalEl = document.getElementById("productModal");
-const modal = new Modal(modalEl);
-
-const saveBtn = document.getElementById("saveProductBtn");
-
-/* Open modal */
+/* ================= MODAL ================= */
 addBtn?.addEventListener("click", () => {
   modal.show();
 });
 
-/* Save product */
+/* ================= SAVE PRODUCT ================= */
 saveBtn?.addEventListener("click", async () => {
+  if (!currentUser) return;
+
   const name = document.getElementById("pName").value.trim();
   const category = document.getElementById("pCategory").value.trim();
   const qty = Number(document.getElementById("pQty").value);
@@ -126,6 +135,13 @@ saveBtn?.addEventListener("click", async () => {
       unitPriceUSD: usd,
       unitPriceCDF: cdf,
       status: "active",
+
+      createdBy: {
+        uid: currentUser.uid,
+        username: currentUser.username,
+        role: currentUser.role
+      },
+
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
@@ -139,4 +155,3 @@ saveBtn?.addEventListener("click", async () => {
     alert("Erreur lors de l'enregistrement.");
   }
 });
-
