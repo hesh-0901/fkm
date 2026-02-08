@@ -13,9 +13,6 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-import { Modal } from
-  "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.esm.min.js";
-
 /* DOM */
 const table = document.getElementById("inventoryTable");
 const addBtn = document.getElementById("addProductBtn");
@@ -25,6 +22,7 @@ const logoutBtn = document.getElementById("logoutBtn");
 
 const modalEl = document.getElementById("productModal");
 const modal = new Modal(modalEl);
+
 const saveBtn = document.getElementById("saveProductBtn");
 
 /* Current user profile (GLOBAL) */
