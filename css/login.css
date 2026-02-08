@@ -8,30 +8,20 @@
   --border-soft: #D1D5DB;
 }
 
-/* Reset minimal */
-* {
-  box-sizing: border-box;
-}
-
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   background-color: var(--bg-light);
-  color: var(--text-dark);
 }
 
-/* Layout */
 .login-layout {
   display: flex;
   min-height: 100vh;
 }
 
-/* Visual side */
 .login-visual {
   flex: 1;
-  background-image: url("../assets/login-bg.jpg");
-  background-size: cover;
-  background-position: center;
+  background: url("../assets/login-bg.jpg") center / cover no-repeat;
   position: relative;
 }
 
@@ -46,10 +36,9 @@ body {
   );
 }
 
-/* Panel */
 .login-panel {
   width: 420px;
-  background-color: #ffffff;
+  background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,11 +49,9 @@ body {
   padding: 3rem 2.5rem;
 }
 
-/* Text */
 .login-title {
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-weight: 600;
-  margin-bottom: 0.25rem;
 }
 
 .login-subtitle {
@@ -73,15 +60,10 @@ body {
   margin-bottom: 2rem;
 }
 
-/* Form */
-.form-label {
-  font-size: 0.8rem;
-}
-
 .form-control {
   height: 44px;
-  background-color: #F9FAFB;
   border: 1px solid var(--border-soft);
+  background-color: #fff;
 }
 
 .form-control:focus {
@@ -89,37 +71,30 @@ body {
   box-shadow: none;
 }
 
-/* Password */
 .password-group {
   position: relative;
 }
 
 .password-toggle {
   position: absolute;
-  top: 36px;
   right: 10px;
+  top: 36px;
   background: none;
   border: none;
-  color: var(--text-muted);
   cursor: pointer;
+  color: var(--text-muted);
 }
 
 .password-toggle:hover {
   color: var(--text-dark);
 }
 
-/* Button */
 .btn-success {
   height: 44px;
   background-color: var(--green-main);
   border: none;
 }
 
-.btn-success:hover {
-  background-color: #256b2b;
-}
-
-/* Error */
 .login-error {
   margin-top: 1rem;
   font-size: 0.8rem;
@@ -127,20 +102,17 @@ body {
   text-align: center;
 }
 
-/* Footer */
 .login-footer {
   margin-top: 2rem;
   font-size: 0.7rem;
-  text-align: center;
   color: var(--text-muted);
+  text-align: center;
 }
 
-/* Responsive */
 @media (max-width: 992px) {
   .login-visual {
     display: none;
   }
-
   .login-panel {
     width: 100%;
   }
