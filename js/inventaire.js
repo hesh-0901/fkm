@@ -1,3 +1,7 @@
+import {
+  addDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { auth, db } from "./firebase.config.js";
 import { onAuthStateChanged, signOut } from
   "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -87,3 +91,52 @@ async function loadInventory() {
     `;
   });
 }
+import { Modal } from
+  "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.esm.min.js";
+
+/* Modal */
+const modalEl = document.getElementById("productModal");
+const modal = new Modal(modalEl);
+
+const saveBtn = document.getElementById("saveProductBtn");
+
+/* Open modal */
+addBtn?.addEventListener("click", () => {
+  modal.show();
+});
+
+/* Save product */
+saveBtn?.addEventListener("click", async () => {
+  const name = document.getElementById("pName").value.trim();
+  const category = document.getElementById("pCategory").value.trim();
+  const qty = Number(document.getElementById("pQty").value);
+  const usd = Number(document.getElementById("pUsd").value || 0);
+  const cdf = Number(document.getElementById("pCdf").value || 0);
+
+  if (!name || !category || qty < 0) {
+    alert("Veuillez remplir correctement les champs obligatoires.");
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, "inventory"), {
+      name,
+      category,
+      quantity: qty,
+      unitPriceUSD: usd,
+      unitPriceCDF: cdf,
+      status: "active",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+
+    modal.hide();
+    document.getElementById("productForm").reset();
+    loadInventory();
+
+  } catch (err) {
+    console.error(err);
+    alert("Erreur lors de l'enregistrement.");
+  }
+});
+
