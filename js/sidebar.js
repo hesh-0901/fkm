@@ -11,42 +11,36 @@ fetch("../partials/sidebar.html")
     const toggleBtn = document.getElementById("toggleSidebar");
     const closeBtn = document.getElementById("closeSidebar");
 
-    /* Toggle sidebar (desktop & mobile) */
+    if (!app || !sidebar) {
+      console.error("App ou sidebar introuvable");
+      return;
+    }
+
+    /* ===== ÉTAT INITIAL ===== */
+    if (window.innerWidth >= 768) {
+      // Desktop : sidebar visible
+      sidebar.classList.remove("collapsed");
+      app.classList.remove("sidebar-hidden");
+    } else {
+      // Mobile : sidebar cachée
+      sidebar.classList.add("collapsed");
+    }
+
+    /* ===== TOGGLE SIDEBAR ===== */
     toggleBtn?.addEventListener("click", () => {
       if (window.innerWidth >= 768) {
-        // Desktop: push layout
+        // Desktop : push / retract
         app.classList.toggle("sidebar-hidden");
       } else {
-        // Mobile: overlay
-        sidebar.classList.remove("collapsed");
+        // Mobile : overlay
+        sidebar.classList.toggle("collapsed");
       }
     });
 
-    // === Etat initial selon la taille d'écran ===
-const app = document.querySelector(".app");
-const sidebar = document.getElementById("sidebar");
-
-if (window.innerWidth >= 768) {
-  // Desktop : sidebar visible
-  sidebar.classList.remove("collapsed");
-  app.classList.remove("sidebar-hidden");
-} else {
-  // Mobile : sidebar cachée
-  sidebar.classList.add("collapsed");
-}
-
-
-    /* Close sidebar (mobile) */
+    /* ===== CLOSE SIDEBAR (mobile) ===== */
     closeBtn?.addEventListener("click", () => {
       sidebar.classList.add("collapsed");
     });
-
-    /* Initial state */
-    if (window.innerWidth < 768) {
-      sidebar.classList.add("collapsed");
-    } else {
-      app.classList.remove("sidebar-hidden");
-    }
   })
   .catch(err => {
     console.error("Erreur sidebar :", err);
