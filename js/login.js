@@ -6,16 +6,13 @@ const form = document.getElementById("loginForm");
 const errorBox = document.getElementById("loginError");
 const passwordInput = document.getElementById("password");
 const toggleBtn = document.getElementById("togglePassword");
-const toggleIcon = toggleBtn.querySelector("i");
+const icon = toggleBtn.querySelector("i");
 
-/* Toggle password visibility */
+/* Show / hide password */
 toggleBtn.addEventListener("click", () => {
-  const isHidden = passwordInput.type === "password";
-
-  passwordInput.type = isHidden ? "text" : "password";
-
-  toggleIcon.classList.toggle("bi-eye");
-  toggleIcon.classList.toggle("bi-eye-slash");
+  const hidden = passwordInput.type === "password";
+  passwordInput.type = hidden ? "text" : "password";
+  icon.className = hidden ? "bi bi-eye-slash" : "bi bi-eye";
 });
 
 /* Login */
@@ -33,7 +30,7 @@ form.addEventListener("submit", async (e) => {
     );
 
     const snap = await getDocs(q);
-    if (snap.empty) throw new Error("Identifiants incorrects.");
+    if (snap.empty) throw new Error("Identifiants invalides.");
 
     const user = snap.docs[0].data();
     if (user.status !== "active") throw new Error("Compte désactivé.");
