@@ -1,119 +1,123 @@
 :root {
-  --blue-main: #0B5C6B;
-  --blue-dark: #083F4A;
-  --green-main: #2E7D32;
-  --bg-light: #F5F7FA;
-  --text-dark: #1F2937;
-  --text-muted: #6B7280;
-  --border-soft: #D1D5DB;
+  --bg-main: #f3f4f6;
+  --panel-bg: #ffffff;
+  --border: #d1d5db;
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  --primary: #1f4fd8; /* bleu ERP */
 }
 
+/* Global */
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  background-color: var(--bg-light);
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-main);
 }
 
-.login-layout {
+/* Layout */
+.erp-layout {
   display: flex;
   min-height: 100vh;
 }
 
-.login-visual {
-  flex: 1;
-  background: url("../assets/login-bg.jpg") center / cover no-repeat;
-  position: relative;
-}
-
-.login-visual::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(11,92,107,0.85),
-    rgba(8,63,74,0.85)
-  );
-}
-
-.login-panel {
-  width: 420px;
-  background: #fff;
+/* Left */
+.erp-left {
+  width: 35%;
+  background-color: #e5e7eb;
+  border-right: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.login-box {
+.erp-brand {
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.erp-brand strong {
+  display: block;
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+}
+
+.erp-brand span {
+  color: var(--text-muted);
+}
+
+/* Right */
+.erp-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Login panel */
+.erp-login {
   width: 100%;
-  padding: 3rem 2.5rem;
+  max-width: 380px;
+  background-color: var(--panel-bg);
+  border: 1px solid var(--border);
+  padding: 2.5rem;
 }
 
-.login-title {
-  font-size: 1.35rem;
-  font-weight: 600;
+.erp-login h1 {
+  font-size: 1.2rem;
+  margin-bottom: 0.25rem;
 }
 
-.login-subtitle {
+.erp-login p {
   font-size: 0.85rem;
   color: var(--text-muted);
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Inputs */
+.form-label {
+  font-size: 0.75rem;
 }
 
 .form-control {
-  height: 44px;
-  border: 1px solid var(--border-soft);
-  background-color: #fff;
+  height: 38px;
+  border-radius: 0;
+  border: 1px solid var(--border);
 }
 
 .form-control:focus {
-  border-color: var(--blue-main);
   box-shadow: none;
+  border-color: var(--primary);
 }
 
+/* Password eye */
 .password-group {
   position: relative;
 }
 
 .password-toggle {
   position: absolute;
-  right: 10px;
-  top: 36px;
+  top: 32px;
+  right: 8px;
   background: none;
   border: none;
-  cursor: pointer;
   color: var(--text-muted);
+  cursor: pointer;
 }
 
-.password-toggle:hover {
-  color: var(--text-dark);
-}
-
-.btn-success {
-  height: 44px;
-  background-color: var(--green-main);
+/* Button */
+.btn-primary {
+  height: 38px;
+  background-color: var(--primary);
+  border-radius: 0;
   border: none;
 }
 
-.login-error {
-  margin-top: 1rem;
-  font-size: 0.8rem;
-  color: #DC2626;
-  text-align: center;
+/* Error */
+.erp-error {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: #b91c1c;
 }
 
-.login-footer {
-  margin-top: 2rem;
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  text-align: center;
-}
-
-@media (max-width: 992px) {
-  .login-visual {
-    display: none;
-  }
-  .login-panel {
-    width: 100%;
-  }
-}
+/* F*
