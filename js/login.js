@@ -1,21 +1,46 @@
-import { auth, db } from "./firebase.config.js";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { collection, query, where, getDocs } from "firebase/firestore";
+/* ======================================================
+   Login logic – ERP / Banque style
+   Auth = Firebase Auth
+   Autorisation = Firestore (users collection)
+   ====================================================== */
 
+import { auth, db } from "./firebase.config.js";
+
+// Firebase Auth
+import {
+  signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+// Firestore
+import {
+  collection,
+  query,
+  where,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+// DOM elements
 const form = document.getElementById("loginForm");
 const errorBox = document.getElementById("loginError");
 const passwordInput = document.getElementById("password");
 const toggleBtn = document.getElementById("togglePassword");
-const icon = toggleBtn.querySelector("i");
+const toggleIcon = toggleBtn.querySelector("i");
 
-/* Show / hide password */
+/* ======================================================
+   Password visibility toggle (eye icon)
+   ====================================================== */
 toggleBtn.addEventListener("click", () => {
-  const hidden = passwordInput.type === "password";
-  passwordInput.type = hidden ? "text" : "password";
-  icon.className = hidden ? "bi bi-eye-slash" : "bi bi-eye";
+  const isHidden = passwordInput.type === "password";
+  passwordInput.type = isHidden ? "text" : "password";
+
+  toggleIcon.className = isHidden
+    ? "bi bi-eye-slash"
+    : "bi bi-eye";
 });
 
-/* Login */
+/* ======================================================
+   Login process
+   ====================================================== */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   errorBox.textContent = "";
@@ -23,24 +48,43 @@ form.addEventListener("submit", async (e) => {
   const username = document.getElementById("username").value.trim();
   const password = passwordInput.value;
 
+  if (!username || !password) {
+    errorBox.textContent = "Identifiant et mot de passe requis.";
+    return;
+  }
+
   try {
+    // 1. Lookup user by username (Firestore)
     const q = query(
       collection(db, "users"),
       where("username", "==", username)
     );
 
-    const snap = await getDocs(q);
-    if (snap.empty) throw new Error("Identifiants invalides.");
+    const snapshot = await getDocs(q);
 
-    const user = snap.docs[0].data();
-    if (user.status !== "active") throw new Error("Compte désactivé.");
+    if (snapshot.empty) {
+      throw new Error("Identifiants incorrects.");
+    }
 
-    await signInWithEmailAndPassword(auth, user.email, password);
+    const userData = snapshot.docs[0].data();
 
-    window.location.href =
-      user.role === "operateur"
-        ? "index.html"
-        : "admin/dashboard.html";
+    if (userData.status !== "active") {
+      throw new Error("Compte désactivé.");
+    }
+
+    // 2. Firebase Auth (email interne)
+    await signInWithEmailAndPassword(
+      auth,
+      userData.email,
+      password
+    );
+
+    // 3. Redirect based on role
+    if (userData.role === "operateur") {
+      window.location.href = "index.html";
+    } else {
+      window.location.href = "admin/dashboard.html";
+    }
 
   } catch (err) {
     errorBox.textContent = err.message;
