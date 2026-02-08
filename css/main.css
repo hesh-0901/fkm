@@ -1,53 +1,107 @@
+:root {
+  --dark: #0d1b2a;
+  --dark-2: #1b263b;
+  --blue: #2563eb;
+  --green: #16a34a;
+  --orange: #ea580c;
+}
+
+/* GLOBAL */
 body {
-  background-color: #f4f6f9;
+  background-color: #f1f3f6;
   font-size: 0.95rem;
 }
 
-/* Sidebar */
+/* SIDEBAR */
 .sidebar {
   min-height: 100vh;
-  background: linear-gradient(180deg, #0d1b2a, #1b263b);
+  background: linear-gradient(180deg, var(--dark), var(--dark-2));
+  color: #fff;
+}
+
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  font-size: 0.85rem;
 }
 
 .sidebar .nav-link {
   color: #cfd8dc;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.4rem;
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  padding: 0.6rem 0.75rem;
-  border-radius: 0.375rem;
 }
 
 .sidebar .nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(255,255,255,0.08);
 }
 
 .sidebar .nav-link.active {
-  background-color: #415a77;
+  background-color: rgba(255,255,255,0.15);
   color: #fff;
   font-weight: 500;
 }
 
-/* KPI */
-.kpi-card {
+/* TOPBAR */
+.topbar {
+  background: #ffffff;
+  padding: 1rem 1.25rem;
   border-radius: 0.75rem;
-  border: none;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
 }
 
-.kpi-label {
+.page-title {
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.page-subtitle {
   font-size: 0.8rem;
-  text-transform: uppercase;
   color: #6c757d;
 }
 
-.kpi-value {
-  font-size: 1.6rem;
+.user-name {
   font-weight: 600;
 }
 
-/* Chart */
+.user-role {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+/* KPI */
+.kpi-card {
+  border: none;
+  border-radius: 0.9rem;
+  color: #fff;
+}
+
+.kpi-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.kpi-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.accent-blue { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+.accent-green { background: linear-gradient(135deg, #16a34a, #15803d); }
+.accent-orange { background: linear-gradient(135deg, #ea580c, #c2410c); }
+
+/* GRAPH */
+.graph-card {
+  border: none;
+  border-radius: 0.9rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+}
+
 .chart-placeholder {
-  height: 300px;
+  height: 320px;
   border: 2px dashed #dee2e6;
   border-radius: 0.5rem;
   display: flex;
