@@ -133,6 +133,54 @@ body {
   color: #9aa0a6;
 }
 
+/* ===============================
+   SIDEBAR COLLAPSE (DESKTOP)
+   =============================== */
+
+.app {
+  transition: all 0.25s ease;
+}
+
+/* Desktop default */
+@media (min-width: 768px) {
+  .sidebar {
+    transform: translateX(0);
+    width: 260px;
+    transition: width 0.25s ease;
+  }
+
+  .main {
+    margin-left: 260px;
+    transition: margin-left 0.25s ease;
+  }
+
+  /* Sidebar hidden */
+  .sidebar-hidden .sidebar {
+    width: 0;
+    overflow: hidden;
+  }
+
+  .sidebar-hidden .main {
+    margin-left: 0;
+  }
+}
+
+/* Mobile behaviour unchanged */
+@media (max-width: 767px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    z-index: 1050;
+  }
+
+  .sidebar.collapsed {
+    transform: translateX(-100%);
+  }
+}
+
+
 /* Mobile */
 @media (max-width: 768px) {
   .sidebar {
