@@ -5,48 +5,43 @@ import { doc, getDoc } from "firebase/firestore";
 const form = document.getElementById("loginForm");
 const errorBox = document.getElementById("loginError");
 
+const passwordInput = document.getElementById("password");
+const togglePassword = document.getElementById("togglePassword");
+
+// Toggle password visibility
+togglePassword.addEventListener("click", () => {
+  const isPassword = passwordInput.type === "password";
+  passwordInput.type = isPassword ? "text" : "password";
+  togglePassword.classList.toggle("bi-eye");
+  togglePassword.classList.toggle("bi-eye-slash");
+});
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   errorBox.textContent = "";
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
   try {
-    // Authentification
+    const email = document.getElementById("email").value;
+    const password = passwordInput.value;
+
     const cred = await signInWithEmailAndPassword(auth, email, password);
     const uid = cred.user.uid;
 
-    // Récupération rôle depuis Firestore
     const userRef = doc(db, "users", uid);
-    const userSnap = await getDoc(userRef);
+    const snap = await getDoc(userRef);
 
-    if (!userSnap.exists()) {
-      throw new Error("Utilisateur non autorisé.");
-    }
+    if (!snap.exists()) throw new Error("Accès non autorisé.");
 
-    const userData = userSnap.data();
+    const user = snap.data();
 
-    if (userData.status === "suspended") {
+    if (user.status === "suspended") {
       throw new Error("Compte suspendu.");
     }
 
-    // Redirection selon rôle
-    switch (userData.role) {
-      case "operateur":
-        window.location.href = "index.html";
-        break;
-
-      case "admin":
-        window.location.href = "admin/dashboard.html";
-        break;
-
-      case "directeur":
-        window.location.href = "admin/dashboard.html";
-        break;
-
-      default:
-        throw new Error("Rôle invalide.");
+    if (user.role === "operateur") {
+      window.location.href = "index.html";
+    } else {
+      window.location.href = "admin/dashboard.html";
     }
 
   } catch (err) {
