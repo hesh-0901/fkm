@@ -22,6 +22,20 @@ fetch("../partials/sidebar.html")
       }
     });
 
+    // === Etat initial selon la taille d'écran ===
+const app = document.querySelector(".app");
+const sidebar = document.getElementById("sidebar");
+
+if (window.innerWidth >= 768) {
+  // Desktop : sidebar visible
+  sidebar.classList.remove("collapsed");
+  app.classList.remove("sidebar-hidden");
+} else {
+  // Mobile : sidebar cachée
+  sidebar.classList.add("collapsed");
+}
+
+
     /* Close sidebar (mobile) */
     closeBtn?.addEventListener("click", () => {
       sidebar.classList.add("collapsed");
