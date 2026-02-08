@@ -1,69 +1,167 @@
-body {
+/* ==========================================================================
+   login.css — FKM ENERGY - Page de connexion
+   ========================================================================== */
+
+* {
   margin: 0;
-  background-color: #f3f4f6;
-  font-family: Arial, Helvetica, sans-serif;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.login-container {
+body {
   min-height: 100vh;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
 
-.login-card {
+/* Conteneur principal centré */
+.login-container {
   width: 100%;
-  max-width: 360px;
-  background: #fff;
-  padding: 2.5rem;
-  border: 1px solid #d1d5db;
+  max-width: 420px;
 }
 
+/* Carte de connexion */
+.login-card {
+  background: rgba(30, 41, 59, 0.72);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.6),
+              0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  transition: transform 0.25s ease, box-shadow 0.35s ease;
+}
+
+.login-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 28px 80px -20px rgba(0, 0, 0, 0.65),
+              0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+}
+
+/* Titres */
 .login-title {
-  font-size: 1.3rem;
-  margin-bottom: 0.25rem;
+  font-size: 1.95rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.025em;
 }
 
 .login-subtitle {
-  font-size: 0.85rem;
-  color: #6b7280;
-  margin-bottom: 2rem;
+  color: #94a3b8;
+  text-align: center;
+  font-size: 0.95rem;
+  margin-bottom: 2.2rem;
+}
+
+/* Champs de formulaire */
+.form-label {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #cbd5e1;
+  margin-bottom: 0.45rem;
+  display: block;
 }
 
 .form-control {
-  height: 40px;
+  background: rgba(51, 65, 85, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  color: #f1f5f9;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: all 0.2s ease;
 }
 
+.form-control:focus {
+  background: rgba(51, 65, 85, 0.75);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+  outline: none;
+  color: #ffffff;
+}
+
+/* Groupe mot de passe + œil */
 .password-group {
   position: relative;
 }
 
 .password-toggle {
   position: absolute;
-  top: 34px;
-  right: 10px;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-12%);
   background: none;
   border: none;
-  color: #6b7280;
+  color: #94a3b8;
+  font-size: 1.3rem;
   cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 6px;
+  transition: all 0.2s;
 }
 
+.password-toggle:hover,
+.password-toggle:focus {
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.15);
+}
+
+/* Bouton principal */
 .btn-primary {
-  height: 40px;
-  background-color: #1f4fd8;
+  background: linear-gradient(90deg, #2563eb, #3b82f6);
   border: none;
+  border-radius: 10px;
+  padding: 0.85rem;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: white;
+  transition: all 0.28s ease;
+  box-shadow: 0 6px 16px -6px rgba(59, 130, 246, 0.45);
 }
 
+.btn-primary:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(90deg, #1d4ed8, #2563eb);
+  box-shadow: 0 12px 24px -8px rgba(59, 130, 246, 0.55);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Message d'erreur */
 .login-error {
-  margin-top: 1rem;
-  font-size: 0.8rem;
-  color: #b91c1c;
+  color: #f87171;
+  font-size: 0.9rem;
   text-align: center;
+  margin-top: 1rem;
+  min-height: 1.2rem;
 }
 
+/* Footer */
 .login-footer {
-  margin-top: 1.5rem;
-  font-size: 0.7rem;
-  color: #6b7280;
   text-align: center;
+  color: #64748b;
+  font-size: 0.82rem;
+  margin-top: 1.8rem;
+  opacity: 0.9;
+}
+
+/* Responsive léger */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 2rem 1.4rem;
+  }
+  
+  .login-title {
+    font-size: 1.75rem;
+  }
 }
