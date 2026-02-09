@@ -1,107 +1,80 @@
-// === RESET STRICT DES CHAMPS AU CHARGEMENT ===
+// ================= RESET STRICT =================
 window.addEventListener("DOMContentLoaded", () => {
-  const usernameInput = document.getElementById("username");
+  const emailInput = document.getElementById("username");
   const passwordInput = document.getElementById("password");
   const rememberMe = document.getElementById("rememberMe");
 
-  if (usernameInput) usernameInput.value = "";
+  if (emailInput) emailInput.value = "";
   if (passwordInput) passwordInput.value = "";
   if (rememberMe) rememberMe.checked = false;
 });
 
-import { auth, db } from "./firebase.config.js";
+// ================= IMPORTS =================
+import { auth } from "./firebase.config.js";
 import {
   signInWithEmailAndPassword,
   setPersistence,
   browserSessionPersistence
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import {
-  collection,
-  query,
-  where,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* DOM */
+// ================= DOM =================
 const form = document.getElementById("loginForm");
-const usernameInput = document.getElementById("username");
+const emailInput = document.getElementById("username"); // email
 const passwordInput = document.getElementById("password");
 const rememberMe = document.getElementById("rememberMe");
 const errorBox = document.getElementById("loginError");
 const togglePassword = document.getElementById("togglePassword");
 
-/* Initial state : champs vides */
-usernameInput.value = "";
-passwordInput.value = "";
-
-/* Remember me (username only) */
-const savedUser = localStorage.getItem("rememberedUsername");
-if (savedUser) {
-  usernameInput.value = savedUser;
+// ================= REMEMBER ME =================
+const savedEmail = localStorage.getItem("rememberedEmail");
+if (savedEmail) {
+  emailInput.value = savedEmail;
   rememberMe.checked = true;
 }
 
-/* Toggle password */
+// ================= TOGGLE PASSWORD =================
 togglePassword.addEventListener("click", () => {
   passwordInput.type =
     passwordInput.type === "password" ? "text" : "password";
 });
 
-/* Session limitée à 30 minutes */
+// ================= SESSION 30 MIN =================
 function startSessionTimer() {
-  setTimeout(() => {
-    auth.signOut();
-    window.location.href = "login.html";
+  setTimeout(async () => {
+    await auth.signOut();
+    window.location.replace("login.html");
   }, 30 * 60 * 1000);
 }
 
-/* Submit */
+// ================= SUBMIT =================
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   errorBox.textContent = "";
 
-  const username = usernameInput.value.trim();
+  const email = emailInput.value.trim();
   const password = passwordInput.value;
 
-  if (!username || !password) {
+  if (!email || !password) {
     errorBox.textContent = "Veuillez renseigner tous les champs.";
     return;
   }
 
   try {
-    /* Session-only persistence */
     await setPersistence(auth, browserSessionPersistence);
 
-    /* Get email from username */
-    const q = query(
-      collection(db, "users"),
-      where("username", "==", username),
-      where("status", "==", "active")
-    );
-
-    const snap = await getDocs(q);
-    if (snap.empty) {
-      errorBox.textContent = "Identifiant ou mot de passe incorrect.";
-      return;
-    }
-
-    const email = snap.docs[0].data().email;
-
-    /* Firebase Auth */
     await signInWithEmailAndPassword(auth, email, password);
 
-    /* Remember me */
     if (rememberMe.checked) {
-      localStorage.setItem("rememberedUsername", username);
+      localStorage.setItem("rememberedEmail", email);
     } else {
-      localStorage.removeItem("rememberedUsername");
+      localStorage.removeItem("rememberedEmail");
     }
 
     startSessionTimer();
-    window.location.href = "admin/dashboard.html";
+    window.location.replace("admin/dashboard.html");
 
   } catch (err) {
     console.error(err);
-    errorBox.textContent = "Connexion impossible.";
+    errorBox.textContent = "Identifiants incorrects.";
   }
 });
