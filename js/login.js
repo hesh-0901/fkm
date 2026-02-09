@@ -1,3 +1,14 @@
+// === RESET STRICT DES CHAMPS AU CHARGEMENT ===
+window.addEventListener("DOMContentLoaded", () => {
+  const usernameInput = document.getElementById("username");
+  const passwordInput = document.getElementById("password");
+  const rememberMe = document.getElementById("rememberMe");
+
+  if (usernameInput) usernameInput.value = "";
+  if (passwordInput) passwordInput.value = "";
+  if (rememberMe) rememberMe.checked = false;
+});
+
 import { auth, db } from "./firebase.config.js";
 import {
   signInWithEmailAndPassword,
