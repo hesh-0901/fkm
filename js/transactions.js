@@ -32,10 +32,23 @@ onAuthStateChanged(auth, async (user) => {
   const snap = await getDoc(doc(db, "users", user.uid));
   if (!snap.exists()) return;
 
-  currentUser = { uid: user.uid, ...snap.data() };
+const data = snap.data();
 
-  userNameEl.textContent = currentUser.username;
-  userRoleEl.textContent = currentUser.role;
+currentUser = {
+  uid: user.uid,
+  username: data.username || "",
+  name: data.name || "",
+  fonction: data.fonction || "",
+  role: data.role
+};
+
+// 🔹 Affichage identité (ERP-style)
+userNameEl.textContent =
+  currentUser.name || currentUser.username || "—";
+
+userRoleEl.textContent =
+  currentUser.fonction || currentUser.role;
+
 
   if (currentUser.role === "operateur") {
     newTxBtn.classList.remove("d-none");
