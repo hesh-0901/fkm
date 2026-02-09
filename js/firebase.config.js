@@ -7,7 +7,6 @@ import { getAuth } from
 import { getFirestore } from
   "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* Firebase config */
 const firebaseConfig = {
   apiKey: "AIzaSyCbq46M1-H2Kwdu0m7ICA-LNhLAh8f5n_I",
   authDomain: "fkmenergy-e3a8d.firebaseapp.com",
@@ -18,9 +17,7 @@ const firebaseConfig = {
   measurementId: "G-2ZWZ834H10"
 };
 
-/* Init Firebase */
 const app = initializeApp(firebaseConfig);
 
-/* EXPORTS */
 export const auth = getAuth(app);
 export const db = getFirestore(app);
