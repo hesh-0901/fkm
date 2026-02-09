@@ -1,62 +1,96 @@
 import { auth, db } from "./firebase.config.js";
-
 import {
-  signInWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-
+  signInWithEmailAndPassword,
+  setPersistence,
+  browserSessionPersistence
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
   collection,
   query,
   where,
   getDocs
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* DOM */
 const form = document.getElementById("loginForm");
-const errorBox = document.getElementById("loginError");
+const usernameInput = document.getElementById("username");
 const passwordInput = document.getElementById("password");
-const toggleBtn = document.getElementById("togglePassword");
-const icon = toggleBtn.querySelector("i");
+const rememberMe = document.getElementById("rememberMe");
+const errorBox = document.getElementById("loginError");
+const togglePassword = document.getElementById("togglePassword");
 
-/* Show / hide password */
-toggleBtn.addEventListener("click", () => {
-  const hidden = passwordInput.type === "password";
-  passwordInput.type = hidden ? "text" : "password";
-  icon.className = hidden ? "bi bi-eye-slash" : "bi bi-eye";
+/* Initial state : champs vides */
+usernameInput.value = "";
+passwordInput.value = "";
+
+/* Remember me (username only) */
+const savedUser = localStorage.getItem("rememberedUsername");
+if (savedUser) {
+  usernameInput.value = savedUser;
+  rememberMe.checked = true;
+}
+
+/* Toggle password */
+togglePassword.addEventListener("click", () => {
+  passwordInput.type =
+    passwordInput.type === "password" ? "text" : "password";
 });
 
-/* Login */
+/* Session limitée à 30 minutes */
+function startSessionTimer() {
+  setTimeout(() => {
+    auth.signOut();
+    window.location.href = "login.html";
+  }, 30 * 60 * 1000);
+}
+
+/* Submit */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   errorBox.textContent = "";
 
-  const username = document.getElementById("username").value.trim();
+  const username = usernameInput.value.trim();
   const password = passwordInput.value;
 
+  if (!username || !password) {
+    errorBox.textContent = "Veuillez renseigner tous les champs.";
+    return;
+  }
+
   try {
-    // Lookup user by username (Firestore)
+    /* Session-only persistence */
+    await setPersistence(auth, browserSessionPersistence);
+
+    /* Get email from username */
     const q = query(
       collection(db, "users"),
-      where("username", "==", username)
+      where("username", "==", username),
+      where("status", "==", "active")
     );
 
     const snap = await getDocs(q);
-
     if (snap.empty) {
-      throw new Error("Identifiants invalides.");
+      errorBox.textContent = "Identifiant ou mot de passe incorrect.";
+      return;
     }
 
-    const userData = snap.docs[0].data();
+    const email = snap.docs[0].data().email;
 
-    // Firebase Auth login
-    await signInWithEmailAndPassword(
-      auth,
-      userData.email,
-      password
-    );
+    /* Firebase Auth */
+    await signInWithEmailAndPassword(auth, email, password);
 
+    /* Remember me */
+    if (rememberMe.checked) {
+      localStorage.setItem("rememberedUsername", username);
+    } else {
+      localStorage.removeItem("rememberedUsername");
+    }
+
+    startSessionTimer();
     window.location.href = "admin/dashboard.html";
 
   } catch (err) {
-    errorBox.textContent = err.message;
+    console.error(err);
+    errorBox.textContent = "Connexion impossible.";
   }
 });
