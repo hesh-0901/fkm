@@ -22,14 +22,29 @@
     <h1 class="login-title">Connexion sécurisée</h1>
     <p class="login-subtitle">Accès réservé au personnel autorisé</p>
 
+    <!-- ✅ FORM OBLIGATOIRE -->
+    <form id="loginForm" autocomplete="off">
+
       <div class="mb-3">
         <label class="form-label">Identifiant</label>
-        <input type="text" id="username" class="form-control" autocomplete="off">
+        <input
+          type="text"
+          id="username"
+          class="form-control"
+          autocomplete="off"
+          required
+        >
       </div>
 
       <div class="mb-3 password-group">
         <label class="form-label">Mot de passe</label>
-        <input type="password" id="password" class="form-control">
+        <input
+          type="password"
+          id="password"
+          class="form-control"
+          autocomplete="new-password"
+          required
+        >
         <button type="button" id="togglePassword" class="password-toggle">
           <i class="bi bi-eye"></i>
         </button>
@@ -49,6 +64,7 @@
       <div id="loginError" class="login-error"></div>
 
     </form>
+    <!-- ✅ FIN FORM -->
 
     <div class="login-footer">
       © FKM ENERGY · Accès contrôlé
