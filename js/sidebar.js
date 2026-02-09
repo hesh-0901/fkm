@@ -45,3 +45,22 @@ fetch("../partials/sidebar.html")
   .catch(err => {
     console.error("Erreur sidebar :", err);
   });
+/* ===== ACTIVE MENU AUTO ===== */
+const currentPath = window.location.pathname;
+
+// Toutes les entrées du menu
+document.querySelectorAll(".sidebar .nav-link").forEach(link => {
+  const href = link.getAttribute("href");
+
+  if (!href) return;
+
+  // Normalisation (important pour GitHub Pages)
+  const linkPath = new URL(href, window.location.origin).pathname;
+
+  if (currentPath.endsWith(linkPath)) {
+    link.classList.add("active");
+  } else {
+    link.classList.remove("active");
+  }
+});
+
