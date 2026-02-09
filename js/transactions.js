@@ -32,23 +32,17 @@ onAuthStateChanged(auth, async (user) => {
   const snap = await getDoc(doc(db, "users", user.uid));
   if (!snap.exists()) return;
 
-const data = snap.data();
+  const data = snap.data();
 
-currentUser = {
-  uid: user.uid,
-  username: data.username || "",
-  name: data.name || "",
-  fonction: data.fonction || "",
-  role: data.role
-};
+  currentUser = {
+    uid: user.uid,
+    displayName: data.displayName || data.name || data.username || "",
+    role: data.role,
+    fonction: data.fonction || ""
+  };
 
-// 🔹 Affichage identité (ERP-style)
-userNameEl.textContent =
-  currentUser.name || currentUser.username || "—";
-
-userRoleEl.textContent =
-  currentUser.fonction || currentUser.role;
-
+  userNameEl.textContent = currentUser.displayName || "—";
+  userRoleEl.textContent = currentUser.fonction || currentUser.role;
 
   if (currentUser.role === "operateur") {
     newTxBtn.classList.remove("d-none");
@@ -66,22 +60,27 @@ logoutBtn.onclick = async () => {
 /* LOAD TRANSACTIONS */
 async function loadTransactions() {
   table.innerHTML = "";
+
   const snap = await getDocs(collection(db, "transactions"));
 
   snap.forEach(d => {
     const t = d.data();
+
     table.innerHTML += `
       <tr>
-        <td>${t.createdAt?.toDate().toLocaleString()}</td>
+        <td>${t.createdAt?.toDate().toLocaleString() || "—"}</td>
         <td>${t.productName}</td>
         <td>${t.type === "out" ? "Sortie" : "Entrée"}</td>
         <td>${t.quantity}</td>
         <td>
-          <span class="badge bg-${t.status === "pending" ? "warning" : t.status === "approved" ? "success" : "danger"}">
+          <span class="badge bg-${
+            t.status === "pending" ? "warning" :
+            t.status === "approved" ? "success" : "danger"
+          }">
             ${t.status}
           </span>
         </td>
-        <td>${t.createdBy.username}</td>
+        <td>${t.createdBy?.displayName || "—"}</td>
         <td></td>
       </tr>
     `;
@@ -89,25 +88,23 @@ async function loadTransactions() {
 }
 
 /* OPEN MODAL */
-newTxBtn?.addEventListener("click", loadProducts);
-
-async function loadProducts() {
+newTxBtn?.addEventListener("click", async () => {
   const select = document.getElementById("txProduct");
   select.innerHTML = "";
 
   const snap = await getDocs(collection(db, "inventory"));
   snap.forEach(d => {
     const p = d.data();
-    select.innerHTML += `
-      <option value="${d.id}">${p.name}</option>
-    `;
+    select.innerHTML += `<option value="${d.id}">${p.name}</option>`;
   });
 
   modal.show();
-}
+});
 
 /* SAVE TRANSACTION */
 saveBtn.onclick = async () => {
+  if (!currentUser) return;
+
   const productId = document.getElementById("txProduct").value;
   const qty = Number(document.getElementById("txQty").value);
   const type = document.getElementById("txType").value;
@@ -128,7 +125,7 @@ saveBtn.onclick = async () => {
 
     createdBy: {
       uid: currentUser.uid,
-      username: currentUser.username,
+      displayName: currentUser.displayName,
       role: currentUser.role
     },
 
