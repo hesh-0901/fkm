@@ -93,32 +93,62 @@
 
       <div class="modal-body">
         <form id="productForm">
+
           <div class="row g-3">
+
+            <!-- Nom -->
             <div class="col-md-6">
               <label class="form-label">Nom du produit</label>
               <input type="text" class="form-control" id="pName" required>
             </div>
 
+            <!-- Catégorie -->
             <div class="col-md-6">
               <label class="form-label">Catégorie</label>
               <input type="text" class="form-control" id="pCategory" required>
             </div>
 
+            <!-- Quantité -->
             <div class="col-md-4">
-              <label class="form-label">Quantité</label>
+              <label class="form-label">Quantité actuelle</label>
               <input type="number" class="form-control" id="pQty" min="0" required>
             </div>
 
+            <!-- Seuil minimum -->
             <div class="col-md-4">
+              <label class="form-label">
+                Stock minimum (alerte)
+              </label>
+              <input type="number" class="form-control" id="pMinQty" min="0" value="0">
+              <small class="text-muted">
+                Alerte si stock ≤ seuil
+              </small>
+            </div>
+
+            <!-- Devise -->
+            <div class="col-md-4">
+              <label class="form-label">Devise de prix</label>
+              <select class="form-select" id="priceCurrency">
+                <option value="USD">USD uniquement</option>
+                <option value="CDF">CDF uniquement</option>
+                <option value="BOTH">USD & CDF</option>
+              </select>
+            </div>
+
+            <!-- Prix USD -->
+            <div class="col-md-6" id="usdBlock">
               <label class="form-label">Prix unitaire (USD)</label>
               <input type="number" class="form-control" id="pUsd" min="0">
             </div>
 
-            <div class="col-md-4">
+            <!-- Prix CDF -->
+            <div class="col-md-6 d-none" id="cdfBlock">
               <label class="form-label">Prix unitaire (CDF)</label>
               <input type="number" class="form-control" id="pCdf" min="0">
             </div>
+
           </div>
+
         </form>
       </div>
 
@@ -130,6 +160,7 @@
     </div>
   </div>
 </div>
+
 
 <!-- JS -->
 <script type="module" src="../js/inventaire.js"></script>
