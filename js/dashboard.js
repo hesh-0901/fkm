@@ -3,12 +3,12 @@ import { auth, db } from "./firebase.config.js";
 import {
   onAuthStateChanged,
   signOut
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
   doc,
   getDoc
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const userNameEl = document.getElementById("userName");
 const userRoleEl = document.getElementById("userRole");
@@ -38,7 +38,6 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // Affichage utilisateur
   userNameEl.textContent = data.name || data.username;
   userRoleEl.textContent = data.fonction || data.role;
 });
