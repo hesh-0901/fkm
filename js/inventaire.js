@@ -7,37 +7,31 @@ import {
 import {
   collection,
   getDocs,
+  addDoc,
   doc,
   getDoc,
-  addDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* DOM */
 const table = document.getElementById("inventoryTable");
 const addBtn = document.getElementById("addProductBtn");
+const logoutBtn = document.getElementById("logoutBtn");
 const userNameEl = document.getElementById("userName");
 const userRoleEl = document.getElementById("userRole");
-const logoutBtn = document.getElementById("logoutBtn");
 
-const modalEl = document.getElementById("productModal");
+const modal = new bootstrap.Modal(document.getElementById("productModal"));
 const saveBtn = document.getElementById("saveProductBtn");
 
-/* Bootstrap modal (global) */
-let modal = null;
-if (window.bootstrap) {
-  modal = new bootstrap.Modal(modalEl);
-}
+const currencySelect = document.getElementById("pCurrency");
+const usdBlock = document.getElementById("usdBlock");
+const cdfBlock = document.getElementById("cdfBlock");
 
-/* Current user */
 let currentUser = null;
 
-/* ================= AUTH GUARD ================= */
+/* AUTH */
 onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "../login.html";
-    return;
-  }
+  if (!user) return location.replace("../login.html");
 
   const snap = await getDoc(doc(db, "users", user.uid));
   if (!snap.exists()) return;
@@ -46,39 +40,34 @@ onAuthStateChanged(auth, async (user) => {
 
   currentUser = {
     uid: user.uid,
-    username: data.username,
+    displayName: data.displayName || data.name || data.username || "",
     role: data.role,
-    fonction: data.fonction
+    fonction: data.fonction || ""
   };
 
-  userNameEl.textContent = currentUser.username || "—";
+  userNameEl.textContent = currentUser.displayName || "—";
   userRoleEl.textContent = currentUser.fonction || currentUser.role;
 
   if (["admin", "directeur"].includes(currentUser.role)) {
-    addBtn.style.display = "inline-flex";
+    addBtn.classList.remove("d-none");
   }
 
   loadInventory();
 });
 
-/* ================= LOGOUT ================= */
-logoutBtn.addEventListener("click", async () => {
+/* LOGOUT */
+logoutBtn.onclick = async () => {
   await signOut(auth);
-  window.location.href = "../login.html";
-});
+  location.replace("../login.html");
+};
 
-/* ================= LOAD INVENTORY ================= */
+/* LOAD INVENTORY */
 async function loadInventory() {
-  table.innerHTML = `
-    <tr>
-      <td colspan="6" class="text-center text-muted">Chargement...</td>
-    </tr>
-  `;
-
-  const snapshot = await getDocs(collection(db, "inventory"));
   table.innerHTML = "";
 
-  if (snapshot.empty) {
+  const snap = await getDocs(collection(db, "inventory"));
+
+  if (snap.empty) {
     table.innerHTML = `
       <tr>
         <td colspan="6" class="text-center text-muted">
@@ -89,69 +78,81 @@ async function loadInventory() {
     return;
   }
 
-  snapshot.forEach(docSnap => {
-    const p = docSnap.data();
+  snap.forEach(d => {
+    const p = d.data();
+    const low = p.quantity <= p.minQuantity;
 
     table.innerHTML += `
       <tr>
         <td>${p.name}</td>
         <td>${p.category}</td>
         <td>${p.quantity}</td>
-        <td>${p.unitPriceUSD ?? "—"}</td>
-        <td>${p.unitPriceCDF ?? "—"}</td>
+        <td>${p.minQuantity}</td>
         <td>
-          <button class="btn btn-sm btn-outline-secondary">Détails</button>
+          ${
+            p.pricing?.mode === "USD" ? p.pricing.usd + " $" :
+            p.pricing?.mode === "CDF" ? p.pricing.cdf + " CDF" :
+            p.pricing?.usd + " $ / " + p.pricing?.cdf + " CDF"
+          }
+        </td>
+        <td>
+          <span class="badge bg-${low ? "danger" : "success"}">
+            ${low ? "Stock faible" : "OK"}
+          </span>
         </td>
       </tr>
     `;
   });
 }
 
-/* ================= MODAL ================= */
-addBtn.addEventListener("click", () => {
-  modal?.show();
-});
+/* CURRENCY UI */
+currencySelect.onchange = () => {
+  const v = currencySelect.value;
+  usdBlock.classList.toggle("d-none", v === "CDF");
+  cdfBlock.classList.toggle("d-none", v === "USD");
+};
 
-/* ================= SAVE PRODUCT ================= */
-saveBtn.addEventListener("click", async () => {
-  if (!currentUser) return;
+/* OPEN MODAL */
+addBtn.onclick = () => modal.show();
 
-  const name = document.getElementById("pName").value.trim();
-  const category = document.getElementById("pCategory").value.trim();
-  const qty = Number(document.getElementById("pQty").value);
-  const usd = Number(document.getElementById("pUsd").value || 0);
-  const cdf = Number(document.getElementById("pCdf").value || 0);
+/* SAVE PRODUCT */
+saveBtn.onclick = async () => {
+  if (!["admin", "directeur"].includes(currentUser.role)) return;
 
-  if (!name || !category || qty < 0) {
-    alert("Veuillez remplir correctement les champs obligatoires.");
-    return;
-  }
+  const name = pName.value.trim();
+  const category = pCategory.value.trim();
+  const qty = Number(pQty.value);
+  const minQty = Number(pMinQty.value || 0);
+  const mode = pCurrency.value;
 
-  try {
-    await addDoc(collection(db, "inventory"), {
-      name,
-      category,
-      quantity: qty,
-      unitPriceUSD: usd,
-      unitPriceCDF: cdf,
-      status: "active",
+  const usd = mode !== "CDF" ? Number(pUsd.value || 0) : null;
+  const cdf = mode !== "USD" ? Number(pCdf.value || 0) : null;
 
-      createdBy: {
-        uid: currentUser.uid,
-        username: currentUser.username,
-        role: currentUser.role
-      },
+  if (!name || !category || qty < 0) return;
 
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
+  await addDoc(collection(db, "inventory"), {
+    name,
+    category,
+    quantity: qty,
+    minQuantity: minQty,
 
-    modal.hide();
-    document.getElementById("productForm").reset();
-    loadInventory();
+    pricing: {
+      mode,
+      usd,
+      cdf
+    },
 
-  } catch (err) {
-    console.error(err);
-    alert("Erreur lors de l'enregistrement.");
-  }
-});
+    createdBy: {
+      uid: currentUser.uid,
+      displayName: currentUser.displayName,
+      role: currentUser.role
+    },
+
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  });
+
+  modal.hide();
+  document.getElementById("productForm").reset();
+  loadInventory();
+};
