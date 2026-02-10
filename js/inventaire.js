@@ -43,10 +43,16 @@ onAuthStateChanged(auth, async (user) => {
   const snap = await getDoc(doc(db, "users", user.uid));
   if (!snap.exists()) return;
 
-  currentUser = { uid: user.uid, ...snap.data() };
+currentUser = {
+  uid: user.uid,
+  name: snap.data().name || snap.data().username || "—",
+  fonction: snap.data().fonction || "",
+  role: snap.data().role
+};
 
-  userNameEl.textContent = currentUser.displayName || "—";
-  userRoleEl.textContent = currentUser.role;
+userNameEl.textContent = currentUser.name;
+userRoleEl.textContent = currentUser.fonction;
+
 
   if ([ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) {
     addBtn.classList.remove("d-none");
