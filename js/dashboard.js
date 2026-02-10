@@ -1,36 +1,40 @@
-// js/dashboard.js
 import { auth, db } from "./firebase.config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
-  collection,
-  getDocs,
-  doc,
-  getDoc
+  collection, getDocs, doc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* DOM */
-const logoutBtn = document.getElementById("logoutBtn");
 const userNameEl = document.getElementById("userName");
 const userRoleEl = document.getElementById("userRole");
+const logoutBtn = document.getElementById("logoutBtn");
 
 const kpiProducts = document.getElementById("kpiProducts");
 const kpiLowStock = document.getElementById("kpiLowStock");
-const kpiPendingTx = document.getElementById("kpiPendingTx");
-const kpiApprovedTx = document.getElementById("kpiApprovedTx");
+const kpiPending = document.getElementById("kpiPending");
+const kpiApproved = document.getElementById("kpiApproved");
+
+const alertsList = document.getElementById("alertsList");
+const activityList = document.getElementById("activityList");
+const usersList = document.getElementById("usersList");
+
+let chart;
 
 /* AUTH */
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, async user => {
   if (!user) return location.replace("../login.html");
 
   const snap = await getDoc(doc(db, "users", user.uid));
-  if (!snap.exists()) return;
+  const me = snap.data();
 
-  const data = snap.data();
-
-  userNameEl.textContent = data.name || "—";
-  userRoleEl.textContent = data.fonction || "";
+  userNameEl.textContent = me.name;
+  userRoleEl.textContent = me.fonction;
 
   loadKPIs();
+  loadChart();
+  loadAlerts();
+  loadActivity();
+  loadUsers();
 });
 
 /* LOGOUT */
@@ -39,31 +43,77 @@ logoutBtn.onclick = async () => {
   location.replace("../login.html");
 };
 
-/* LOAD KPI */
+/* KPIs */
 async function loadKPIs() {
-  /* INVENTORY */
-  const invSnap = await getDocs(collection(db, "inventory"));
-  let lowStock = 0;
+  const inv = await getDocs(collection(db, "inventory"));
+  let low = 0;
+  inv.forEach(d => { if (d.data().quantity <= d.data().minQuantity) low++; });
+  kpiProducts.textContent = inv.size;
+  kpiLowStock.textContent = low;
 
-  invSnap.forEach(d => {
+  const tx = await getDocs(collection(db, "transactions"));
+  let p = 0, a = 0;
+  tx.forEach(d => {
+    if (d.data().status === "pending") p++;
+    if (d.data().status === "approved") a++;
+  });
+  kpiPending.textContent = p;
+  kpiApproved.textContent = a;
+}
+
+/* CHART */
+async function loadChart() {
+  const tx = await getDocs(collection(db, "transactions"));
+  let inQty = 0, outQty = 0;
+
+  tx.forEach(d => {
+    if (d.data().status !== "approved") return;
+    d.data().type === "in" ? inQty += d.data().quantity : outQty += d.data().quantity;
+  });
+
+  const ctx = document.getElementById("txChart");
+  chart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Entrées", "Sorties"],
+      datasets: [{
+        data: [inQty, outQty],
+        backgroundColor: ["#2E7D32", "#B71C1C"]
+      }]
+    }
+  });
+}
+
+/* ALERTS */
+async function loadAlerts() {
+  alertsList.innerHTML = "";
+  const inv = await getDocs(collection(db, "inventory"));
+  inv.forEach(d => {
     const p = d.data();
-    if (p.quantity <= p.minQuantity) lowStock++;
+    if (p.quantity <= p.minQuantity) {
+      alertsList.innerHTML += `<li class="list-group-item text-danger">${p.name} : stock critique</li>`;
+    }
   });
+}
 
-  kpiProducts.textContent = invSnap.size;
-  kpiLowStock.textContent = lowStock;
-
-  /* TRANSACTIONS */
-  const txSnap = await getDocs(collection(db, "transactions"));
-  let pending = 0;
-  let approved = 0;
-
-  txSnap.forEach(d => {
+/* ACTIVITY */
+async function loadActivity() {
+  activityList.innerHTML = "";
+  const tx = await getDocs(collection(db, "transactions"));
+  tx.docs.slice(-5).reverse().forEach(d => {
     const t = d.data();
-    if (t.status === "pending") pending++;
-    if (t.status === "approved") approved++;
+    activityList.innerHTML += `<li class="list-group-item">
+      ${t.createdBy?.name} • ${t.productName} • ${t.type} • ${t.quantity}
+    </li>`;
   });
+}
 
-  kpiPendingTx.textContent = pending;
-  kpiApprovedTx.textContent = approved;
+/* USERS */
+async function loadUsers() {
+  usersList.innerHTML = "";
+  const users = await getDocs(collection(db, "users"));
+  users.forEach(d => {
+    const u = d.data();
+    usersList.innerHTML += `<li class="list-group-item">${u.name} <small class="text-muted">(${u.role})</small></li>`;
+  });
 }
