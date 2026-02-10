@@ -20,6 +20,7 @@ const ROLES = {
 };
 
 /* DOM */
+const cComment = document.getElementById("cComment");
 const table = document.getElementById("clientsTable");
 const addBtn = document.getElementById("addClientBtn");
 const logoutBtn = document.getElementById("logoutBtn");
@@ -124,17 +125,19 @@ saveBtn.onclick = async () => {
   if (![ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) return;
 
   await addDoc(collection(db, "clients"), {
-    name: cName.value.trim(),
-    phone: cPhone.value.trim(),
-    status: "PENDING",
-    createdBy: {
-      uid: currentUser.uid,
-      name: currentUser.name,
-      role: currentUser.role
-    },
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  });
+  name: cName.value.trim(),
+  phone: cPhone.value.trim(),
+  comment: cComment.value.trim(),
+  status: "PENDING",
+  createdBy: {
+    uid: currentUser.uid,
+    name: currentUser.name,
+    role: currentUser.role
+  },
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp()
+});
+;
 
   modal.hide();
   clientForm.reset();
