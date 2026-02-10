@@ -5,8 +5,6 @@ import {
   collection,
   getDocs,
   addDoc,
-  updateDoc,
-  deleteDoc,
   doc,
   getDoc,
   serverTimestamp
@@ -15,7 +13,6 @@ import {
 /* ROLES */
 const ROLES = {
   OPERATEUR: "operateur",
-  ADMIN: "admin",
   DIRECTEUR: "directeur"
 };
 
@@ -29,7 +26,17 @@ const userRoleEl = document.getElementById("userRole");
 const modal = new bootstrap.Modal(document.getElementById("txModal"));
 const saveBtn = document.getElementById("saveTxBtn");
 
+const txProduct = document.getElementById("txProduct");
+const txType = document.getElementById("txType");
+const txQty = document.getElementById("txQty");
+
+const partnerSearch = document.getElementById("partnerSearch");
+const partnerList = document.getElementById("partnerList");
+const partnerId = document.getElementById("partnerId");
+const partnerName = document.getElementById("partnerName");
+
 let currentUser = null;
+let partnersCache = [];
 
 /* AUTH */
 onAuthStateChanged(auth, async (user) => {
@@ -42,8 +49,8 @@ onAuthStateChanged(auth, async (user) => {
 
   currentUser = {
     uid: user.uid,
-    name: data.name || data.username || "—",
-    fonction: data.fonction || "",
+    name: data.name,
+    fonction: data.fonction,
     role: data.role
   };
 
@@ -66,167 +73,115 @@ logoutBtn.onclick = async () => {
 /* LOAD TRANSACTIONS */
 async function loadTransactions() {
   table.innerHTML = "";
-
   const snap = await getDocs(collection(db, "transactions"));
-
-  if (snap.empty) {
-    table.innerHTML = `
-      <tr>
-        <td colspan="7" class="text-center text-muted">
-          Aucune transaction enregistrée
-        </td>
-      </tr>
-    `;
-    return;
-  }
 
   snap.forEach(d => {
     const t = d.data();
-
     table.innerHTML += `
       <tr>
         <td>${t.createdAt?.toDate().toLocaleString() || "—"}</td>
         <td>${t.productName}</td>
         <td>${t.type === "out" ? "Sortie" : "Entrée"}</td>
         <td>${t.quantity}</td>
+        <td>${t.partner?.name || "—"}</td>
         <td>
-          <span class="badge bg-${
-            t.status === "pending" ? "warning" :
-            t.status === "approved" ? "success" : "secondary"
-          }">
+          <span class="badge bg-${t.status === "pending" ? "warning" : "success"}">
             ${t.status}
           </span>
         </td>
         <td>${t.createdBy?.name || "—"}</td>
-        <td class="text-end">
-          ${
-            t.status === "pending" &&
-            [ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)
-              ? `<button class="btn btn-sm btn-outline-success me-1"
-                   onclick="approveTx('${d.id}')">
-                   Valider
-                 </button>`
-              : ""
-          }
-          ${
-            currentUser.role === ROLES.DIRECTEUR
-              ? `<button class="btn btn-sm btn-outline-danger"
-                   onclick="deleteTx('${d.id}')">
-                   Supprimer
-                 </button>`
-              : ""
-          }
-        </td>
       </tr>
     `;
   });
 }
 
 /* OPEN MODAL */
-newTxBtn.addEventListener("click", async () => {
-  const select = document.getElementById("txProduct");
-  select.innerHTML = "";
+newTxBtn.onclick = async () => {
+  txProduct.innerHTML = "";
+  partnerList.innerHTML = "";
+  partnerSearch.value = "";
+  partnerId.value = "";
+  partnerName.value = "";
 
-  const snap = await getDocs(collection(db, "inventory"));
-  snap.forEach(d => {
-    const p = d.data();
-    select.innerHTML += `<option value="${d.id}">${p.name}</option>`;
+  const products = await getDocs(collection(db, "inventory"));
+  products.forEach(d => {
+    txProduct.innerHTML += `<option value="${d.id}">${d.data().name}</option>`;
   });
 
+  await loadPartners();
   modal.show();
-});
+};
 
-/* CREATE TRANSACTION */
+/* LOAD PARTNERS */
+async function loadPartners() {
+  partnersCache = [];
+  partnerList.innerHTML = "";
+
+  const type = txType.value === "out" ? "clients" : "fournisseurs";
+  const snap = await getDocs(collection(db, type));
+
+  snap.forEach(d => {
+    if (d.data().status !== "ACTIVE") return;
+    partnersCache.push({ id: d.id, name: d.data().name });
+  });
+
+  renderPartners("");
+}
+
+/* FILTER */
+partnerSearch.oninput = () => {
+  renderPartners(partnerSearch.value.toLowerCase());
+};
+
+function renderPartners(filter) {
+  partnerList.innerHTML = "";
+
+  partnersCache
+    .filter(p => p.name.toLowerCase().includes(filter))
+    .forEach(p => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "list-group-item list-group-item-action";
+      btn.textContent = p.name;
+      btn.onclick = () => {
+        partnerId.value = p.id;
+        partnerName.value = p.name;
+        partnerSearch.value = p.name;
+        partnerList.innerHTML = "";
+      };
+      partnerList.appendChild(btn);
+    });
+}
+
+/* TYPE SWITCH */
+txType.onchange = loadPartners;
+
+/* SAVE */
 saveBtn.onclick = async () => {
-  if (
-    !currentUser ||
-    ![ROLES.OPERATEUR, ROLES.DIRECTEUR].includes(currentUser.role)
-  ) {
-    alert("Accès refusé");
-    return;
-  }
+  if (!partnerId.value || txQty.value <= 0) return;
 
-  const productId = document.getElementById("txProduct").value;
-  const qty = Number(document.getElementById("txQty").value);
-  const type = document.getElementById("txType").value;
-
-  if (!productId || qty <= 0) return;
-
-  const productSnap = await getDoc(doc(db, "inventory", productId));
+  const productSnap = await getDoc(doc(db, "inventory", txProduct.value));
   if (!productSnap.exists()) return;
 
-  const product = productSnap.data();
-
   await addDoc(collection(db, "transactions"), {
-    productId,
-    productName: product.name,
-    quantity: qty,
-    type,
+    productId: txProduct.value,
+    productName: productSnap.data().name,
+    quantity: Number(txQty.value),
+    type: txType.value,
+    partner: {
+      id: partnerId.value,
+      name: partnerName.value,
+      type: txType.value === "out" ? "client" : "fournisseur"
+    },
     status: "pending",
-
     createdBy: {
       uid: currentUser.uid,
       name: currentUser.name,
       role: currentUser.role
     },
-
-    createdAt: serverTimestamp(),
-    validatedAt: null
+    createdAt: serverTimestamp()
   });
 
   modal.hide();
-  loadTransactions();
-};
-
-/* VALIDATION ADMIN / DIRECTEUR */
-window.approveTx = async (txId) => {
-  if (![ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) return;
-
-  const txRef = doc(db, "transactions", txId);
-  const txSnap = await getDoc(txRef);
-  if (!txSnap.exists()) return;
-
-  const tx = txSnap.data();
-  if (tx.status !== "pending") return;
-
-  const productRef = doc(db, "inventory", tx.productId);
-  const productSnap = await getDoc(productRef);
-  if (!productSnap.exists()) return;
-
-  const product = productSnap.data();
-  let newQty = product.quantity;
-
-  if (tx.type === "out") newQty -= tx.quantity;
-  if (tx.type === "in") newQty += tx.quantity;
-
-  if (newQty < 0) {
-    alert("Stock insuffisant");
-    return;
-  }
-
-  await updateDoc(productRef, {
-    quantity: newQty,
-    updatedAt: serverTimestamp()
-  });
-
-  await updateDoc(txRef, {
-    status: "approved",
-    validatedAt: serverTimestamp(),
-    validatedBy: {
-      uid: currentUser.uid,
-      name: currentUser.name,
-      role: currentUser.role
-    }
-  });
-
-  loadTransactions();
-};
-
-/* DELETE (DIRECTEUR) */
-window.deleteTx = async (txId) => {
-  if (currentUser.role !== ROLES.DIRECTEUR) return;
-  if (!confirm("Supprimer cette transaction ?")) return;
-
-  await deleteDoc(doc(db, "transactions", txId));
   loadTransactions();
 };
