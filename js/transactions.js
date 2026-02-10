@@ -45,14 +45,15 @@ onAuthStateChanged(auth, async (user) => {
     role: data.role
   };
 
-  // ✅ AFFICHAGE IDENTITÉ (CORRIGÉ)
+  // ✅ AFFICHAGE IDENTITÉ
   userNameEl.textContent = currentUser.name;
   userRoleEl.textContent = currentUser.fonction;
 
-  // ✅ SEUL L’OPÉRATEUR CRÉE DES TRANSACTIONS
-if ([ROLES.OPERATEUR, ROLES.DIRECTEUR].includes(currentUser.role)) {
-  newTxBtn.classList.remove("d-none");
-}
+  // ✅ OPERATEUR + DIRECTEUR peuvent créer
+  if ([ROLES.OPERATEUR, ROLES.DIRECTEUR].includes(currentUser.role)) {
+    newTxBtn.classList.remove("d-none");
+  }
+
   loadTransactions();
 });
 
@@ -117,14 +118,15 @@ newTxBtn.addEventListener("click", async () => {
   modal.show();
 });
 
-/* SAVE TRANSACTION */
-if (
-  !currentUser ||
-  ![ROLES.OPERATEUR, ROLES.DIRECTEUR].includes(currentUser.role)
-) {
-  alert("Accès refusé");
-  return;
-}
+/* SAVE TRANSACTION ✅ (CORRECTION MAJEURE ICI) */
+saveBtn.onclick = async () => {
+  if (
+    !currentUser ||
+    ![ROLES.OPERATEUR, ROLES.DIRECTEUR].includes(currentUser.role)
+  ) {
+    alert("Accès refusé");
+    return;
+  }
 
   const productId = document.getElementById("txProduct").value;
   const qty = Number(document.getElementById("txQty").value);
