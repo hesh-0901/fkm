@@ -61,25 +61,47 @@ async function loadKPIs() {
   kpiApproved.textContent = a;
 }
 
-/* CHART */
+/* CHART ✅ FIX LÉGENDE */
 async function loadChart() {
   const tx = await getDocs(collection(db, "transactions"));
-  let inQty = 0, outQty = 0;
+  let inQty = 0;
+  let outQty = 0;
 
   tx.forEach(d => {
-    if (d.data().status !== "approved") return;
-    d.data().type === "in" ? inQty += d.data().quantity : outQty += d.data().quantity;
+    const t = d.data();
+    if (t.status !== "approved") return;
+    if (t.type === "in") inQty += t.quantity;
+    if (t.type === "out") outQty += t.quantity;
   });
 
   const ctx = document.getElementById("txChart");
+
+  if (chart) chart.destroy();
+
   chart = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: ["Entrées", "Sorties"],
-      datasets: [{
-        data: [inQty, outQty],
-        backgroundColor: ["#2E7D32", "#B71C1C"]
-      }]
+      labels: ["Volume"],
+      datasets: [
+        {
+          label: "Entrées",
+          data: [inQty],
+          backgroundColor: "#2E7D32"
+        },
+        {
+          label: "Sorties",
+          data: [outQty],
+          backgroundColor: "#B71C1C"
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: "bottom"
+        }
+      }
     }
   });
 }
@@ -102,9 +124,10 @@ async function loadActivity() {
   const tx = await getDocs(collection(db, "transactions"));
   tx.docs.slice(-5).reverse().forEach(d => {
     const t = d.data();
-    activityList.innerHTML += `<li class="list-group-item">
-      ${t.createdBy?.name} • ${t.productName} • ${t.type} • ${t.quantity}
-    </li>`;
+    activityList.innerHTML += `
+      <li class="list-group-item">
+        ${t.createdBy?.name} • ${t.productName} • ${t.type} • ${t.quantity}
+      </li>`;
   });
 }
 
@@ -114,6 +137,9 @@ async function loadUsers() {
   const users = await getDocs(collection(db, "users"));
   users.forEach(d => {
     const u = d.data();
-    usersList.innerHTML += `<li class="list-group-item">${u.name} <small class="text-muted">(${u.role})</small></li>`;
+    usersList.innerHTML += `
+      <li class="list-group-item">
+        ${u.name} <small class="text-muted">(${u.role})</small>
+      </li>`;
   });
 }
