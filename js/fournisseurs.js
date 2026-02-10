@@ -20,6 +20,7 @@ const ROLES = {
 };
 
 /* DOM */
+const cComment = document.getElementById("cComment");
 const table = document.getElementById("suppliersTable");
 const addBtn = document.getElementById("addSupplierBtn");
 const logoutBtn = document.getElementById("logoutBtn");
@@ -123,18 +124,19 @@ async function loadSuppliers() {
 saveBtn.onclick = async () => {
   if (![ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) return;
 
-  await addDoc(collection(db, "fournisseurs"), {
-    name: sName.value.trim(),
-    phone: sPhone.value.trim(),
-    status: "PENDING",
-    createdBy: {
-      uid: currentUser.uid,
-      name: currentUser.name,
-      role: currentUser.role
-    },
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  });
+await addDoc(collection(db, "clients"), {
+  name: cName.value.trim(),
+  phone: cPhone.value.trim(),
+  comment: cComment.value.trim(),
+  status: "PENDING",
+  createdBy: {
+    uid: currentUser.uid,
+    name: currentUser.name,
+    role: currentUser.role
+  },
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp()
+});
 
   modal.hide();
   supplierForm.reset();
