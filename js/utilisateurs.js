@@ -3,8 +3,13 @@ import { auth, db } from "./firebase.config.js";
 import { onAuthStateChanged, signOut } from
   "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
-  collection, getDocs, addDoc, updateDoc, deleteDoc,
-  doc, getDoc, serverTimestamp
+  collection,
+  getDocs,
+  addDoc,
+  deleteDoc,
+  doc,
+  getDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ROLES */
@@ -28,7 +33,8 @@ const infoContent = document.getElementById("userInfoContent");
 const saveBtn = document.getElementById("saveUserBtn");
 
 const uName = document.getElementById("uName");
-const uEmail = document.getElementById("uEmail");
+const uUsername = document.getElementById("uUsername");
+const uFonction = document.getElementById("uFonction");
 const uRole = document.getElementById("uRole");
 const userForm = document.getElementById("userForm");
 
@@ -41,11 +47,10 @@ onAuthStateChanged(auth, async (user) => {
   const snap = await getDoc(doc(db, "users", user.uid));
   if (!snap.exists()) return;
 
-  const data = snap.data();
-  currentUser = { uid: user.uid, ...data };
+  currentUser = snap.data();
 
   userNameEl.textContent = currentUser.name;
-  userRoleEl.textContent = currentUser.role;
+  userRoleEl.textContent = currentUser.fonction;
 
   if (currentUser.role === ROLES.DIRECTEUR) {
     addBtn.classList.remove("d-none");
@@ -71,11 +76,12 @@ async function loadUsers() {
     table.innerHTML += `
       <tr>
         <td>${u.name}</td>
-        <td>${u.email || "—"}</td>
+        <td>${u.username}</td>
+        <td>${u.fonction}</td>
         <td><span class="badge bg-primary">${u.role}</span></td>
         <td>
-          <span class="badge bg-${u.status === "ACTIVE" ? "success" : "danger"}">
-            ${u.status || "ACTIVE"}
+          <span class="badge bg-${u.status === "active" ? "success" : "danger"}">
+            ${u.status}
           </span>
         </td>
         <td>${u.createdAt?.toDate().toLocaleString() || "—"}</td>
@@ -103,9 +109,11 @@ window.showUserInfo = (u) => {
   infoContent.innerHTML = `
     <div class="space-y-2">
       <div><strong>Nom :</strong> ${u.name}</div>
-      <div><strong>Email :</strong> ${u.email || "—"}</div>
+      <div><strong>Identifiant :</strong> ${u.username}</div>
+      <div><strong>Email :</strong> ${u.email}</div>
+      <div><strong>Fonction :</strong> ${u.fonction}</div>
       <div><strong>Rôle :</strong> ${u.role}</div>
-      <div><strong>Statut :</strong> ${u.status || "ACTIVE"}</div>
+      <div><strong>Statut :</strong> ${u.status}</div>
     </div>
   `;
   infoModal.show();
@@ -115,11 +123,16 @@ window.showUserInfo = (u) => {
 saveBtn.onclick = async () => {
   if (currentUser.role !== ROLES.DIRECTEUR) return;
 
+  const username = uUsername.value.trim().toLowerCase();
+  const email = `${username}@fkmenergy.com`;
+
   await addDoc(collection(db, "users"), {
     name: uName.value.trim(),
-    email: uEmail.value.trim(),
+    username,
+    email,
+    fonction: uFonction.value.trim(),
     role: uRole.value,
-    status: "ACTIVE",
+    status: "active",
     createdAt: serverTimestamp()
   });
 
