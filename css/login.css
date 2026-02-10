@@ -30,7 +30,7 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.15); /* 👈 ajuste ici */
+  background: rgba(255, 255, 255, 0.30); /* 👈 ajuste ici */
 }
 
 /* Bloc texte */
