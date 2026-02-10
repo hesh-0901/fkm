@@ -82,27 +82,40 @@
       </div>
 
       <div class="modal-body">
-        <form id="txForm">
+<form id="txForm">
 
-          <div class="mb-3">
-            <label class="form-label">Produit</label>
-            <select class="form-select" id="txProduct" required></select>
-          </div>
+  <div class="mb-3">
+    <label class="form-label">Produit</label>
+    <select class="form-select" id="txProduct" required></select>
+  </div>
 
-          <div class="mb-3">
-            <label class="form-label">Type</label>
-            <select class="form-select" id="txType">
-              <option value="out">Sortie</option>
-              <option value="in">Entrée</option>
-            </select>
-          </div>
+  <div class="mb-3">
+    <label class="form-label">Type</label>
+    <select class="form-select" id="txType">
+      <option value="out">Sortie (Client)</option>
+      <option value="in">Entrée (Fournisseur)</option>
+    </select>
+  </div>
 
-          <div class="mb-3">
-            <label class="form-label">Quantité</label>
-            <input type="number" class="form-control" id="txQty" min="1" required>
-          </div>
+  <!-- CLIENT -->
+  <div class="mb-3" id="clientBlock">
+    <label class="form-label">Client</label>
+    <select class="form-select" id="txClient"></select>
+  </div>
 
-        </form>
+  <!-- FOURNISSEUR -->
+  <div class="mb-3 d-none" id="supplierBlock">
+    <label class="form-label">Fournisseur</label>
+    <select class="form-select" id="txSupplier"></select>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Quantité</label>
+    <input type="number" class="form-control" id="txQty" min="1" required>
+  </div>
+
+</form>
+
       </div>
 
       <div class="modal-footer">
