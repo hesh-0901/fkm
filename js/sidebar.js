@@ -1,21 +1,19 @@
 fetch("../partials/sidebar.html")
-  .then(r => r.text())
+  .then(res => res.text())
   .then(html => {
     document.getElementById("sidebar-container").innerHTML = html;
 
-    const toggle = document.getElementById("sidebarToggleInternal");
+    const toggleBtn = document.getElementById("sidebarToggleInternal");
 
-    toggle.addEventListener("click", () => {
-      document.body.classList.toggle("sidebar-open");
+    toggleBtn.addEventListener("click", () => {
+      document.body.classList.toggle("sidebar-collapsed");
     });
 
-    // Active menu auto
-    const currentPath = location.pathname;
-    document.querySelectorAll(".sidebar .nav-link").forEach(link => {
-      if (currentPath.endsWith(link.getAttribute("href"))) {
+    /* ACTIVE LINK */
+    const path = window.location.pathname;
+    document.querySelectorAll(".sidebar-link").forEach(link => {
+      if (path.endsWith(link.getAttribute("href"))) {
         link.classList.add("active");
-      } else {
-        link.classList.remove("active");
       }
     });
   });
