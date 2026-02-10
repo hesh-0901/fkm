@@ -6,41 +6,49 @@ fetch("../partials/sidebar.html")
   .then(html => {
     document.getElementById("sidebar-container").innerHTML = html;
 
-    const app = document.querySelector(".app");
     const sidebar = document.getElementById("sidebar");
     const toggleBtn = document.getElementById("toggleSidebar");
     const closeBtn = document.getElementById("closeSidebar");
+    const body = document.body;
 
-    if (!app || !sidebar) return;
+    if (!sidebar) return;
 
-    /* ===== ÉTAT INITIAL ===== */
     const isDesktop = () => window.innerWidth >= 768;
 
+    /* =============================
+       ÉTAT INITIAL
+       ============================= */
     if (isDesktop()) {
-      sidebar.classList.remove("collapsed");
-      app.classList.remove("sidebar-hidden");
+      body.classList.remove("sidebar-hidden");
+      sidebar.classList.remove("show");
     } else {
-      sidebar.classList.add("collapsed");
+      body.classList.add("sidebar-hidden");
     }
 
-    /* ===== TOGGLE ===== */
+    /* =============================
+       TOGGLE SIDEBAR
+       ============================= */
     toggleBtn?.addEventListener("click", () => {
       if (isDesktop()) {
-        app.classList.toggle("sidebar-hidden");
+        body.classList.toggle("sidebar-hidden");
       } else {
-        sidebar.classList.toggle("collapsed");
+        sidebar.classList.toggle("show");
       }
     });
 
-    /* ===== CLOSE (MOBILE) ===== */
+    /* =============================
+       CLOSE (MOBILE)
+       ============================= */
     closeBtn?.addEventListener("click", () => {
-      sidebar.classList.add("collapsed");
+      sidebar.classList.remove("show");
     });
 
-    /* ===== ACTIVE MENU AUTO ===== */
+    /* =============================
+       AUTO ACTIVE MENU
+       ============================= */
     const currentPath = window.location.pathname;
 
-    document.querySelectorAll(".sidebar .nav-link").forEach(link => {
+    document.querySelectorAll("#sidebar a").forEach(link => {
       const href = link.getAttribute("href");
       if (!href) return;
 
@@ -53,14 +61,17 @@ fetch("../partials/sidebar.html")
       }
     });
 
-    /* ===== RESIZE HANDLER ===== */
+    /* =============================
+       RESIZE HANDLER
+       ============================= */
     window.addEventListener("resize", () => {
       if (isDesktop()) {
-        sidebar.classList.remove("collapsed");
+        sidebar.classList.remove("show");
       } else {
-        sidebar.classList.add("collapsed");
-        app.classList.remove("sidebar-hidden");
+        body.classList.add("sidebar-hidden");
       }
     });
   })
-  .catch(err => console.error("Erreur sidebar :", err));
+  .catch(err => {
+    console.error("Erreur sidebar :", err);
+  });
