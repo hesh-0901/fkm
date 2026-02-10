@@ -1,12 +1,8 @@
-// ================= RESET STRICT =================
+// ================= RESET =================
 window.addEventListener("DOMContentLoaded", () => {
-  const emailInput = document.getElementById("username");
-  const passwordInput = document.getElementById("password");
-  const rememberMe = document.getElementById("rememberMe");
-
-  if (emailInput) emailInput.value = "";
-  if (passwordInput) passwordInput.value = "";
-  if (rememberMe) rememberMe.checked = false;
+  document.getElementById("username").value = "";
+  document.getElementById("password").value = "";
+  document.getElementById("rememberMe").checked = false;
 });
 
 // ================= IMPORTS =================
@@ -19,18 +15,13 @@ import {
 
 // ================= DOM =================
 const form = document.getElementById("loginForm");
-const emailInput = document.getElementById("username"); // email
+const usernameInput = document.getElementById("username");
 const passwordInput = document.getElementById("password");
 const rememberMe = document.getElementById("rememberMe");
 const errorBox = document.getElementById("loginError");
 const togglePassword = document.getElementById("togglePassword");
 
-// ================= REMEMBER ME =================
-const savedEmail = localStorage.getItem("rememberedEmail");
-if (savedEmail) {
-  emailInput.value = savedEmail;
-  rememberMe.checked = true;
-}
+const DOMAIN = "@fkmenergy.com";
 
 // ================= TOGGLE PASSWORD =================
 togglePassword.addEventListener("click", () => {
@@ -38,7 +29,7 @@ togglePassword.addEventListener("click", () => {
     passwordInput.type === "password" ? "text" : "password";
 });
 
-// ================= SESSION 30 MIN =================
+// ================= SESSION TIMER =================
 function startSessionTimer() {
   setTimeout(async () => {
     await auth.signOut();
@@ -51,23 +42,24 @@ form.addEventListener("submit", async (e) => {
   e.preventDefault();
   errorBox.textContent = "";
 
-  const email = emailInput.value.trim();
+  const username = usernameInput.value.trim().toLowerCase();
   const password = passwordInput.value;
 
-  if (!email || !password) {
+  if (!username || !password) {
     errorBox.textContent = "Veuillez renseigner tous les champs.";
     return;
   }
 
+  const email = username + DOMAIN;
+
   try {
     await setPersistence(auth, browserSessionPersistence);
-
     await signInWithEmailAndPassword(auth, email, password);
 
     if (rememberMe.checked) {
-      localStorage.setItem("rememberedEmail", email);
+      localStorage.setItem("rememberedUser", username);
     } else {
-      localStorage.removeItem("rememberedEmail");
+      localStorage.removeItem("rememberedUser");
     }
 
     startSessionTimer();
@@ -75,6 +67,6 @@ form.addEventListener("submit", async (e) => {
 
   } catch (err) {
     console.error(err);
-    errorBox.textContent = "Identifiants incorrects.";
+    errorBox.textContent = "Identifiant ou mot de passe incorrect.";
   }
 });
