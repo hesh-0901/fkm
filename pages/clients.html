@@ -64,28 +64,23 @@
 </div>
 
 <!-- MODAL CLIENT -->
-<div class="modal fade" id="clientModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
+<form id="clientForm">
+  <div class="mb-3">
+    <label class="form-label">Nom</label>
+    <input id="cName" class="form-control" required>
+  </div>
 
-      <div class="modal-header">
-        <h5 class="modal-title">Client</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+  <div class="mb-3">
+    <label class="form-label">Téléphone</label>
+    <input id="cPhone" class="form-control">
+  </div>
 
-      <div class="modal-body">
-        <form id="clientForm">
-          <div class="mb-3">
-            <label class="form-label">Nom</label>
-            <input id="cName" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Téléphone</label>
-            <input id="cPhone" class="form-control">
-          </div>
-        </form>
-      </div>
-
+  <div class="mb-3">
+    <label class="form-label">Commentaire</label>
+    <textarea id="cComment" class="form-control" rows="3"
+      placeholder="Remarque, condition particulière, info utile..."></textarea>
+  </div>
+</form>
       <div class="modal-footer">
         <button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
         <button class="btn btn-success" id="saveClientBtn">Enregistrer</button>
