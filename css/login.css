@@ -25,24 +25,25 @@ body {
   justify-content: center;
 }
 
+/* Overlay global pour baisser l’opacité de l’image */
+.login-visual::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.15); /* 👈 ajuste ici */
+}
+
+/* Bloc texte */
 .visual-overlay {
-  background: rgba(0,0,0,0.45);
+  position: relative;
+  background: rgba(0, 0, 0, 0.45);
   color: #fff;
   padding: 3rem;
   text-align: center;
   border-radius: 0.75rem;
+  z-index: 1;
 }
 
-.visual-overlay h1 {
-  font-size: 2.2rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-}
-
-.visual-overlay p {
-  font-size: 1rem;
-  opacity: 0.9;
-}
 
 /* ================= RIGHT PANEL ================= */
 .login-panel {
