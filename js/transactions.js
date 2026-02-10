@@ -50,10 +50,9 @@ onAuthStateChanged(auth, async (user) => {
   userRoleEl.textContent = currentUser.fonction;
 
   // ✅ SEUL L’OPÉRATEUR CRÉE DES TRANSACTIONS
-  if (currentUser.role === ROLES.OPERATEUR) {
-    newTxBtn.classList.remove("d-none");
-  }
-
+if ([ROLES.OPERATEUR, ROLES.DIRECTEUR].includes(currentUser.role)) {
+  newTxBtn.classList.remove("d-none");
+}
   loadTransactions();
 });
 
@@ -119,11 +118,13 @@ newTxBtn.addEventListener("click", async () => {
 });
 
 /* SAVE TRANSACTION */
-saveBtn.onclick = async () => {
-  if (!currentUser || currentUser.role !== ROLES.OPERATEUR) {
-    alert("Accès refusé");
-    return;
-  }
+if (
+  !currentUser ||
+  ![ROLES.OPERATEUR, ROLES.DIRECTEUR].includes(currentUser.role)
+) {
+  alert("Accès refusé");
+  return;
+}
 
   const productId = document.getElementById("txProduct").value;
   const qty = Number(document.getElementById("txQty").value);
