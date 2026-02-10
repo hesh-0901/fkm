@@ -1,9 +1,6 @@
+// js/transactions.js
 import { auth, db } from "./firebase.config.js";
-import {
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
   collection,
   getDocs,
@@ -12,6 +9,13 @@ import {
   getDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* ROLES */
+const ROLES = {
+  OPERATEUR: "operateur",
+  ADMIN: "admin",
+  DIRECTEUR: "directeur"
+};
 
 /* DOM */
 const table = document.getElementById("txTable");
@@ -36,15 +40,17 @@ onAuthStateChanged(auth, async (user) => {
 
   currentUser = {
     uid: user.uid,
-    displayName: data.displayName || data.name || data.username || "",
-    role: data.role,
-    fonction: data.fonction || ""
+    name: data.name || data.username || "—",
+    fonction: data.fonction || "",
+    role: data.role
   };
 
-  userNameEl.textContent = currentUser.displayName || "—";
-  userRoleEl.textContent = currentUser.fonction || currentUser.role;
+  // ✅ AFFICHAGE IDENTITÉ (CORRIGÉ)
+  userNameEl.textContent = currentUser.name;
+  userRoleEl.textContent = currentUser.fonction;
 
-  if (currentUser.role === "operateur") {
+  // ✅ SEUL L’OPÉRATEUR CRÉE DES TRANSACTIONS
+  if (currentUser.role === ROLES.OPERATEUR) {
     newTxBtn.classList.remove("d-none");
   }
 
@@ -63,6 +69,17 @@ async function loadTransactions() {
 
   const snap = await getDocs(collection(db, "transactions"));
 
+  if (snap.empty) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="7" class="text-center text-muted">
+          Aucune transaction enregistrée
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
   snap.forEach(d => {
     const t = d.data();
 
@@ -75,12 +92,12 @@ async function loadTransactions() {
         <td>
           <span class="badge bg-${
             t.status === "pending" ? "warning" :
-            t.status === "approved" ? "success" : "danger"
+            t.status === "approved" ? "success" : "secondary"
           }">
             ${t.status}
           </span>
         </td>
-        <td>${t.createdBy?.displayName || "—"}</td>
+        <td>${t.createdBy?.name || "—"}</td>
         <td></td>
       </tr>
     `;
@@ -88,7 +105,7 @@ async function loadTransactions() {
 }
 
 /* OPEN MODAL */
-newTxBtn?.addEventListener("click", async () => {
+newTxBtn.addEventListener("click", async () => {
   const select = document.getElementById("txProduct");
   select.innerHTML = "";
 
@@ -103,7 +120,10 @@ newTxBtn?.addEventListener("click", async () => {
 
 /* SAVE TRANSACTION */
 saveBtn.onclick = async () => {
-  if (!currentUser) return;
+  if (!currentUser || currentUser.role !== ROLES.OPERATEUR) {
+    alert("Accès refusé");
+    return;
+  }
 
   const productId = document.getElementById("txProduct").value;
   const qty = Number(document.getElementById("txQty").value);
@@ -125,7 +145,7 @@ saveBtn.onclick = async () => {
 
     createdBy: {
       uid: currentUser.uid,
-      displayName: currentUser.displayName,
+      name: currentUser.name,
       role: currentUser.role
     },
 
