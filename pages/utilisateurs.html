@@ -118,6 +118,7 @@
 <div class="modal fade" id="userModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content rounded-xl">
+
       <div class="modal-header">
         <h5 class="modal-title">Nouvel utilisateur</h5>
         <button class="btn-close" data-bs-dismiss="modal"></button>
@@ -125,14 +126,39 @@
 
       <div class="modal-body">
         <form id="userForm">
+
+          <!-- NOM -->
           <div class="mb-3">
-            <label class="form-label">Nom</label>
+            <label class="form-label">Nom complet</label>
             <input id="uName" class="form-control" required>
           </div>
+
+          <!-- USERNAME -->
           <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input id="uEmail" type="email" class="form-control" required>
+            <label class="form-label">Identifiant</label>
+            <div class="input-group">
+              <input
+                id="uUsername"
+                class="form-control"
+                placeholder="prenom.nom"
+                required
+              >
+              <span class="input-group-text">@fkmenergy.com</span>
+            </div>
           </div>
+
+          <!-- FONCTION -->
+          <div class="mb-3">
+            <label class="form-label">Fonction</label>
+            <input
+              id="uFonction"
+              class="form-control"
+              placeholder="Ex : Architecte système IT"
+              required
+            >
+          </div>
+
+          <!-- ROLE -->
           <div class="mb-3">
             <label class="form-label">Rôle</label>
             <select id="uRole" class="form-select">
@@ -141,13 +167,17 @@
               <option value="directeur">Directeur</option>
             </select>
           </div>
+
         </form>
       </div>
 
       <div class="modal-footer">
         <button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-        <button class="btn btn-success" id="saveUserBtn">Enregistrer</button>
+        <button class="btn btn-success" id="saveUserBtn">
+          Enregistrer
+        </button>
       </div>
+
     </div>
   </div>
 </div>
