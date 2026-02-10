@@ -64,24 +64,34 @@
 </div>
 
 <!-- MODAL FOURNISSEUR -->
-<form id="supplierForm">
-  <div class="mb-3">
-    <label class="form-label">Nom</label>
-    <input id="sName" class="form-control" required>
-  </div>
+<div class="modal fade" id="supplierModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
 
-  <div class="mb-3">
-    <label class="form-label">Téléphone</label>
-    <input id="sPhone" class="form-control">
-  </div>
+      <div class="modal-header">
+        <h5 class="modal-title">Fournisseur</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
 
-  <div class="mb-3">
-    <label class="form-label">Commentaire</label>
-    <textarea id="sComment" class="form-control" rows="3"
-      placeholder="Contact, condition, remarque..."></textarea>
-  </div>
-</form>
+      <div class="modal-body">
+        <form id="supplierForm">
+          <div class="mb-3">
+            <label class="form-label">Nom</label>
+            <input id="sName" class="form-control" required>
+          </div>
 
+          <div class="mb-3">
+            <label class="form-label">Téléphone</label>
+            <input id="sPhone" class="form-control">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Commentaire</label>
+            <textarea id="sComment" class="form-control" rows="3"
+              placeholder="Contact, condition, remarque..."></textarea>
+          </div>
+        </form>
+      </div>
 
       <div class="modal-footer">
         <button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
