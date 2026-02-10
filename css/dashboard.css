@@ -46,7 +46,7 @@ body {
   color: #fff;
   display: flex;
   flex-direction: column;
-  transition: transform 0.25s ease, width 0.25s ease;
+  transition: transform 0.25s ease;
 }
 
 /* Sidebar header */
@@ -99,7 +99,6 @@ body {
 .main {
   flex: 1;
   padding: 1rem;
-  transition: margin-left 0.25s ease;
 }
 
 /* ===============================
@@ -185,17 +184,17 @@ body {
    SIDEBAR COLLAPSE (DESKTOP)
    =============================== */
 @media (min-width: 768px) {
-  .sidebar-hidden .sidebar {
-    width: 0;
-    overflow: hidden;
+
+  .sidebar {
+    transform: translateX(0);
   }
 
-  .sidebar-hidden .main {
-    margin-left: 0;
+  .sidebar-hidden .sidebar {
+    transform: translateX(-100%);
   }
 
   .main {
-    margin-left: 260px;
+    margin-left: 0;
   }
 }
 
@@ -203,16 +202,13 @@ body {
    MOBILE
    =============================== */
 @media (max-width: 767px) {
+
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     height: 100%;
     z-index: 1050;
-    transform: translateX(-100%);
-  }
-
-  .sidebar.collapsed {
     transform: translateX(-100%);
   }
 
