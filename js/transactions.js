@@ -5,6 +5,8 @@ import {
   collection,
   getDocs,
   addDoc,
+  updateDoc,
+  deleteDoc,
   doc,
   getDoc,
   serverTimestamp
@@ -45,11 +47,9 @@ onAuthStateChanged(auth, async (user) => {
     role: data.role
   };
 
-  // ✅ AFFICHAGE IDENTITÉ
   userNameEl.textContent = currentUser.name;
   userRoleEl.textContent = currentUser.fonction;
 
-  // ✅ OPERATEUR + DIRECTEUR peuvent créer
   if ([ROLES.OPERATEUR, ROLES.DIRECTEUR].includes(currentUser.role)) {
     newTxBtn.classList.remove("d-none");
   }
@@ -98,7 +98,25 @@ async function loadTransactions() {
           </span>
         </td>
         <td>${t.createdBy?.name || "—"}</td>
-        <td></td>
+        <td class="text-end">
+          ${
+            t.status === "pending" &&
+            [ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)
+              ? `<button class="btn btn-sm btn-outline-success me-1"
+                   onclick="approveTx('${d.id}')">
+                   Valider
+                 </button>`
+              : ""
+          }
+          ${
+            currentUser.role === ROLES.DIRECTEUR
+              ? `<button class="btn btn-sm btn-outline-danger"
+                   onclick="deleteTx('${d.id}')">
+                   Supprimer
+                 </button>`
+              : ""
+          }
+        </td>
       </tr>
     `;
   });
@@ -118,7 +136,7 @@ newTxBtn.addEventListener("click", async () => {
   modal.show();
 });
 
-/* SAVE TRANSACTION ✅ (CORRECTION MAJEURE ICI) */
+/* CREATE TRANSACTION */
 saveBtn.onclick = async () => {
   if (
     !currentUser ||
@@ -157,5 +175,58 @@ saveBtn.onclick = async () => {
   });
 
   modal.hide();
+  loadTransactions();
+};
+
+/* VALIDATION ADMIN / DIRECTEUR */
+window.approveTx = async (txId) => {
+  if (![ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) return;
+
+  const txRef = doc(db, "transactions", txId);
+  const txSnap = await getDoc(txRef);
+  if (!txSnap.exists()) return;
+
+  const tx = txSnap.data();
+  if (tx.status !== "pending") return;
+
+  const productRef = doc(db, "inventory", tx.productId);
+  const productSnap = await getDoc(productRef);
+  if (!productSnap.exists()) return;
+
+  const product = productSnap.data();
+  let newQty = product.quantity;
+
+  if (tx.type === "out") newQty -= tx.quantity;
+  if (tx.type === "in") newQty += tx.quantity;
+
+  if (newQty < 0) {
+    alert("Stock insuffisant");
+    return;
+  }
+
+  await updateDoc(productRef, {
+    quantity: newQty,
+    updatedAt: serverTimestamp()
+  });
+
+  await updateDoc(txRef, {
+    status: "approved",
+    validatedAt: serverTimestamp(),
+    validatedBy: {
+      uid: currentUser.uid,
+      name: currentUser.name,
+      role: currentUser.role
+    }
+  });
+
+  loadTransactions();
+};
+
+/* DELETE (DIRECTEUR) */
+window.deleteTx = async (txId) => {
+  if (currentUser.role !== ROLES.DIRECTEUR) return;
+  if (!confirm("Supprimer cette transaction ?")) return;
+
+  await deleteDoc(doc(db, "transactions", txId));
   loadTransactions();
 };
