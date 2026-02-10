@@ -1,7 +1,10 @@
 import { auth, db } from "./firebase.config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
-  collection, getDocs, doc, getDoc
+  collection,
+  getDocs,
+  doc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* DOM */
@@ -18,7 +21,7 @@ const alertsList = document.getElementById("alertsList");
 const activityList = document.getElementById("activityList");
 const usersList = document.getElementById("usersList");
 
-let chart;
+let lineChart;
 
 /* AUTH */
 onAuthStateChanged(auth, async user => {
@@ -28,13 +31,15 @@ onAuthStateChanged(auth, async user => {
   const me = snap.data();
 
   userNameEl.textContent = me.name;
-  userRoleEl.textContent = me.fonction;
+  userRoleEl.textContent = me.fonction || me.role;
 
-  loadKPIs();
-  loadChart();
-  loadAlerts();
-  loadActivity();
-  loadUsers();
+  await Promise.all([
+    loadKPIs(),
+    loadAlerts(),
+    loadActivity(),
+    loadUsers(),
+    loadLineChart()
+  ]);
 });
 
 /* LOGOUT */
@@ -45,62 +50,80 @@ logoutBtn.onclick = async () => {
 
 /* KPIs */
 async function loadKPIs() {
-  const inv = await getDocs(collection(db, "inventory"));
+  const invSnap = await getDocs(collection(db, "inventory"));
   let low = 0;
-  inv.forEach(d => { if (d.data().quantity <= d.data().minQuantity) low++; });
-  kpiProducts.textContent = inv.size;
+
+  invSnap.forEach(d => {
+    const p = d.data();
+    if (p.quantity <= p.minQuantity) low++;
+  });
+
+  kpiProducts.textContent = invSnap.size;
   kpiLowStock.textContent = low;
 
-  const tx = await getDocs(collection(db, "transactions"));
-  let p = 0, a = 0;
-  tx.forEach(d => {
-    if (d.data().status === "pending") p++;
-    if (d.data().status === "approved") a++;
+  const txSnap = await getDocs(collection(db, "transactions"));
+  let pending = 0, approved = 0;
+
+  txSnap.forEach(d => {
+    const t = d.data();
+    if (t.status === "pending") pending++;
+    if (t.status === "approved") approved++;
   });
-  kpiPending.textContent = p;
-  kpiApproved.textContent = a;
+
+  kpiPending.textContent = pending;
+  kpiApproved.textContent = approved;
 }
 
-/* CHART ✅ FIX LÉGENDE */
-async function loadChart() {
-  const tx = await getDocs(collection(db, "transactions"));
-  let inQty = 0;
-  let outQty = 0;
+/* LINE CHART – flux dans le temps */
+async function loadLineChart() {
+  const txSnap = await getDocs(collection(db, "transactions"));
+  const map = {};
 
-  tx.forEach(d => {
+  txSnap.forEach(d => {
     const t = d.data();
-    if (t.status !== "approved") return;
-    if (t.type === "in") inQty += t.quantity;
-    if (t.type === "out") outQty += t.quantity;
+    if (t.status !== "approved" || !t.createdAt) return;
+
+    const date = t.createdAt.toDate().toISOString().slice(0, 10);
+    if (!map[date]) map[date] = { in: 0, out: 0 };
+
+    map[date][t.type] += t.quantity;
   });
 
-  const ctx = document.getElementById("txChart");
+  const labels = Object.keys(map).sort();
+  const inData = labels.map(d => map[d].in);
+  const outData = labels.map(d => map[d].out);
 
-  if (chart) chart.destroy();
+  const ctx = document.getElementById("txLineChart");
 
-  chart = new Chart(ctx, {
-    type: "bar",
+  if (lineChart) lineChart.destroy();
+
+  lineChart = new Chart(ctx, {
+    type: "line",
     data: {
-      labels: ["Volume"],
+      labels,
       datasets: [
         {
           label: "Entrées",
-          data: [inQty],
-          backgroundColor: "#2E7D32"
+          data: inData,
+          borderColor: "#2E7D32",
+          backgroundColor: "rgba(46,125,50,0.15)",
+          tension: 0.3,
+          fill: true
         },
         {
           label: "Sorties",
-          data: [outQty],
-          backgroundColor: "#B71C1C"
+          data: outData,
+          borderColor: "#DC2626",
+          backgroundColor: "rgba(220,38,38,0.15)",
+          tension: 0.3,
+          fill: true
         }
       ]
     },
     options: {
       responsive: true,
       plugins: {
-        legend: {
-          position: "bottom"
-        }
+        legend: { position: "bottom" }
       }
     }
   });
@@ -109,11 +132,16 @@ async function loadChart() {
 /* ALERTS */
 async function loadAlerts() {
   alertsList.innerHTML = "";
-  const inv = await getDocs(collection(db, "inventory"));
-  inv.forEach(d => {
+  const invSnap = await getDocs(collection(db, "inventory"));
+
+  invSnap.forEach(d => {
     const p = d.data();
     if (p.quantity <= p.minQuantity) {
-      alertsList.innerHTML += `<li class="list-group-item text-danger">${p.name} : stock critique</li>`;
+      alertsList.innerHTML += `
+        <li class="text-danger flex items-center gap-2">
+          <i class="bi bi-exclamation-circle"></i>
+          ${p.name} : stock critique
+        </li>`;
     }
   });
 }
@@ -121,11 +149,13 @@ async function loadAlerts() {
 /* ACTIVITY */
 async function loadActivity() {
   activityList.innerHTML = "";
-  const tx = await getDocs(collection(db, "transactions"));
-  tx.docs.slice(-5).reverse().forEach(d => {
+  const txSnap = await getDocs(collection(db, "transactions"));
+
+  txSnap.docs.slice(-10).reverse().forEach(d => {
     const t = d.data();
     activityList.innerHTML += `
-      <li class="list-group-item">
+      <li class="flex items-center gap-2">
+        <i class="bi bi-arrow-repeat"></i>
         ${t.createdBy?.name} • ${t.productName} • ${t.type} • ${t.quantity}
       </li>`;
   });
@@ -134,12 +164,14 @@ async function loadActivity() {
 /* USERS */
 async function loadUsers() {
   usersList.innerHTML = "";
-  const users = await getDocs(collection(db, "users"));
-  users.forEach(d => {
+  const usersSnap = await getDocs(collection(db, "users"));
+
+  usersSnap.forEach(d => {
     const u = d.data();
     usersList.innerHTML += `
-      <li class="list-group-item">
-        ${u.name} <small class="text-muted">(${u.role})</small>
+      <li class="flex items-center gap-2">
+        <i class="bi bi-person"></i>
+        ${u.name} <span class="text-muted text-xs">(${u.role})</span>
       </li>`;
   });
 }
