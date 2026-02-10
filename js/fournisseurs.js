@@ -2,14 +2,8 @@
 import { auth, db } from "./firebase.config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
-  collection,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  getDoc,
-  serverTimestamp
+  collection, getDocs, addDoc, updateDoc, deleteDoc,
+  doc, getDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ROLES */
@@ -27,6 +21,9 @@ const userNameEl = document.getElementById("userName");
 const userRoleEl = document.getElementById("userRole");
 
 const modal = new bootstrap.Modal(document.getElementById("supplierModal"));
+const infoModal = new bootstrap.Modal(document.getElementById("supplierInfoModal"));
+const infoContent = document.getElementById("supplierInfoContent");
+
 const saveBtn = document.getElementById("saveSupplierBtn");
 
 const sName = document.getElementById("sName");
@@ -94,26 +91,34 @@ async function loadSuppliers() {
           <span class="badge bg-${
             s.status === "ACTIVE" ? "success" :
             s.status === "BLOCKED" ? "danger" : "warning"
-          }">
-            ${s.status}
-          </span>
+          }">${s.status}</span>
         </td>
         <td>${s.createdBy?.name || "—"}</td>
         <td>${s.createdAt?.toDate().toLocaleString() || "—"}</td>
         <td class="text-end">
+
+          <!-- INFO -->
+          <button class="btn btn-sm btn-outline-primary me-1"
+            onclick='showSupplierInfo(${JSON.stringify(s)})'>
+            <i class="bi bi-info-circle"></i>
+          </button>
+
           ${
             [ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role) && s.status === "PENDING"
-              ? `<button class="btn btn-sm btn-outline-success me-1" onclick="validateSupplier('${d.id}')">Valider</button>`
+              ? `<button class="btn btn-sm btn-outline-success me-1"
+                   onclick="validateSupplier('${d.id}')">Valider</button>`
               : ""
           }
           ${
             currentUser.role === ROLES.ADMIN && s.status === "ACTIVE"
-              ? `<button class="btn btn-sm btn-outline-warning me-1" onclick="blockSupplier('${d.id}')">Bloquer</button>`
+              ? `<button class="btn btn-sm btn-outline-warning me-1"
+                   onclick="blockSupplier('${d.id}')">Bloquer</button>`
               : ""
           }
           ${
             currentUser.role === ROLES.DIRECTEUR
-              ? `<button class="btn btn-sm btn-outline-danger" onclick="deleteSupplier('${d.id}')">Supprimer</button>`
+              ? `<button class="btn btn-sm btn-outline-danger"
+                   onclick="deleteSupplier('${d.id}')">Supprimer</button>`
               : ""
           }
         </td>
@@ -121,6 +126,19 @@ async function loadSuppliers() {
     `;
   });
 }
+
+/* INFO FOURNISSEUR */
+window.showSupplierInfo = (s) => {
+  infoContent.innerHTML = `
+    <div class="space-y-2">
+      <div><strong>Nom :</strong> ${s.name}</div>
+      <div><strong>Téléphone :</strong> ${s.phone || "—"}</div>
+      <div><strong>Statut :</strong> ${s.status}</div>
+      <div><strong>Commentaire :</strong><br>${s.comment || "—"}</div>
+    </div>
+  `;
+  infoModal.show();
+};
 
 /* CREATE */
 saveBtn.onclick = async () => {
