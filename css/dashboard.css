@@ -220,3 +220,64 @@ body {
     margin-left: 0;
   }
 }
+/* ===============================
+   SIDEBAR FIX & STABILITY
+   =============================== */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 1040;
+}
+
+/* ===============================
+   MAIN OFFSET (SIDEBAR AWARE)
+   =============================== */
+.main {
+  margin-left: 260px;
+  transition: margin-left 0.25s ease;
+}
+
+/* Sidebar cachée */
+.sidebar-hidden .main {
+  margin-left: 0;
+}
+/* ===============================
+   SIDEBAR VISUAL POLISH
+   =============================== */
+.sidebar {
+  box-shadow: 4px 0 20px rgba(0,0,0,0.08);
+}
+
+.nav-link {
+  border-radius: 0.4rem;
+  margin: 0.15rem 0.5rem;
+}
+
+.nav-link.active {
+  box-shadow: inset 3px 0 0 rgba(255,255,255,0.9);
+}
+/* ===============================
+   MOBILE REFINEMENT
+   =============================== */
+@media (max-width: 767px) {
+
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar:not(.collapsed) {
+    transform: translateX(0);
+  }
+
+  .main {
+    margin-left: 0;
+  }
+
+  .sidebar-hidden .main {
+    margin-left: 0;
+  }
+}
+
+
