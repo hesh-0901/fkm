@@ -1,4 +1,4 @@
-//js/inventaire.js
+// js/inventaire.js
 import { auth, db } from "./firebase.config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
@@ -43,16 +43,17 @@ onAuthStateChanged(auth, async (user) => {
   const snap = await getDoc(doc(db, "users", user.uid));
   if (!snap.exists()) return;
 
-currentUser = {
-  uid: user.uid,
-  name: snap.data().name || snap.data().username || "—",
-  fonction: snap.data().fonction || "",
-  role: snap.data().role
-};
+  const data = snap.data();
 
-userNameEl.textContent = currentUser.name;
-userRoleEl.textContent = currentUser.fonction;
+  currentUser = {
+    uid: user.uid,
+    name: data.name || "—",
+    fonction: data.fonction || "",
+    role: data.role
+  };
 
+  userNameEl.textContent = currentUser.name;
+  userRoleEl.textContent = currentUser.fonction;
 
   if ([ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) {
     addBtn.classList.remove("d-none");
@@ -67,13 +68,18 @@ logoutBtn.onclick = async () => {
   location.replace("../login.html");
 };
 
-/* INVENTORY */
+/* LOAD INVENTORY */
 async function loadInventory() {
   table.innerHTML = "";
   const snap = await getDocs(collection(db, "inventory"));
 
   if (snap.empty) {
-    table.innerHTML = `<tr><td colspan="7" class="text-center text-muted">Aucun produit</td></tr>`;
+    table.innerHTML = `
+      <tr>
+        <td colspan="9" class="text-center text-muted">
+          Aucun produit enregistré
+        </td>
+      </tr>`;
     return;
   }
 
@@ -87,7 +93,9 @@ async function loadInventory() {
         <td>${p.category}</td>
         <td>${p.quantity}</td>
         <td>${p.minQuantity}</td>
-        <td>${p.pricing?.usd || ""} ${p.pricing?.cdf ? "/ "+p.pricing.cdf+" CDF" : ""}</td>
+        <td>${p.pricing?.usd || ""} ${p.pricing?.cdf ? "/ " + p.pricing.cdf + " CDF" : ""}</td>
+        <td>${p.createdBy?.name || "—"}</td>
+        <td>${p.createdAt?.toDate().toLocaleString() || "—"}</td>
         <td>
           <span class="badge bg-${p.status === "PENDING" ? "warning" : low ? "danger" : "success"}">
             ${p.status || "OK"}
@@ -95,13 +103,13 @@ async function loadInventory() {
         </td>
         <td class="text-end">
           ${
-            currentUser.role === ROLES.ADMIN || currentUser.role === ROLES.DIRECTEUR
+            [ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role) && p.status === "PENDING"
               ? `<button class="btn btn-sm btn-outline-success me-1" onclick="approve('${d.id}')">Valider</button>`
               : ""
           }
           ${
             currentUser.role === ROLES.DIRECTEUR
-              ? `<button class="btn btn-sm btn-outline-danger" onclick="remove('${d.id}')">Supprimer</button>`
+              ? `<button class="btn btn-sm btn-outline-danger" onclick="removeItem('${d.id}')">Supprimer</button>`
               : ""
           }
         </td>
@@ -110,7 +118,7 @@ async function loadInventory() {
   });
 }
 
-/* CREATE */
+/* CREATE PRODUCT */
 saveBtn.onclick = async () => {
   if (![ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) return;
 
@@ -125,7 +133,11 @@ saveBtn.onclick = async () => {
       cdf: Number(pCdf.value || 0)
     },
     status: "PENDING",
-    createdBy: { uid: currentUser.uid, role: currentUser.role },
+    createdBy: {
+      uid: currentUser.uid,
+      name: currentUser.name,
+      role: currentUser.role
+    },
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp()
   });
@@ -135,20 +147,23 @@ saveBtn.onclick = async () => {
   loadInventory();
 };
 
-/* ADMIN VALIDATION */
+/* VALIDATION */
 window.approve = async (id) => {
   if (![ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) return;
+
   await updateDoc(doc(db, "inventory", id), {
     status: "VALIDATED",
     updatedAt: serverTimestamp()
   });
+
   loadInventory();
 };
 
-/* DIRECTEUR DELETE */
-window.remove = async (id) => {
+/* DELETE */
+window.removeItem = async (id) => {
   if (currentUser.role !== ROLES.DIRECTEUR) return;
   if (!confirm("Supprimer ce produit ?")) return;
+
   await deleteDoc(doc(db, "inventory", id));
   loadInventory();
 };
