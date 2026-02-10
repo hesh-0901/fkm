@@ -20,7 +20,6 @@ const ROLES = {
 };
 
 /* DOM */
-const cComment = document.getElementById("cComment");
 const table = document.getElementById("clientsTable");
 const addBtn = document.getElementById("addClientBtn");
 const logoutBtn = document.getElementById("logoutBtn");
@@ -32,15 +31,18 @@ const saveBtn = document.getElementById("saveClientBtn");
 
 const cName = document.getElementById("cName");
 const cPhone = document.getElementById("cPhone");
+const cComment = document.getElementById("cComment");
 const clientForm = document.getElementById("clientForm");
 
 let currentUser = null;
 
 /* AUTH */
-onAuthStateChanged(auth, async user => {
+onAuthStateChanged(auth, async (user) => {
   if (!user) return location.replace("../login.html");
 
   const snap = await getDoc(doc(db, "users", user.uid));
+  if (!snap.exists()) return;
+
   const data = snap.data();
 
   currentUser = {
@@ -125,19 +127,18 @@ saveBtn.onclick = async () => {
   if (![ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) return;
 
   await addDoc(collection(db, "clients"), {
-  name: cName.value.trim(),
-  phone: cPhone.value.trim(),
-  comment: cComment.value.trim(),
-  status: "PENDING",
-  createdBy: {
-    uid: currentUser.uid,
-    name: currentUser.name,
-    role: currentUser.role
-  },
-  createdAt: serverTimestamp(),
-  updatedAt: serverTimestamp()
-});
-;
+    name: cName.value.trim(),
+    phone: cPhone.value.trim(),
+    comment: cComment.value.trim(),
+    status: "PENDING",
+    createdBy: {
+      uid: currentUser.uid,
+      name: currentUser.name,
+      role: currentUser.role
+    },
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  });
 
   modal.hide();
   clientForm.reset();
