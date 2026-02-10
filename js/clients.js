@@ -1,162 +1,198 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <title>Clients | FKM ENERGY</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+// js/clients.js
+import { auth, db } from "./firebase.config.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  collection, getDocs, addDoc, updateDoc, deleteDoc,
+  doc, getDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  <!-- Bootstrap Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+/* ROLES */
+const ROLES = {
+  OPERATEUR: "operateur",
+  ADMIN: "admin",
+  DIRECTEUR: "directeur"
+};
 
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+/* DOM */
+const table = document.getElementById("clientsTable");
+const addBtn = document.getElementById("addClientBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const userNameEl = document.getElementById("userName");
+const userRoleEl = document.getElementById("userRole");
 
-  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: "#0B5C6B",
-            success: "#2E7D32",
-            warning: "#D4A017",
-            danger: "#DC2626",
-            bg: "#F5F7FA",
-            muted: "#6B7280"
+const modal = new bootstrap.Modal(document.getElementById("clientModal"));
+const infoModal = new bootstrap.Modal(document.getElementById("clientInfoModal"));
+const infoContent = document.getElementById("clientInfoContent");
+
+const saveBtn = document.getElementById("saveClientBtn");
+
+const cName = document.getElementById("cName");
+const cPhone = document.getElementById("cPhone");
+const cComment = document.getElementById("cComment");
+const clientForm = document.getElementById("clientForm");
+
+let currentUser = null;
+
+/* AUTH */
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return location.replace("../login.html");
+
+  const snap = await getDoc(doc(db, "users", user.uid));
+  if (!snap.exists()) return;
+
+  const data = snap.data();
+
+  currentUser = {
+    uid: user.uid,
+    name: data.name,
+    fonction: data.fonction,
+    role: data.role
+  };
+
+  userNameEl.textContent = currentUser.name;
+  userRoleEl.textContent = currentUser.fonction;
+
+  if ([ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) {
+    addBtn.classList.remove("d-none");
+  }
+
+  loadClients();
+});
+
+/* LOGOUT */
+logoutBtn.onclick = async () => {
+  await signOut(auth);
+  location.replace("../login.html");
+};
+
+/* LOAD CLIENTS */
+async function loadClients() {
+  table.innerHTML = "";
+  const snap = await getDocs(collection(db, "clients"));
+
+  if (snap.empty) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="6" class="text-center text-muted">
+          Aucun client enregistré
+        </td>
+      </tr>`;
+    return;
+  }
+
+  snap.forEach(d => {
+    const c = d.data();
+
+    table.innerHTML += `
+      <tr>
+        <td>${c.name}</td>
+        <td>${c.phone || "—"}</td>
+        <td>
+          <span class="badge bg-${
+            c.status === "ACTIVE" ? "success" :
+            c.status === "BLOCKED" ? "danger" : "warning"
+          }">${c.status}</span>
+        </td>
+        <td>${c.createdBy?.name || "—"}</td>
+        <td>${c.createdAt?.toDate().toLocaleString() || "—"}</td>
+        <td class="text-end">
+
+          <!-- INFO -->
+          <button class="btn btn-sm btn-outline-primary me-1"
+            onclick='showClientInfo(${JSON.stringify(c)})'>
+            <i class="bi bi-info-circle"></i>
+          </button>
+
+          ${
+            [ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role) && c.status === "PENDING"
+              ? `<button class="btn btn-sm btn-outline-success me-1"
+                   onclick="validateClient('${d.id}')">Valider</button>`
+              : ""
           }
-        }
-      }
-    }
-  </script>
+          ${
+            currentUser.role === ROLES.ADMIN && c.status === "ACTIVE"
+              ? `<button class="btn btn-sm btn-outline-warning me-1"
+                   onclick="blockClient('${d.id}')">Désactiver</button>`
+              : ""
+          }
+          ${
+            currentUser.role === ROLES.DIRECTEUR
+              ? `<button class="btn btn-sm btn-outline-danger"
+                   onclick="deleteClient('${d.id}')">Supprimer</button>`
+              : ""
+          }
+        </td>
+      </tr>
+    `;
+  });
+}
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>body{font-family:Inter,system-ui}</style>
-  <link rel="icon" href="data:,">
-</head>
-
-<body class="bg-bg text-slate-800">
-
-<div class="flex min-h-screen">
-
-  <!-- SIDEBAR -->
-  <div id="sidebar-container"></div>
-
-  <!-- MAIN -->
-  <main id="mainContent" class="flex-1 px-6 py-6 space-y-6 overflow-x-hidden">
-
-    <!-- TOPBAR -->
-    <div class="bg-white rounded-xl shadow-sm px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <button id="toggleSidebar"
-                class="p-2 rounded-lg border border-slate-200 hover:bg-slate-100 transition">
-          <i class="bi bi-list"></i>
-        </button>
-        <div>
-          <h1 class="text-lg font-semibold">Clients</h1>
-          <p class="text-xs text-muted">Gestion des clients</p>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-6">
-        <div class="text-right">
-          <div id="userName" class="font-semibold">—</div>
-          <div id="userRole" class="text-sm text-muted">—</div>
-        </div>
-        <button id="logoutBtn"
-                class="px-4 py-2 rounded-lg border border-red-200 text-danger hover:bg-red-50">
-          <i class="bi bi-box-arrow-right"></i>
-        </button>
-      </div>
+/* INFO CLIENT */
+window.showClientInfo = (c) => {
+  infoContent.innerHTML = `
+    <div class="space-y-2">
+      <div><strong>Nom :</strong> ${c.name}</div>
+      <div><strong>Téléphone :</strong> ${c.phone || "—"}</div>
+      <div><strong>Statut :</strong> ${c.status}</div>
+      <div><strong>Commentaire :</strong><br>${c.comment || "—"}</div>
     </div>
+  `;
+  infoModal.show();
+};
 
-    <!-- HEADER ACTIONS -->
-    <div class="flex items-center justify-between">
-      <h2 class="font-semibold text-base">Liste des clients</h2>
-      <button id="addClientBtn"
-              class="d-none items-center gap-2 px-4 py-2 rounded-lg bg-success text-white hover:bg-green-700">
-        <i class="bi bi-plus-lg"></i>
-        Nouveau client
-      </button>
-    </div>
+/* CREATE */
+saveBtn.onclick = async () => {
+  if (![ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) return;
 
-    <!-- TABLE -->
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-sm">
-          <thead class="bg-slate-50 border-b">
-            <tr class="text-slate-600">
-              <th class="px-4 py-3">Nom</th>
-              <th class="px-4 py-3">Téléphone</th>
-              <th class="px-4 py-3">Statut</th>
-              <th class="px-4 py-3">Créé par</th>
-              <th class="px-4 py-3">Créé le</th>
-              <th class="px-4 py-3 text-end">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="clientsTable" class="divide-y"></tbody>
-        </table>
-      </div>
-    </div>
+  await addDoc(collection(db, "clients"), {
+    name: cName.value.trim(),
+    phone: cPhone.value.trim(),
+    comment: cComment.value.trim(),
+    status: "PENDING",
+    createdBy: {
+      uid: currentUser.uid,
+      name: currentUser.name,
+      role: currentUser.role
+    },
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  });
 
-  </main>
-</div>
+  modal.hide();
+  clientForm.reset();
+  loadClients();
+};
 
-<!-- MODAL CLIENT (création / édition) -->
-<div class="modal fade" id="clientModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-xl">
+/* ADMIN ACTIONS */
+window.validateClient = async (id) => {
+  if (![ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) return;
 
-      <div class="modal-header">
-        <h5 class="modal-title">Client</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+  await updateDoc(doc(db, "clients", id), {
+    status: "ACTIVE",
+    updatedAt: serverTimestamp()
+  });
 
-      <div class="modal-body">
-        <form id="clientForm">
-          <div class="mb-3">
-            <label class="form-label">Nom</label>
-            <input id="cName" class="form-control" required>
-          </div>
+  loadClients();
+};
 
-          <div class="mb-3">
-            <label class="form-label">Téléphone</label>
-            <input id="cPhone" class="form-control">
-          </div>
+window.blockClient = async (id) => {
+  if (currentUser.role !== ROLES.ADMIN) return;
 
-          <div class="mb-3">
-            <label class="form-label">Commentaire</label>
-            <textarea id="cComment" class="form-control" rows="3"></textarea>
-          </div>
-        </form>
-      </div>
+  await updateDoc(doc(db, "clients", id), {
+    status: "BLOCKED",
+    updatedAt: serverTimestamp()
+  });
 
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-        <button class="btn btn-success" id="saveClientBtn">Enregistrer</button>
-      </div>
+  loadClients();
+};
 
-    </div>
-  </div>
-</div>
+/* DIRECTEUR */
+window.deleteClient = async (id) => {
+  if (currentUser.role !== ROLES.DIRECTEUR) return;
+  if (!confirm("Supprimer ce client ?")) return;
 
-<!-- MODAL INFO CLIENT -->
-<div class="modal fade" id="clientInfoModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-xl">
-      <div class="modal-header">
-        <h5 class="modal-title">Informations client</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body" id="clientInfoContent"></div>
-    </div>
-  </div>
-</div>
+  await deleteDoc(doc(db, "clients", id));
+  loadClients();
+};
 
-<!-- SCRIPTS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../js/sidebar.js"></script>
-<script type="module" src="../js/clients.js"></script>
-
-</body>
-</html>
+addBtn.onclick = () => modal.show();
