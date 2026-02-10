@@ -2,25 +2,37 @@
 import { auth, db } from "./firebase.config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
-  collection, getDocs, addDoc, updateDoc, deleteDoc,
-  doc, getDoc, serverTimestamp
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  getDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ROLES */
+/* =========================
+   ROLES
+========================= */
 const ROLES = {
   OPERATEUR: "operateur",
   ADMIN: "admin",
   DIRECTEUR: "directeur"
 };
 
-/* DOM */
+/* =========================
+   DOM
+========================= */
 const table = document.getElementById("inventoryTable");
 const addBtn = document.getElementById("addProductBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const userNameEl = document.getElementById("userName");
 const userRoleEl = document.getElementById("userRole");
 
-const modal = new bootstrap.Modal(document.getElementById("productModal"));
+const modalEl = document.getElementById("productModal");
+const modal = new bootstrap.Modal(modalEl);
+
 const saveBtn = document.getElementById("saveProductBtn");
 
 const pName = document.getElementById("pName");
@@ -36,9 +48,14 @@ const productForm = document.getElementById("productForm");
 
 let currentUser = null;
 
-/* AUTH */
+/* =========================
+   AUTH
+========================= */
 onAuthStateChanged(auth, async (user) => {
-  if (!user) return location.replace("../login.html");
+  if (!user) {
+    location.replace("../login.html");
+    return;
+  }
 
   const snap = await getDoc(doc(db, "users", user.uid));
   if (!snap.exists()) return;
@@ -53,7 +70,7 @@ onAuthStateChanged(auth, async (user) => {
   };
 
   userNameEl.textContent = currentUser.name;
-  userRoleEl.textContent = currentUser.fonction;
+  userRoleEl.textContent = currentUser.fonction || currentUser.role;
 
   if ([ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) {
     addBtn.classList.remove("d-none");
@@ -62,13 +79,17 @@ onAuthStateChanged(auth, async (user) => {
   loadInventory();
 });
 
-/* LOGOUT */
+/* =========================
+   LOGOUT
+========================= */
 logoutBtn.onclick = async () => {
   await signOut(auth);
   location.replace("../login.html");
 };
 
-/* LOAD INVENTORY */
+/* =========================
+   LOAD INVENTORY
+========================= */
 async function loadInventory() {
   table.innerHTML = "";
   const snap = await getDocs(collection(db, "inventory"));
@@ -83,9 +104,9 @@ async function loadInventory() {
     return;
   }
 
-  snap.forEach(d => {
+  snap.forEach((d) => {
     const p = d.data();
-    const low = p.quantity <= p.minQuantity;
+    const lowStock = p.quantity <= p.minQuantity;
 
     table.innerHTML += `
       <tr>
@@ -93,23 +114,35 @@ async function loadInventory() {
         <td>${p.category}</td>
         <td>${p.quantity}</td>
         <td>${p.minQuantity}</td>
-        <td>${p.pricing?.usd || ""} ${p.pricing?.cdf ? "/ " + p.pricing.cdf + " CDF" : ""}</td>
-        <td>${p.createdBy?.name || "—"}</td>
-        <td>${p.createdAt?.toDate().toLocaleString() || "—"}</td>
         <td>
-          <span class="badge bg-${p.status === "PENDING" ? "warning" : low ? "danger" : "success"}">
+          ${p.pricing?.usd ? p.pricing.usd + " USD" : ""}
+          ${p.pricing?.cdf ? " / " + p.pricing.cdf + " CDF" : ""}
+        </td>
+        <td>${p.createdBy?.name || "—"}</td>
+        <td>${p.createdAt?.toDate?.().toLocaleString() || "—"}</td>
+        <td>
+          <span class="badge bg-${
+            p.status === "PENDING"
+              ? "warning"
+              : lowStock
+              ? "danger"
+              : "success"
+          }">
             ${p.status || "OK"}
           </span>
         </td>
         <td class="text-end">
           ${
-            [ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role) && p.status === "PENDING"
-              ? `<button class="btn btn-sm btn-outline-success me-1" onclick="approve('${d.id}')">Valider</button>`
+            [ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role) &&
+            p.status === "PENDING"
+              ? `<button class="btn btn-sm btn-outline-success me-1"
+                   onclick="approve('${d.id}')">Valider</button>`
               : ""
           }
           ${
             currentUser.role === ROLES.DIRECTEUR
-              ? `<button class="btn btn-sm btn-outline-danger" onclick="removeItem('${d.id}')">Supprimer</button>`
+              ? `<button class="btn btn-sm btn-outline-danger"
+                   onclick="removeItem('${d.id}')">Supprimer</button>`
               : ""
           }
         </td>
@@ -118,9 +151,15 @@ async function loadInventory() {
   });
 }
 
-/* CREATE PRODUCT */
+/* =========================
+   CREATE PRODUCT
+========================= */
 saveBtn.onclick = async () => {
-  if (![ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) return;
+  if (!currentUser) return;
+
+  if (![ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) {
+    return;
+  }
 
   await addDoc(collection(db, "inventory"), {
     name: pName.value.trim(),
@@ -147,7 +186,9 @@ saveBtn.onclick = async () => {
   loadInventory();
 };
 
-/* VALIDATION */
+/* =========================
+   VALIDATE PRODUCT
+========================= */
 window.approve = async (id) => {
   if (![ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) return;
 
@@ -159,7 +200,9 @@ window.approve = async (id) => {
   loadInventory();
 };
 
-/* DELETE */
+/* =========================
+   DELETE PRODUCT
+========================= */
 window.removeItem = async (id) => {
   if (currentUser.role !== ROLES.DIRECTEUR) return;
   if (!confirm("Supprimer ce produit ?")) return;
@@ -168,10 +211,17 @@ window.removeItem = async (id) => {
   loadInventory();
 };
 
-/* CURRENCY UI */
+/* =========================
+   CURRENCY UI
+========================= */
 pCurrency.onchange = () => {
   usdBlock.classList.toggle("d-none", pCurrency.value === "CDF");
   cdfBlock.classList.toggle("d-none", pCurrency.value === "USD");
 };
 
-addBtn.onclick = () => modal.show();
+/* =========================
+   OPEN MODAL
+========================= */
+addBtn.onclick = () => {
+  modal.show();
+};
