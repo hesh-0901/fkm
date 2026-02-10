@@ -1,5 +1,5 @@
 <!-- ===============================
-     SIDEBAR + STYLE INTÉGRÉ
+     SIDEBAR + STYLE INTÉGRÉ (MINI MODE)
      =============================== -->
 <style>
   /* ===== SIDEBAR CORE ===== */
@@ -11,9 +11,10 @@
     display: flex;
     flex-direction: column;
     position: relative;
-    transition: transform 0.25s ease;
+    transition: width 0.25s ease;
   }
 
+  /* ===== HEADER ===== */
   .sidebar-header {
     display: flex;
     justify-content: space-between;
@@ -26,9 +27,10 @@
     font-weight: 700;
     font-size: 0.8rem;
     letter-spacing: 0.12em;
+    white-space: nowrap;
   }
 
-  /* ===== TOGGLE BUTTON ===== */
+  /* ===== TOGGLE BUTTON (INTERNE) ===== */
   .sidebar-toggle-btn {
     background: rgba(255,255,255,0.15);
     border: none;
@@ -62,6 +64,13 @@
     text-decoration: none;
     font-size: 0.9rem;
     transition: background 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .sidebar .nav-link i {
+    font-size: 1rem;
+    min-width: 20px;
+    text-align: center;
   }
 
   .sidebar .nav-link:hover {
@@ -75,21 +84,33 @@
     margin: 0 0.5rem;
   }
 
-  /* ===== COLLAPSED STATE ===== */
-  body.sidebar-collapsed .sidebar {
-    transform: translateX(-100%);
+  /* ===== MINI MODE ===== */
+  body.sidebar-mini .sidebar {
+    width: 72px;
   }
 
-  body.sidebar-collapsed .main {
-    margin-left: 0 !important;
+  body.sidebar-mini .brand,
+  body.sidebar-mini .sidebar-section,
+  body.sidebar-mini .nav-text {
+    display: none;
   }
 
-  /* ===== DESKTOP PUSH ===== */
-  @media (min-width: 768px) {
-    .main {
-      margin-left: 260px;
-      transition: margin-left 0.25s ease;
-    }
+  body.sidebar-mini .nav-link {
+    justify-content: center;
+  }
+
+  body.sidebar-mini .sidebar-toggle-btn {
+    transform: rotate(180deg);
+  }
+
+  /* ===== MAIN PUSH ===== */
+  .main {
+    margin-left: 260px;
+    transition: margin-left 0.25s ease;
+  }
+
+  body.sidebar-mini .main {
+    margin-left: 72px;
   }
 
   /* ===== MOBILE ===== */
@@ -100,14 +121,15 @@
       left: 0;
       z-index: 1050;
       transform: translateX(-100%);
+      width: 260px;
     }
 
     body.sidebar-open .sidebar {
       transform: translateX(0);
     }
 
-    body.sidebar-open .main {
-      margin-left: 0;
+    .main {
+      margin-left: 0 !important;
     }
   }
 </style>
@@ -120,22 +142,59 @@
   </div>
 
   <div class="sidebar-section">Pilotage</div>
-  <a class="nav-link" href="../admin/dashboard.html">Dashboard</a>
+  <a class="nav-link" href="../admin/dashboard.html">
+    <i class="bi bi-speedometer2"></i>
+    <span class="nav-text">Dashboard</span>
+  </a>
 
   <div class="sidebar-section">Stock</div>
-  <a class="nav-link" href="../admin/inventaire.html">Inventaire</a>
-  <a class="nav-link" href="../admin/transactions.html">Transactions</a>
+  <a class="nav-link" href="../admin/inventaire.html">
+    <i class="bi bi-box-seam"></i>
+    <span class="nav-text">Inventaire</span>
+  </a>
+  <a class="nav-link" href="../admin/transactions.html">
+    <i class="bi bi-arrow-left-right"></i>
+    <span class="nav-text">Transactions</span>
+  </a>
 
   <div class="sidebar-section">Partenaires</div>
-  <a class="nav-link" href="../pages/clients.html">Clients</a>
-  <a class="nav-link" href="../pages/fournisseurs.html">Fournisseurs</a>
-
-  <div class="sidebar-section">Finance</div>
-  <a class="nav-link" href="../pages/taux-devises.html">Taux & Devises</a>
-  <a class="nav-link" href="../pages/rapports-financiers.html">Rapports financiers</a>
+  <a class="nav-link" href="../pages/clients.html">
+    <i class="bi bi-people"></i>
+    <span class="nav-text">Clients</span>
+  </a>
+  <a class="nav-link" href="../pages/fournisseurs.html">
+    <i class="bi bi-truck"></i>
+    <span class="nav-text">Fournisseurs</span>
+  </a>
 
   <div class="sidebar-section">Administration</div>
-  <a class="nav-link" href="../pages/utilisateurs.html">Utilisateurs</a>
-  <a class="nav-link" href="../pages/audit-securite.html">Audit & Sécurité</a>
+  <a class="nav-link" href="../pages/utilisateurs.html">
+    <i class="bi bi-person-gear"></i>
+    <span class="nav-text">Utilisateurs</span>
+  </a>
+  <a class="nav-link" href="../pages/audit-securite.html">
+    <i class="bi bi-shield-lock"></i>
+    <span class="nav-text">Audit & Sécurité</span>
+  </a>
 
 </aside>
+
+<script>
+  const toggleBtn = document.getElementById("sidebarToggleInternal");
+
+  toggleBtn.addEventListener("click", () => {
+    if (window.innerWidth >= 768) {
+      document.body.classList.toggle("sidebar-mini");
+    } else {
+      document.body.classList.toggle("sidebar-open");
+    }
+  });
+
+  /* Active menu auto */
+  const currentPath = window.location.pathname;
+  document.querySelectorAll(".sidebar .nav-link").forEach(link => {
+    if (currentPath.endsWith(new URL(link.href).pathname)) {
+      link.classList.add("active");
+    }
+  });
+</script>
