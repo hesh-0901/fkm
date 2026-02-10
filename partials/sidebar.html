@@ -1,248 +1,57 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sidebar Autonome</title>
-
-<style>
-/* ===============================
-   RESET & BASE
-   =============================== */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #f1f5f9;
-  display: flex;
-}
-
-/* ===============================
-   SIDEBAR
-   =============================== */
-.sidebar {
-  width: 260px;
-  min-height: 100vh;
-  background: linear-gradient(180deg, #0B5C6B, #083F4A);
-  color: #fff;
-  position: fixed;
-  top: 0;
-  left: 0;
-  display: flex;
-  flex-direction: column;
-  transition: width 0.25s ease, transform 0.25s ease;
-  z-index: 1000;
-}
-
-/* ===============================
-   HEADER
-   =============================== */
-.sidebar-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-  border-bottom: 1px solid rgba(255,255,255,0.15);
-}
-
-.brand {
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  white-space: nowrap;
-}
-
-.sidebar-toggle-btn {
-  background: rgba(255,255,255,0.15);
-  border: none;
-  color: #fff;
-  padding: 0.4rem;
-  border-radius: 0.4rem;
-  cursor: pointer;
-}
-
-.sidebar-toggle-btn svg {
-  width: 16px;
-  height: 16px;
-  transition: transform 0.25s ease;
-}
-
-/* ===============================
-   SECTIONS
-   =============================== */
-.sidebar-section {
-  padding: 0.75rem 1rem 0.25rem;
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: rgba(255,255,255,0.6);
-}
-
-/* ===============================
-   NAV LINKS
-   =============================== */
-.nav-link {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.7rem 1rem;
-  color: #e0f2f1;
-  text-decoration: none;
-  font-size: 0.9rem;
-  transition: background 0.2s ease;
-  white-space: nowrap;
-}
-
-.nav-link:hover {
-  background: rgba(255,255,255,0.08);
-}
-
-.nav-link.active {
-  background: #2E7D32;
-  border-radius: 0.4rem;
-  margin: 0 0.5rem;
-}
-
-.nav-link svg {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
-/* ===============================
-   MINI MODE
-   =============================== */
-body.sidebar-mini .sidebar {
-  width: 72px;
-}
-
-body.sidebar-mini .brand,
-body.sidebar-mini .sidebar-section,
-body.sidebar-mini .nav-text {
-  display: none;
-}
-
-body.sidebar-mini .nav-link {
-  justify-content: center;
-}
-
-body.sidebar-mini .sidebar-toggle-btn svg {
-  transform: rotate(180deg);
-}
-
-/* ===============================
-   MAIN CONTENT
-   =============================== */
-.main {
-  margin-left: 260px;
-  padding: 2rem;
-  width: 100%;
-  transition: margin-left 0.25s ease;
-}
-
-body.sidebar-mini .main {
-  margin-left: 72px;
-}
-
-/* ===============================
-   MOBILE
-   =============================== */
-@media (max-width: 768px) {
-  .sidebar {
-    transform: translateX(-100%);
-  }
-
-  body.sidebar-open .sidebar {
-    transform: translateX(0);
-  }
-
-  .main {
-    margin-left: 0 !important;
-  }
-}
-</style>
-</head>
-
-<body>
-
-<!-- ===============================
-     SIDEBAR
-     =============================== -->
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
 
   <div class="sidebar-header">
     <div class="brand">FKM ENERGY</div>
-    <button class="sidebar-toggle-btn" id="sidebarToggle">
-      <!-- Chevron -->
-      <svg viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd" d="M12.293 15.707a1 1 0 010-1.414L15.586 11H4a1 1 0 110-2h11.586l-3.293-3.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
-      </svg>
+    <!-- bouton interne -->
+    <button id="sidebarToggleInternal" class="sidebar-toggle-btn" title="Réduire le menu">
+      ❮
     </button>
   </div>
 
   <div class="sidebar-section">Pilotage</div>
-  <a href="#" class="nav-link active">
-    <!-- Dashboard -->
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
-    </svg>
+  <a class="nav-link" href="../admin/dashboard.html">
+    <i class="bi bi-speedometer2"></i>
     <span class="nav-text">Dashboard</span>
   </a>
 
   <div class="sidebar-section">Stock</div>
-  <a href="#" class="nav-link">
-    <!-- Box -->
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/>
-    </svg>
+  <a class="nav-link" href="../admin/inventaire.html">
+    <i class="bi bi-box-seam"></i>
     <span class="nav-text">Inventaire</span>
   </a>
-
-  <a href="#" class="nav-link">
-    <!-- Arrows -->
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <path d="M7 7h11v2H7l3-3-1.4-1.4L3.2 10l5.4 5.4L10 14l-3-3h11v2H7z"/>
-    </svg>
+  <a class="nav-link" href="../admin/transactions.html">
+    <i class="bi bi-arrow-left-right"></i>
     <span class="nav-text">Transactions</span>
   </a>
 
+  <div class="sidebar-section">Partenaires</div>
+  <a class="nav-link" href="../pages/clients.html">
+    <i class="bi bi-people"></i>
+    <span class="nav-text">Clients</span>
+  </a>
+  <a class="nav-link" href="../pages/fournisseurs.html">
+    <i class="bi bi-truck"></i>
+    <span class="nav-text">Fournisseurs</span>
+  </a>
+
+  <div class="sidebar-section">Finance</div>
+  <a class="nav-link" href="../pages/taux-devises.html">
+    <i class="bi bi-currency-exchange"></i>
+    <span class="nav-text">Taux & Devises</span>
+  </a>
+  <a class="nav-link" href="../pages/rapports-financiers.html">
+    <i class="bi bi-cash-coin"></i>
+    <span class="nav-text">Rapports financiers</span>
+  </a>
+
   <div class="sidebar-section">Administration</div>
-  <a href="#" class="nav-link">
-    <!-- User -->
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/>
-    </svg>
+  <a class="nav-link" href="../pages/utilisateurs.html">
+    <i class="bi bi-person-gear"></i>
     <span class="nav-text">Utilisateurs</span>
+  </a>
+  <a class="nav-link" href="../pages/audit-securite.html">
+    <i class="bi bi-shield-lock"></i>
+    <span class="nav-text">Audit & Sécurité</span>
   </a>
 
 </aside>
-
-<!-- ===============================
-     MAIN CONTENT
-     =============================== -->
-<main class="main">
-  <h1>Contenu principal</h1>
-  <p>
-    Quand la sidebar est ouverte, elle pousse le contenu.<br>
-    Quand elle est fermée, le contenu occupe toute la largeur.
-  </p>
-</main>
-
-<script>
-const toggleBtn = document.getElementById("sidebarToggle");
-
-toggleBtn.addEventListener("click", () => {
-  if (window.innerWidth >= 768) {
-    document.body.classList.toggle("sidebar-mini");
-  } else {
-    document.body.classList.toggle("sidebar-open");
-  }
-});
-</script>
-
-</body>
-</html>
