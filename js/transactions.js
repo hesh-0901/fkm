@@ -1,243 +1,190 @@
-// js/transactions.js
 import { auth, db } from "./firebase.config.js";
 import {
-  onAuthStateChanged,
-  signOut
+onAuthStateChanged,
+signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
-  collection,
-  getDocs,
-  addDoc,
-  updateDoc,
-  doc,
-  getDoc,
-  serverTimestamp,
-  increment
+collection,
+getDocs,
+addDoc,
+updateDoc,
+doc,
+getDoc,
+serverTimestamp,
+increment
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-/* ROLES */
-const ROLES = {
-  OPERATEUR: "operateur",
-  ADMIN: "admin",
-  DIRECTEUR: "directeur"
-};
 
 /* DOM */
 const table = document.getElementById("txTable");
 const newTxBtn = document.getElementById("newTxBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const userNameEl = document.getElementById("userName");
-const userRoleEl = document.getElementById("userRole");
-
 const modal = new bootstrap.Modal(document.getElementById("txModal"));
 const saveBtn = document.getElementById("saveTxBtn");
 
 const txProduct = document.getElementById("txProduct");
-const txType = document.getElementById("txType");
 const txQty = document.getElementById("txQty");
-
 const partnerSearch = document.getElementById("partnerSearch");
-const partnerList = document.getElementById("partnerList");
-const partnerId = document.getElementById("partnerId");
-const partnerName = document.getElementById("partnerName");
+
+const unitPriceEl = document.getElementById("unitPrice");
+const currencyEl = document.getElementById("currency");
+const totalPriceEl = document.getElementById("totalPrice");
 
 let currentUser = null;
-let partnersCache = [];
+let productCache = {};
 
 /* AUTH */
 onAuthStateChanged(auth, async (user) => {
-  if (!user) return location.replace("../login.html");
+if (!user) return location.replace("../login.html");
 
-  const snap = await getDoc(doc(db, "users", user.uid));
-  if (!snap.exists()) return;
-
-  const data = snap.data();
-
-  currentUser = {
-    uid: user.uid,
-    name: data.name,
-    fonction: data.fonction,
-    role: data.role
-  };
-
-  userNameEl.textContent = currentUser.name;
-  userRoleEl.textContent = currentUser.fonction;
-
-  if ([ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) {
-    newTxBtn.classList.remove("d-none");
-  }
-
-  loadTransactions();
+currentUser = user;
+loadProducts();
+loadTransactions();
 });
 
-/* LOGOUT */
-logoutBtn.onclick = async () => {
-  await signOut(auth);
-  location.replace("../login.html");
+/* LOAD PRODUCTS */
+async function loadProducts() {
+txProduct.innerHTML = "";
+const snap = await getDocs(collection(db, "inventory"));
+
+snap.forEach(d => {
+const p = d.data();
+productCache[d.id] = p;
+txProduct.innerHTML += `<option value="${d.id}">${p.name}</option>`;
+});
+updatePrice();
+}
+
+/* UPDATE PRICE */
+function updatePrice() {
+const p = productCache[txProduct.value];
+if (!p) return;
+
+const price = p.pricing?.usd || p.pricing?.cdf || 0;
+const currency = p.pricing?.usd ? "USD" : "CDF";
+
+unitPriceEl.textContent = price;
+currencyEl.textContent = currency;
+
+const total = price * (Number(txQty.value) || 0);
+totalPriceEl.textContent = total + " " + currency;
+}
+
+txProduct.onchange = updatePrice;
+txQty.oninput = updatePrice;
+
+/* SAVE */
+saveBtn.onclick = async () => {
+
+const p = productCache[txProduct.value];
+if (!p || !txQty.value) return;
+
+const price = p.pricing?.usd || p.pricing?.cdf || 0;
+const currency = p.pricing?.usd ? "USD" : "CDF";
+const total = price * Number(txQty.value);
+
+/* AUTO NUMBER */
+const year = new Date().getFullYear();
+const txNumber = "TX-" + year + "-" + Date.now();
+const invoiceNumber = "INV-" + year + "-" + Date.now();
+
+await addDoc(collection(db, "transactions"), {
+txNumber,
+invoiceNumber,
+productId: txProduct.value,
+productName: p.name,
+quantity: Number(txQty.value),
+unitPrice: price,
+total,
+currency,
+partnerName: partnerSearch.value,
+status: "pending",
+createdBy: currentUser.uid,
+createdAt: serverTimestamp()
+});
+
+modal.hide();
+loadTransactions();
 };
 
-/* LOAD TRANSACTIONS */
+/* LOAD TABLE */
 async function loadTransactions() {
-  table.innerHTML = "";
-  const snap = await getDocs(collection(db, "transactions"));
+table.innerHTML = "";
+const snap = await getDocs(collection(db, "transactions"));
 
-  snap.forEach(d => {
-    const t = d.data();
+snap.forEach(d => {
+const t = d.data();
 
-    const canValidate =
-      [ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)
-      && t.status === "pending";
+table.innerHTML += `
+<tr class="hover:bg-slate-50">
+<td class="px-4 py-2 font-medium">${t.txNumber}</td>
+<td class="px-4 py-2">${t.createdAt?.toDate().toLocaleDateString() || "-"}</td>
+<td class="px-4 py-2">${t.partnerName}</td>
+<td class="px-4 py-2">${t.productName}</td>
+<td class="px-4 py-2 text-right">${t.quantity}</td>
+<td class="px-4 py-2 text-right font-semibold">${t.total} ${t.currency}</td>
+<td class="px-4 py-2">
+<span class="px-2 py-1 rounded-full text-xs ${
+t.status === "approved"
+? "bg-emerald-100 text-emerald-700"
+: "bg-amber-100 text-amber-700"
+}">
+${t.status}
+</span>
+</td>
+<td class="px-4 py-2 text-right space-x-2">
 
-    table.innerHTML += `
-      <tr>
-        <td>${t.createdAt?.toDate().toLocaleString() || "—"}</td>
-        <td>${t.productName}</td>
-        <td>${t.type === "out" ? "Sortie" : "Entrée"}</td>
-        <td>${t.quantity}</td>
-        <td>${t.partner?.name || "—"}</td>
-        <td>
-          <span class="badge bg-${
-            t.status === "pending" ? "warning" : "success"
-          }">
-            ${t.status}
-          </span>
-        </td>
-        <td>${t.createdBy?.name || "—"}</td>
-        <td class="text-end">
-          ${
-            canValidate
-              ? `<button class="btn btn-sm btn-outline-success"
-                   onclick="validateTx('${d.id}')">
-                   <i class="bi bi-check-lg"></i>
-                 </button>`
-              : ""
-          }
-        </td>
-      </tr>
-    `;
-  });
+<button class="text-emerald-600"
+onclick="validateTx('${d.id}')">
+<i class="bi bi-check-circle"></i>
+</button>
+
+<button class="text-slate-600">
+<i class="bi bi-pencil-square"></i>
+</button>
+
+<button class="text-indigo-600"
+onclick="printInvoice('${d.id}')">
+<i class="bi bi-printer"></i>
+</button>
+
+</td>
+</tr>
+`;
+});
 }
 
 /* VALIDATION */
-window.validateTx = async (txId) => {
-  if (![ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) return;
+window.validateTx = async (id) => {
+const txSnap = await getDoc(doc(db, "transactions", id));
+const tx = txSnap.data();
+if (tx.status !== "pending") return;
 
-  const txSnap = await getDoc(doc(db, "transactions", txId));
-  if (!txSnap.exists()) return;
+await updateDoc(doc(db, "inventory", tx.productId), {
+quantity: increment(-tx.quantity)
+});
 
-  const tx = txSnap.data();
-  if (tx.status !== "pending") return;
+await updateDoc(doc(db, "transactions", id), {
+status: "approved"
+});
 
-  const productRef = doc(db, "inventory", tx.productId);
+loadTransactions();
+};
 
-  // Mise à jour stock
-  await updateDoc(productRef, {
-    quantity: tx.type === "in"
-      ? increment(tx.quantity)
-      : increment(-tx.quantity),
-    updatedAt: serverTimestamp()
-  });
+/* PRINT */
+window.printInvoice = async (id) => {
+const txSnap = await getDoc(doc(db, "transactions", id));
+const tx = txSnap.data();
 
-  // Mise à jour statut transaction
-  await updateDoc(doc(db, "transactions", txId), {
-    status: "approved",
-    approvedBy: {
-      uid: currentUser.uid,
-      name: currentUser.name
-    },
-    approvedAt: serverTimestamp()
-  });
-
-  loadTransactions();
+const win = window.open("", "_blank");
+win.document.write(`
+<h2>FKM ENERGY</h2>
+<p>Facture: ${tx.invoiceNumber}</p>
+<p>Client: ${tx.partnerName}</p>
+<p>Produit: ${tx.productName}</p>
+<p>Quantité: ${tx.quantity}</p>
+<p>Total: ${tx.total} ${tx.currency}</p>
+`);
+win.print();
 };
 
 /* OPEN MODAL */
-newTxBtn.onclick = async () => {
-  txProduct.innerHTML = "";
-  partnerList.innerHTML = "";
-  partnerSearch.value = "";
-  partnerId.value = "";
-  partnerName.value = "";
-
-  const products = await getDocs(collection(db, "inventory"));
-  products.forEach(d => {
-    txProduct.innerHTML += `<option value="${d.id}">${d.data().name}</option>`;
-  });
-
-  await loadPartners();
-  modal.show();
-};
-
-/* LOAD PARTNERS */
-async function loadPartners() {
-  partnersCache = [];
-  partnerList.innerHTML = "";
-
-  const type = txType.value === "out" ? "clients" : "fournisseurs";
-  const snap = await getDocs(collection(db, type));
-
-  snap.forEach(d => {
-    if (d.data().status !== "ACTIVE") return;
-    partnersCache.push({ id: d.id, name: d.data().name });
-  });
-
-  renderPartners("");
-}
-
-/* FILTER */
-partnerSearch.oninput = () => {
-  renderPartners(partnerSearch.value.toLowerCase());
-};
-
-function renderPartners(filter) {
-  partnerList.innerHTML = "";
-
-  partnersCache
-    .filter(p => p.name.toLowerCase().includes(filter))
-    .forEach(p => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "list-group-item list-group-item-action";
-      btn.textContent = p.name;
-      btn.onclick = () => {
-        partnerId.value = p.id;
-        partnerName.value = p.name;
-        partnerSearch.value = p.name;
-        partnerList.innerHTML = "";
-      };
-      partnerList.appendChild(btn);
-    });
-}
-
-/* TYPE SWITCH */
-txType.onchange = loadPartners;
-
-/* SAVE TRANSACTION */
-saveBtn.onclick = async () => {
-  if (!partnerId.value || txQty.value <= 0) return;
-
-  const productSnap = await getDoc(doc(db, "inventory", txProduct.value));
-  if (!productSnap.exists()) return;
-
-  await addDoc(collection(db, "transactions"), {
-    productId: txProduct.value,
-    productName: productSnap.data().name,
-    quantity: Number(txQty.value),
-    type: txType.value,
-    partner: {
-      id: partnerId.value,
-      name: partnerName.value,
-      type: txType.value === "out" ? "client" : "fournisseur"
-    },
-    status: "pending",
-    createdBy: {
-      uid: currentUser.uid,
-      name: currentUser.name,
-      role: currentUser.role
-    },
-    createdAt: serverTimestamp()
-  });
-
-  modal.hide();
-  loadTransactions();
-};
+newTxBtn.onclick = () => modal.show();
