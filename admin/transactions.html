@@ -45,24 +45,36 @@
   <main id="mainContent" class="flex-1 px-6 py-6 space-y-6 overflow-x-hidden">
 
     <!-- TOPBAR -->
-    <div class="bg-white rounded-xl shadow-sm px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <button id="toggleSidebar"
-                class="p-2 rounded-lg border border-slate-200 hover:bg-slate-100 transition">
-          <i class="bi bi-list"></i>
-        </button>
-        <div>
-          <h1 class="text-lg font-semibold leading-tight">Transactions</h1>
-          <p class="text-xs text-muted">Ventes & gestion commerciale</p>
-        </div>
-      </div>
+    <!-- TOPBAR -->
+<div class="bg-white rounded-xl shadow-sm px-6 py-4 flex items-center justify-between">
+  
+  <div class="flex items-center gap-3">
+    <button id="toggleSidebar"
+            class="p-2 rounded-lg border border-slate-200 hover:bg-slate-100 transition">
+      <i class="bi bi-list"></i>
+    </button>
 
-      <button id="newTxBtn"
-              class="d-none items-center gap-2 px-4 py-2 rounded-lg bg-success text-white hover:bg-green-700 transition">
-        <i class="bi bi-plus-lg"></i>
-        Nouvelle vente
-      </button>
+    <div>
+      <h1 class="text-lg font-semibold leading-tight">Transactions</h1>
+      <p class="text-xs text-muted">Ventes & gestion commerciale</p>
     </div>
+  </div>
+
+  <!-- UTILISATEUR -->
+  <div class="flex items-center gap-6">
+    <div class="text-right">
+      <div id="userName" class="font-semibold leading-tight">—</div>
+      <div id="userRole" class="text-sm text-muted">—</div>
+    </div>
+
+    <button id="logoutBtn"
+            class="px-4 py-2 rounded-lg border border-red-200 text-danger hover:bg-red-50 transition">
+      <i class="bi bi-box-arrow-right"></i>
+    </button>
+  </div>
+
+</div>
+
 
     <!-- TABLE -->
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
