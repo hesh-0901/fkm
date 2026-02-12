@@ -11,19 +11,25 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ROLES */
+/* ==========================================================
+   ROLES
+========================================================== */
 const ROLES = {
   OPERATEUR: "operateur",
   ADMIN: "admin",
   DIRECTEUR: "directeur"
 };
 
-/* DOM */
+/* ==========================================================
+   DOM
+========================================================== */
 const table = document.getElementById("inventoryTable");
 const addBtn = document.getElementById("addProductBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const userNameEl = document.getElementById("userName");
 const userRoleEl = document.getElementById("userRole");
+
+const searchInput = document.getElementById("inventorySearch"); // 🔥 nouveau champ recherche
 
 const modal = new bootstrap.Modal(document.getElementById("productModal"));
 const saveBtn = document.getElementById("saveProductBtn");
@@ -41,8 +47,11 @@ const productForm = document.getElementById("productForm");
 
 let currentUser = null;
 let editingId = null;
+let inventoryCache = []; // 🔥 cache pour filtre dynamique
 
-/* AUTH */
+/* ==========================================================
+   AUTH
+========================================================== */
 onAuthStateChanged(auth, async (user) => {
   if (!user) return location.replace("../login.html");
 
@@ -63,30 +72,50 @@ onAuthStateChanged(auth, async (user) => {
     addBtn.classList.remove("d-none");
   }
 
-  loadInventory();
+  await loadInventory();
 });
 
-/* LOGOUT */
+/* ==========================================================
+   LOGOUT
+========================================================== */
 logoutBtn.onclick = async () => {
   await signOut(auth);
   location.replace("../login.html");
 };
 
-/* LOAD INVENTORY */
+/* ==========================================================
+   LOAD INVENTORY
+========================================================== */
 async function loadInventory() {
   table.innerHTML = "";
+  inventoryCache = [];
+
   const snap = await getDocs(collection(db, "inventory"));
 
   let index = 1;
 
   snap.forEach(d => {
-    const p = d.data();
+    const data = { id: d.id, index: index++, ...d.data() };
+    inventoryCache.push(data);
+  });
+
+  renderTable(inventoryCache);
+}
+
+/* ==========================================================
+   RENDER TABLE (réutilisable pour filtre)
+========================================================== */
+function renderTable(dataList) {
+  table.innerHTML = "";
+
+  dataList.forEach(p => {
+
     const low = p.quantity <= p.minQuantity;
 
     table.innerHTML += `
-      <tr>
-        <td class="px-4 py-3 fw-semibold">${index++}</td>
-        <td class="px-4 py-3">${p.name}</td>
+      <tr class="hover:bg-slate-50 transition text-sm">
+        <td class="px-4 py-3 fw-semibold">${p.index}</td>
+        <td class="px-4 py-3 font-medium">${p.name}</td>
         <td class="px-4 py-3">${p.category}</td>
         <td class="px-4 py-3">${p.quantity}</td>
         <td class="px-4 py-3">${p.minQuantity}</td>
@@ -102,41 +131,65 @@ async function loadInventory() {
           </span>
         </td>
         <td class="px-4 py-3 text-end">
+
           <div class="dropdown">
             <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
               <i class="bi bi-three-dots-vertical"></i>
             </button>
+
             <ul class="dropdown-menu dropdown-menu-end">
+
               ${
                 currentUser.role === ROLES.DIRECTEUR
                   ? `
                   <li>
                     <a class="dropdown-item"
-                       onclick="editItem('${d.id}')">
+                       onclick="editItem('${p.id}')">
                        <i class="bi bi-pencil-square me-2 text-primary"></i>
                        Modifier
                     </a>
                   </li>
+
                   <li>
                     <a class="dropdown-item text-danger"
-                       onclick="removeItem('${d.id}')">
+                       onclick="removeItem('${p.id}')">
                        <i class="bi bi-trash me-2"></i>
                        Supprimer
                     </a>
                   </li>`
                   : ""
               }
+
             </ul>
           </div>
+
         </td>
       </tr>
     `;
   });
 }
 
-/* CREATE / UPDATE */
+/* ==========================================================
+   FILTRE TYPE EXCEL 🔥
+========================================================== */
+searchInput?.addEventListener("input", () => {
+
+  const term = searchInput.value.toLowerCase();
+
+  const filtered = inventoryCache.filter(p =>
+    p.name.toLowerCase().includes(term) ||
+    p.category.toLowerCase().includes(term) ||
+    String(p.quantity).includes(term) ||
+    String(p.minQuantity).includes(term)
+  );
+
+  renderTable(filtered);
+});
+
+/* ==========================================================
+   CREATE / UPDATE
+========================================================== */
 saveBtn.onclick = async () => {
-  if (!currentUser) return;
 
   const data = {
     name: pName.value.trim(),
@@ -171,8 +224,11 @@ saveBtn.onclick = async () => {
   loadInventory();
 };
 
-/* EDIT */
+/* ==========================================================
+   EDIT
+========================================================== */
 window.editItem = async (id) => {
+
   if (currentUser.role !== ROLES.DIRECTEUR) return;
 
   const snap = await getDoc(doc(db, "inventory", id));
@@ -190,8 +246,11 @@ window.editItem = async (id) => {
   modal.show();
 };
 
-/* DELETE */
+/* ==========================================================
+   DELETE
+========================================================== */
 window.removeItem = async (id) => {
+
   if (currentUser.role !== ROLES.DIRECTEUR) return;
   if (!confirm("Supprimer ce produit ?")) return;
 
@@ -199,7 +258,9 @@ window.removeItem = async (id) => {
   loadInventory();
 };
 
-/* CURRENCY SWITCH */
+/* ==========================================================
+   CURRENCY SWITCH
+========================================================== */
 pCurrency.onchange = () => {
   usdBlock.classList.toggle("d-none", pCurrency.value === "CDF");
   cdfBlock.classList.toggle("d-none", pCurrency.value === "USD");
