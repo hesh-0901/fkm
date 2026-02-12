@@ -16,15 +16,13 @@ const pendingTxEl = document.getElementById("pendingTx");
 const approvedTxEl = document.getElementById("approvedTx");
 
 const alertsList = document.getElementById("alertsList");
+const activitiesContainer = document.getElementById("recentActivities");
 
 const userNameEl = document.getElementById("userName");
 const userRoleEl = document.getElementById("userRole");
 const logoutBtn = document.getElementById("logoutBtn");
 
-const txChartContainer = document.getElementById("txChart");
-
 let activities = [];
-let txChartInstance = null;
 
 /* ==========================================================
    AUTH
@@ -72,7 +70,7 @@ function initRealtimeDashboard() {
         quantity: p.quantity
       });
 
-      pushActivity("Produit mis à jour", p.name, p.updatedAt || p.createdAt);
+      pushActivity("inventory", p.name, p.updatedAt || p.createdAt);
     });
 
     totalProductsEl.textContent = totalProducts;
@@ -97,11 +95,7 @@ function initRealtimeDashboard() {
       if (t.status === "approved") approved++;
       if (t.status === "rejected") rejected++;
 
-      pushActivity(
-        `Transaction ${t.status}`,
-        t.invoiceNumber,
-        t.updatedAt || t.createdAt
-      );
+      pushActivity("transaction", t.invoiceNumber, t.updatedAt || t.createdAt, t.status);
     });
 
     pendingTxEl.textContent = pending;
@@ -109,48 +103,12 @@ function initRealtimeDashboard() {
 
     renderAlerts(lowStockEl.textContent, pending, rejected);
   });
-
-  /* USERS */
-  onSnapshot(collection(db, "users"), (snap) => {
-    snap.forEach(doc => {
-      const u = doc.data();
-      pushActivity(
-        "Utilisateur modifié",
-        u.name,
-        u.updatedAt || u.createdAt
-      );
-    });
-  });
-
-  /* CLIENTS */
-  onSnapshot(collection(db, "clients"), (snap) => {
-    snap.forEach(doc => {
-      const c = doc.data();
-      pushActivity(
-        "Client modifié",
-        c.name,
-        c.updatedAt || c.createdAt
-      );
-    });
-  });
-
-  /* FOURNISSEURS */
-  onSnapshot(collection(db, "fournisseurs"), (snap) => {
-    snap.forEach(doc => {
-      const f = doc.data();
-      pushActivity(
-        "Fournisseur modifié",
-        f.name,
-        f.updatedAt || f.createdAt
-      );
-    });
-  });
 }
 
 /* ==========================================================
    ACTIVITY ENGINE
 ========================================================== */
-function pushActivity(type, label, timestamp) {
+function pushActivity(type, label, timestamp, status = null) {
 
   if (!timestamp) return;
 
@@ -159,6 +117,7 @@ function pushActivity(type, label, timestamp) {
   activities.push({
     type,
     label,
+    status,
     date
   });
 
@@ -169,24 +128,73 @@ function pushActivity(type, label, timestamp) {
 
 function renderActivities() {
 
-  if (!txChartContainer) return;
+  if (!activitiesContainer) return;
 
-  txChartContainer.innerHTML = `
-    <div class="space-y-3 max-h-80 overflow-y-auto">
-      ${activities.slice(0,15).map(a => `
-        <div class="flex items-start gap-3 border-b pb-2">
-          <i class="bi bi-activity text-primary text-lg"></i>
-          <div>
-            <p class="font-medium text-sm">${a.type}</p>
-            <p class="text-xs text-muted">${a.label}</p>
-            <p class="text-[11px] text-slate-400">
-              ${a.date.toLocaleString()}
-            </p>
-          </div>
+  activitiesContainer.innerHTML = activities.slice(0,15).map(a => {
+
+    let icon = "bi-activity";
+    let color = "bg-primary";
+
+    if (a.type === "transaction") {
+      if (a.status === "approved") {
+        icon = "bi-check-circle";
+        color = "bg-success";
+      } else if (a.status === "pending") {
+        icon = "bi-hourglass-split";
+        color = "bg-warning";
+      } else if (a.status === "rejected") {
+        icon = "bi-x-circle";
+        color = "bg-danger";
+      }
+    }
+
+    return `
+      <div class="relative pl-10 group">
+
+        <span class="absolute left-0 top-1.5 w-6 h-6 rounded-full ${color}
+                     flex items-center justify-center text-white text-xs shadow">
+          <i class="bi ${icon}"></i>
+        </span>
+
+        <div class="bg-slate-50 rounded-lg p-3 border border-slate-100
+                    group-hover:shadow-md transition">
+          <p class="text-sm font-medium capitalize">
+            ${a.type === "transaction" ? "Transaction" : "Produit"}
+          </p>
+          <p class="text-xs text-muted">${a.label}</p>
+          <p class="text-[11px] text-slate-400">
+            ${formatTimeAgo(a.date)}
+          </p>
         </div>
-      `).join("")}
-    </div>
-  `;
+
+      </div>
+    `;
+  }).join("");
+}
+
+/* ==========================================================
+   FORMAT TIME AGO
+========================================================== */
+function formatTimeAgo(date) {
+
+  const seconds = Math.floor((new Date() - date) / 1000);
+
+  const intervals = [
+    { label: "an", seconds: 31536000 },
+    { label: "mois", seconds: 2592000 },
+    { label: "jour", seconds: 86400 },
+    { label: "heure", seconds: 3600 },
+    { label: "minute", seconds: 60 }
+  ];
+
+  for (const i of intervals) {
+    const count = Math.floor(seconds / i.seconds);
+    if (count >= 1) {
+      return `Il y a ${count} ${i.label}${count > 1 ? "s" : ""}`;
+    }
+  }
+
+  return "À l'instant";
 }
 
 /* ==========================================================
