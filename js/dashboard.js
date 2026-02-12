@@ -202,22 +202,44 @@ function formatTimeAgo(date) {
 ========================================================== */
 function renderStockChart(products) {
 
-  const options = {
-    series: [{
-      name: 'Stock',
-      data: products.map(p => p.quantity)
-    }],
-    chart: {
-      type: 'bar',
-      height: 300
-    },
-    colors: ['#0B5C6B'],
-    xaxis: {
-      categories: products.map(p => p.name)
-    }
-  };
+  const container = document.getElementById("stockPremiumList");
+  if (!container) return;
 
-  new ApexCharts(document.querySelector("#stockChart"), options).render();
+  if (!products.length) {
+    container.innerHTML = `
+      <p class="text-sm text-muted">Aucune donnée disponible.</p>
+    `;
+    return;
+  }
+
+  const maxStock = Math.max(...products.map(p => p.quantity));
+
+  container.innerHTML = products.map(p => {
+
+    const percentage = Math.round((p.quantity / maxStock) * 100);
+
+    return `
+      <div class="space-y-2 group">
+
+        <div class="flex justify-between items-center">
+          <p class="text-sm font-medium group-hover:text-primary transition">
+            ${p.name}
+          </p>
+          <span class="text-xs font-semibold text-slate-500">
+            ${p.quantity}
+          </span>
+        </div>
+
+        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+          <div class="h-2 rounded-full bg-gradient-to-r from-primary to-primaryDark
+                      transition-all duration-700 ease-out"
+               style="width:${percentage}%">
+          </div>
+        </div>
+
+      </div>
+    `;
+  }).join("");
 }
 
 /* ==========================================================
