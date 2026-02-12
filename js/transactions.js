@@ -1,18 +1,24 @@
 // js/transactions.js
 import { auth, db } from "./firebase.config.js";
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
   collection,
   getDocs,
   addDoc,
+  updateDoc,
   doc,
   getDoc,
-  serverTimestamp
+  serverTimestamp,
+  increment
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ROLES */
 const ROLES = {
   OPERATEUR: "operateur",
+  ADMIN: "admin",
   DIRECTEUR: "directeur"
 };
 
@@ -57,7 +63,7 @@ onAuthStateChanged(auth, async (user) => {
   userNameEl.textContent = currentUser.name;
   userRoleEl.textContent = currentUser.fonction;
 
-  if ([ROLES.OPERATEUR, ROLES.DIRECTEUR].includes(currentUser.role)) {
+  if ([ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) {
     newTxBtn.classList.remove("d-none");
   }
 
@@ -77,6 +83,11 @@ async function loadTransactions() {
 
   snap.forEach(d => {
     const t = d.data();
+
+    const canValidate =
+      [ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)
+      && t.status === "pending";
+
     table.innerHTML += `
       <tr>
         <td>${t.createdAt?.toDate().toLocaleString() || "—"}</td>
@@ -85,15 +96,60 @@ async function loadTransactions() {
         <td>${t.quantity}</td>
         <td>${t.partner?.name || "—"}</td>
         <td>
-          <span class="badge bg-${t.status === "pending" ? "warning" : "success"}">
+          <span class="badge bg-${
+            t.status === "pending" ? "warning" : "success"
+          }">
             ${t.status}
           </span>
         </td>
         <td>${t.createdBy?.name || "—"}</td>
+        <td class="text-end">
+          ${
+            canValidate
+              ? `<button class="btn btn-sm btn-outline-success"
+                   onclick="validateTx('${d.id}')">
+                   <i class="bi bi-check-lg"></i>
+                 </button>`
+              : ""
+          }
+        </td>
       </tr>
     `;
   });
 }
+
+/* VALIDATION */
+window.validateTx = async (txId) => {
+  if (![ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) return;
+
+  const txSnap = await getDoc(doc(db, "transactions", txId));
+  if (!txSnap.exists()) return;
+
+  const tx = txSnap.data();
+  if (tx.status !== "pending") return;
+
+  const productRef = doc(db, "inventory", tx.productId);
+
+  // Mise à jour stock
+  await updateDoc(productRef, {
+    quantity: tx.type === "in"
+      ? increment(tx.quantity)
+      : increment(-tx.quantity),
+    updatedAt: serverTimestamp()
+  });
+
+  // Mise à jour statut transaction
+  await updateDoc(doc(db, "transactions", txId), {
+    status: "approved",
+    approvedBy: {
+      uid: currentUser.uid,
+      name: currentUser.name
+    },
+    approvedAt: serverTimestamp()
+  });
+
+  loadTransactions();
+};
 
 /* OPEN MODAL */
 newTxBtn.onclick = async () => {
@@ -156,7 +212,7 @@ function renderPartners(filter) {
 /* TYPE SWITCH */
 txType.onchange = loadPartners;
 
-/* SAVE */
+/* SAVE TRANSACTION */
 saveBtn.onclick = async () => {
   if (!partnerId.value || txQty.value <= 0) return;
 
