@@ -7,134 +7,211 @@ import {
   getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* DOM */
+/* ==========================================================
+   DOM
+========================================================== */
 const userNameEl = document.getElementById("userName");
 const userRoleEl = document.getElementById("userRole");
 const logoutBtn = document.getElementById("logoutBtn");
 
-const kpiContainer = document.getElementById("kpiContainer");
-const financeContainer = document.getElementById("financeContainer");
+const kpiMonth = document.getElementById("kpiMonth");
+const kpiTotal = document.getElementById("kpiTotal");
+const kpiCritical = document.getElementById("kpiCritical");
+const kpiPending = document.getElementById("kpiPending");
 
-let transactions = [];
-let inventory = [];
-let currentRange = "all";
+const alertsContainer = document.getElementById("alertsContainer");
 
-/* AUTH */
+/* ==========================================================
+   AUTH
+========================================================== */
 onAuthStateChanged(auth, async (user) => {
   if (!user) return location.replace("../login.html");
 
   const snap = await getDoc(doc(db, "users", user.uid));
-  const data = snap.data();
+  if (!snap.exists()) return;
 
-  userNameEl.textContent = data.name;
-  userRoleEl.textContent = data.fonction;
+  const me = snap.data();
 
-  await loadData();
-  renderDashboard();
+  userNameEl.textContent = me.name || "—";
+  userRoleEl.textContent = me.fonction || "—";
+
+  await loadDashboard();
 });
 
-/* LOGOUT */
+/* ==========================================================
+   LOGOUT
+========================================================== */
 logoutBtn.onclick = async () => {
   await signOut(auth);
   location.replace("../login.html");
 };
 
-/* LOAD DATA */
-async function loadData() {
+/* ==========================================================
+   MAIN DASHBOARD LOADER
+========================================================== */
+async function loadDashboard() {
+
   const txSnap = await getDocs(collection(db, "transactions"));
-  transactions = txSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-
   const invSnap = await getDocs(collection(db, "inventory"));
-  inventory = invSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-}
 
-/* FILTER */
-document.querySelectorAll(".filter-btn").forEach(btn => {
-  btn.onclick = () => {
-    currentRange = btn.dataset.range;
-    renderDashboard();
+  let totalRevenue = 0;
+  let monthRevenue = 0;
+  let pendingCount = 0;
+
+  let statusCount = {
+    approved: 0,
+    pending: 0,
+    rejected: 0
   };
-});
 
-/* FILTER LOGIC */
-function filterTransactions() {
-  if (currentRange === "all") return transactions;
+  let revenueLast7Days = {};
+  let productSales = {};
 
   const now = new Date();
-  return transactions.filter(t => {
-    const date = t.createdAt?.toDate();
-    if (!date) return false;
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
 
-    if (currentRange === "today")
-      return date.toDateString() === now.toDateString();
+  /* =========================
+     TRANSACTIONS ANALYSIS
+  ========================= */
+  txSnap.forEach(d => {
+    const t = d.data();
+    if (!t.createdAt) return;
 
-    const days = parseInt(currentRange);
-    const diff = (now - date) / (1000 * 60 * 60 * 24);
-    return diff <= days;
+    const date = t.createdAt.toDate();
+    const dayKey = date.toISOString().slice(0, 10);
+
+    statusCount[t.status]++;
+
+    if (t.status === "approved") {
+
+      totalRevenue += t.total || 0;
+
+      if (date.getMonth() === currentMonth &&
+          date.getFullYear() === currentYear) {
+        monthRevenue += t.total || 0;
+      }
+
+      // 7 derniers jours
+      const diffDays = (now - date) / (1000 * 60 * 60 * 24);
+      if (diffDays <= 7) {
+        revenueLast7Days[dayKey] =
+          (revenueLast7Days[dayKey] || 0) + (t.total || 0);
+      }
+
+      // Top produits
+      productSales[t.productName] =
+        (productSales[t.productName] || 0) + t.quantity;
+    }
+
+    if (t.status === "pending") pendingCount++;
   });
+
+  /* =========================
+     INVENTORY ANALYSIS
+  ========================= */
+  let criticalCount = 0;
+  let outOfStock = 0;
+
+  invSnap.forEach(d => {
+    const p = d.data();
+    if (p.quantity <= p.minQuantity) criticalCount++;
+    if (p.quantity === 0) outOfStock++;
+  });
+
+  /* =========================
+     KPI UPDATE
+  ========================= */
+  kpiTotal.textContent = totalRevenue.toLocaleString();
+  kpiMonth.textContent = monthRevenue.toLocaleString();
+  kpiCritical.textContent = criticalCount;
+  kpiPending.textContent = pendingCount;
+
+  /* =========================
+     ALERTES INTELLIGENTES
+  ========================= */
+  alertsContainer.innerHTML = "";
+
+  if (criticalCount > 0) {
+    alertsContainer.innerHTML += alertBox(
+      "danger",
+      `⚠️ ${criticalCount} produit(s) en stock critique`
+    );
+  }
+
+  if (outOfStock > 0) {
+    alertsContainer.innerHTML += alertBox(
+      "danger",
+      `🚨 ${outOfStock} produit(s) en rupture totale`
+    );
+  }
+
+  if (pendingCount > 5) {
+    alertsContainer.innerHTML += alertBox(
+      "warning",
+      `⏳ Trop de transactions en attente (${pendingCount})`
+    );
+  }
+
+  /* =========================
+     CHART 1 - CA 7 JOURS
+  ========================= */
+  const sortedDays = Object.keys(revenueLast7Days).sort();
+  const revenueData = sortedDays.map(d => revenueLast7Days[d]);
+
+  new ApexCharts(document.querySelector("#chartRevenue"), {
+    chart: { type: "area", height: 300 },
+    series: [{ name: "CA", data: revenueData }],
+    xaxis: { categories: sortedDays },
+    colors: ["#0B5C6B"],
+    dataLabels: { enabled: false },
+    stroke: { curve: "smooth" }
+  }).render();
+
+  /* =========================
+     CHART 2 - DONUT STATUS
+  ========================= */
+  new ApexCharts(document.querySelector("#chartStatus"), {
+    chart: { type: "donut", height: 300 },
+    series: [
+      statusCount.approved,
+      statusCount.pending,
+      statusCount.rejected
+    ],
+    labels: ["Approuvées", "En attente", "Rejetées"],
+    colors: ["#2E7D32", "#D4A017", "#DC2626"]
+  }).render();
+
+  /* =========================
+     CHART 3 - TOP PRODUITS
+  ========================= */
+  const topProducts = Object.entries(productSales)
+    .sort((a,b) => b[1] - a[1])
+    .slice(0,5);
+
+  new ApexCharts(document.querySelector("#chartProducts"), {
+    chart: { type: "bar", height: 300 },
+    series: [{
+      name: "Quantité vendue",
+      data: topProducts.map(p => p[1])
+    }],
+    xaxis: {
+      categories: topProducts.map(p => p[0])
+    },
+    colors: ["#0B5C6B"]
+  }).render();
 }
 
-/* RENDER */
-function renderDashboard() {
-
-  const data = filterTransactions();
-
-  const total = data.length;
-  const approved = data.filter(t => t.status === "approved");
-  const pending = data.filter(t => t.status === "pending");
-  const rejected = data.filter(t => t.status === "rejected");
-
-  const sum = arr => arr.reduce((acc, t) => acc + (t.total || 0), 0);
-
-  renderKPIs(total, approved.length, pending.length, rejected.length);
-  renderFinance(sum(approved), sum(pending), sum(rejected));
-  renderCharts(approved.length, pending.length, rejected.length);
-}
-
-/* KPI */
-function renderKPIs(total, approved, pending, rejected) {
-  kpiContainer.innerHTML = `
-    ${card("Total", total, "primary")}
-    ${card("Approved", approved, "emerald")}
-    ${card("Pending", pending, "amber")}
-    ${card("Rejected", rejected, "red")}
-  `;
-}
-
-function renderFinance(a, p, r) {
-  financeContainer.innerHTML = `
-    ${card("CA Validé", a + " USD", "emerald")}
-    ${card("En attente", p + " USD", "amber")}
-    ${card("Refusé", r + " USD", "red")}
-    ${card("Stock critique", inventory.filter(i => i.quantity <= i.minQuantity).length, "danger")}
-  `;
-}
-
-function card(title, value, color) {
+/* ==========================================================
+   ALERT COMPONENT
+========================================================== */
+function alertBox(type, message) {
   return `
-    <div class="bg-white p-4 rounded-xl shadow-sm">
-      <div class="text-xs text-muted">${title}</div>
-      <div class="text-2xl font-bold text-${color}-600">${value}</div>
+    <div class="p-4 rounded-lg border-l-4
+      ${type === "danger"
+        ? "bg-red-50 border-red-500 text-red-700"
+        : "bg-yellow-50 border-yellow-500 text-yellow-700"}">
+      ${message}
     </div>
   `;
-}
-
-/* CHARTS */
-function renderCharts(a, p, r) {
-
-  new ApexCharts(document.querySelector("#areaChart"), {
-    chart: { type: 'area', height: 300 },
-    series: [
-      { name: 'Approved', data: [a] },
-      { name: 'Pending', data: [p] },
-      { name: 'Rejected', data: [r] }
-    ],
-    xaxis: { categories: ['Transactions'] }
-  }).render();
-
-  new ApexCharts(document.querySelector("#donutChart"), {
-    chart: { type: 'donut', height: 300 },
-    series: [a, p, r],
-    labels: ['Approved', 'Pending', 'Rejected']
-  }).render();
 }
