@@ -30,9 +30,6 @@
     }
   </script>
 
-  <!-- ApexCharts -->
-  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-
   <link rel="icon" href="data:,">
 </head>
 
@@ -44,9 +41,9 @@
   <div id="sidebar-container"></div>
 
   <!-- MAIN -->
-  <main class="flex-1 px-6 py-6 space-y-6 overflow-x-hidden">
+  <main id="mainContent" class="flex-1 px-6 py-6 space-y-6 overflow-x-hidden">
 
-    <!-- TOPBAR -->
+    <!-- TOPBAR (IDENTIQUE INVENTAIRE) -->
     <div class="bg-white rounded-xl shadow-sm px-6 py-4 flex items-center justify-between">
 
       <div class="flex items-center gap-3">
@@ -56,14 +53,14 @@
         </button>
         <div>
           <h1 class="text-lg font-semibold leading-tight">Dashboard</h1>
-          <p class="text-xs text-muted">Vue d’ensemble des performances</p>
+          <p class="text-xs text-muted">Vue d'ensemble du système</p>
         </div>
       </div>
 
       <div class="flex items-center gap-6">
         <div class="text-right">
           <div id="userName" class="font-semibold leading-tight">—</div>
-          <div id="userFunction" class="text-sm text-muted">—</div>
+          <div id="userRole" class="text-sm text-muted">—</div>
         </div>
 
         <button id="logoutBtn"
@@ -76,52 +73,58 @@
     <!-- KPI CARDS -->
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
 
-      <div class="bg-white p-6 rounded-xl shadow-sm">
-        <p class="text-sm text-muted">Chiffre d'affaires</p>
-        <h3 id="totalRevenue" class="text-2xl font-semibold mt-2">0 USD</h3>
+      <div class="bg-white rounded-xl shadow-sm p-5">
+        <div class="text-xs text-muted">Produits</div>
+        <div id="kpiProducts" class="text-2xl font-semibold mt-2">0</div>
       </div>
 
-      <div class="bg-white p-6 rounded-xl shadow-sm">
-        <p class="text-sm text-muted">Transactions en attente</p>
-        <h3 id="pendingCount" class="text-2xl font-semibold mt-2">0</h3>
+      <div class="bg-white rounded-xl shadow-sm p-5">
+        <div class="text-xs text-muted">Stock faible</div>
+        <div id="kpiLowStock" class="text-2xl font-semibold mt-2 text-danger">0</div>
       </div>
 
-      <div class="bg-white p-6 rounded-xl shadow-sm">
-        <p class="text-sm text-muted">Produits critiques</p>
-        <h3 id="lowStockCount" class="text-2xl font-semibold mt-2">0</h3>
+      <div class="bg-white rounded-xl shadow-sm p-5">
+        <div class="text-xs text-muted">Transactions en attente</div>
+        <div id="kpiPending" class="text-2xl font-semibold mt-2 text-warning">0</div>
       </div>
 
-      <div class="bg-white p-6 rounded-xl shadow-sm">
-        <p class="text-sm text-muted">Total produits</p>
-        <h3 id="totalProducts" class="text-2xl font-semibold mt-2">0</h3>
+      <div class="bg-white rounded-xl shadow-sm p-5">
+        <div class="text-xs text-muted">Ventes approuvées</div>
+        <div id="kpiApproved" class="text-2xl font-semibold mt-2 text-success">0</div>
       </div>
 
     </div>
 
-    <!-- GRAPHS -->
+    <!-- CHARTS ROW -->
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
-      <div class="bg-white p-6 rounded-xl shadow-sm">
-        <h4 class="text-sm font-semibold mb-4">Évolution des ventes</h4>
-        <div id="salesChart"></div>
+      <!-- VENTES PAR STATUT -->
+      <div class="bg-white rounded-xl shadow-sm p-5">
+        <h3 class="text-sm font-semibold mb-4">Transactions par statut</h3>
+        <div id="chartStatus"></div>
       </div>
 
-      <div class="bg-white p-6 rounded-xl shadow-sm">
-        <h4 class="text-sm font-semibold mb-4">Statut des transactions</h4>
-        <div id="statusChart"></div>
+      <!-- STOCK PAR PRODUIT -->
+      <div class="bg-white rounded-xl shadow-sm p-5">
+        <h3 class="text-sm font-semibold mb-4">Top produits en stock</h3>
+        <div id="chartStock"></div>
       </div>
 
     </div>
 
-    <!-- ALERTES -->
-    <div class="bg-white p-6 rounded-xl shadow-sm">
-      <h4 class="text-sm font-semibold mb-4">Alertes intelligentes</h4>
+    <!-- ALERTES INTELLIGENTES -->
+    <div class="bg-white rounded-xl shadow-sm p-5">
+      <h3 class="text-sm font-semibold mb-4">Alertes intelligentes</h3>
       <ul id="alertsList" class="space-y-2 text-sm"></ul>
     </div>
 
   </main>
 </div>
 
+<!-- ApexCharts -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../js/sidebar.js"></script>
 <script type="module" src="../js/dashboard.js"></script>
