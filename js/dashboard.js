@@ -1,5 +1,12 @@
+/* ==========================================================
+   IMPORTS FIREBASE
+========================================================== */
 import { auth, db } from "./firebase.config.js";
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
 import {
   collection,
   getDocs,
@@ -7,23 +14,27 @@ import {
   getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ==============================
+
+/* ==========================================================
    DOM
-============================== */
+========================================================== */
 const userNameEl = document.getElementById("userName");
-const userFunctionEl = document.getElementById("userFunction");
+const userRoleEl = document.getElementById("userRole");
 const logoutBtn = document.getElementById("logoutBtn");
 
-const totalRevenueEl = document.getElementById("totalRevenue");
-const pendingCountEl = document.getElementById("pendingCount");
-const lowStockCountEl = document.getElementById("lowStockCount");
-const totalProductsEl = document.getElementById("totalProducts");
+const kpiProducts = document.getElementById("kpiProducts");
+const kpiLowStock = document.getElementById("kpiLowStock");
+const kpiPending = document.getElementById("kpiPending");
+const kpiApproved = document.getElementById("kpiApproved");
 
 const alertsList = document.getElementById("alertsList");
 
-/* ==============================
+let currentUser = null;
+
+
+/* ==========================================================
    AUTH
-============================== */
+========================================================== */
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
@@ -31,146 +42,166 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  const userSnap = await getDoc(doc(db, "users", user.uid));
-  const userData = userSnap.data();
+  const snap = await getDoc(doc(db, "users", user.uid));
+  if (!snap.exists()) return;
 
-  userNameEl.textContent = userData.name || "—";
-  userFunctionEl.textContent = userData.fonction || "—";
+  currentUser = snap.data();
 
-  await loadDashboard();
+  userNameEl.textContent = currentUser.name || "—";
+  userRoleEl.textContent = currentUser.fonction || currentUser.role;
+
+  loadDashboard();
 });
 
-/* ==============================
+
+/* ==========================================================
    LOGOUT
-============================== */
+========================================================== */
 logoutBtn.onclick = async () => {
   await signOut(auth);
   location.replace("../login.html");
 };
 
-/* ==============================
+
+/* ==========================================================
    LOAD DASHBOARD DATA
-============================== */
+========================================================== */
 async function loadDashboard() {
 
-  const [txSnap, invSnap] = await Promise.all([
-    getDocs(collection(db, "transactions")),
-    getDocs(collection(db, "inventory"))
-  ]);
+  const inventorySnap = await getDocs(collection(db, "inventory"));
+  const txSnap = await getDocs(collection(db, "transactions"));
 
-  /* ==============================
-     VARIABLES AGREGATION
-  ============================== */
-  let totalRevenue = 0;
-  let pendingCount = 0;
-  let approvedCount = 0;
-  let rejectedCount = 0;
+  let totalProducts = 0;
+  let lowStock = 0;
 
-  let monthlyRevenue = {};
-  let lowStockCount = 0;
-  let totalProducts = invSnap.size;
+  let pending = 0;
+  let approved = 0;
+  let rejected = 0;
 
-  /* ==============================
-     TRANSACTIONS LOOP
-  ============================== */
-  txSnap.forEach(doc => {
-    const t = doc.data();
+  let stockData = [];
+  let alerts = [];
 
-    if (t.status === "pending") pendingCount++;
-    if (t.status === "approved") {
-      approvedCount++;
-      totalRevenue += t.total || 0;
+  /* ===== INVENTORY ===== */
+  inventorySnap.forEach(d => {
+    const p = d.data();
+    totalProducts++;
 
-      const date = t.createdAt?.toDate();
-      if (date) {
-        const month = date.getMonth() + 1;
-        monthlyRevenue[month] = (monthlyRevenue[month] || 0) + (t.total || 0);
-      }
+    stockData.push({
+      name: p.name,
+      qty: p.quantity
+    });
+
+    if (p.quantity <= p.minQuantity) {
+      lowStock++;
+      alerts.push(`⚠️ Stock faible : ${p.name}`);
     }
-    if (t.status === "rejected") rejectedCount++;
   });
 
-  /* ==============================
-     INVENTORY LOOP
-  ============================== */
-  invSnap.forEach(doc => {
-    const p = doc.data();
-    if (p.quantity <= p.minQuantity) lowStockCount++;
+  /* ===== TRANSACTIONS ===== */
+  txSnap.forEach(d => {
+    const t = d.data();
+
+    if (t.status === "pending") pending++;
+    if (t.status === "approved") approved++;
+    if (t.status === "rejected") rejected++;
+
+    if (t.status === "pending") {
+      alerts.push(`🕒 Transaction en attente : ${t.invoiceNumber}`);
+    }
   });
 
-  /* ==============================
-     UPDATE KPI UI
-  ============================== */
-  totalRevenueEl.textContent = totalRevenue.toLocaleString() + " USD";
-  pendingCountEl.textContent = pendingCount;
-  lowStockCountEl.textContent = lowStockCount;
-  totalProductsEl.textContent = totalProducts;
+  /* ===== KPI UPDATE ===== */
+  kpiProducts.textContent = totalProducts;
+  kpiLowStock.textContent = lowStock;
+  kpiPending.textContent = pending;
+  kpiApproved.textContent = approved;
 
-  /* ==============================
-     ALERTES INTELLIGENTES
-  ============================== */
+  /* ===== ALERTS RENDER ===== */
+  renderAlerts(alerts);
+
+  /* ===== CHARTS ===== */
+  renderStatusChart(pending, approved, rejected);
+  renderStockChart(stockData.slice(0, 5));
+}
+
+
+/* ==========================================================
+   ALERTS
+========================================================== */
+function renderAlerts(alerts) {
+
   alertsList.innerHTML = "";
 
-  if (pendingCount > 0) {
-    alertsList.innerHTML += `
-      <li class="text-warning">
-        <i class="bi bi-exclamation-circle me-2"></i>
-        ${pendingCount} transaction(s) en attente de validation
+  if (alerts.length === 0) {
+    alertsList.innerHTML = `
+      <li class="text-muted">
+        <i class="bi bi-check-circle text-success me-2"></i>
+        Aucun problème détecté
       </li>`;
+    return;
   }
 
-  if (lowStockCount > 0) {
+  alerts.forEach(a => {
     alertsList.innerHTML += `
-      <li class="text-danger">
-        <i class="bi bi-box-seam me-2"></i>
-        ${lowStockCount} produit(s) en stock critique
-      </li>`;
-  }
+      <li class="flex items-center gap-2">
+        ${a}
+      </li>
+    `;
+  });
+}
 
-  if (pendingCount === 0 && lowStockCount === 0) {
-    alertsList.innerHTML += `
-      <li class="text-success">
-        <i class="bi bi-check-circle me-2"></i>
-        Système stable – aucune alerte critique
-      </li>`;
-  }
 
-  /* ==============================
-     APEX CHART - SALES
-  ============================== */
-  const salesOptions = {
-    chart: {
-      type: 'area',
-      height: 300,
-      toolbar: { show: false }
-    },
-    series: [{
-      name: "Ventes",
-      data: Array.from({ length: 12 }, (_, i) => monthlyRevenue[i+1] || 0)
-    }],
-    xaxis: {
-      categories: ["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Aoû","Sep","Oct","Nov","Déc"]
-    },
-    colors: ['#0B5C6B'],
-    stroke: { curve: 'smooth' },
-    dataLabels: { enabled: false }
-  };
+/* ==========================================================
+   CHART 1 - STATUS DONUT
+========================================================== */
+function renderStatusChart(pending, approved, rejected) {
 
-  new ApexCharts(document.querySelector("#salesChart"), salesOptions).render();
-
-  /* ==============================
-     APEX CHART - STATUS
-  ============================== */
-  const statusOptions = {
+  const options = {
     chart: {
       type: 'donut',
       height: 300
     },
-    series: [approvedCount, pendingCount, rejectedCount],
-    labels: ["Approuvées", "En attente", "Rejetées"],
-    colors: ["#2E7D32", "#D4A017", "#DC2626"],
-    legend: { position: 'bottom' }
+    series: [pending, approved, rejected],
+    labels: ["Pending", "Approved", "Rejected"],
+    colors: ["#D4A017", "#2E7D32", "#DC2626"],
+    legend: {
+      position: "bottom"
+    }
   };
 
-  new ApexCharts(document.querySelector("#statusChart"), statusOptions).render();
+  const chart = new ApexCharts(
+    document.querySelector("#chartStatus"),
+    options
+  );
+
+  chart.render();
+}
+
+
+/* ==========================================================
+   CHART 2 - STOCK BAR
+========================================================== */
+function renderStockChart(stockData) {
+
+  const options = {
+    chart: {
+      type: 'bar',
+      height: 300
+    },
+    series: [{
+      name: "Stock",
+      data: stockData.map(s => s.qty)
+    }],
+    xaxis: {
+      categories: stockData.map(s => s.name)
+    },
+    colors: ["#0B5C6B"]
+  };
+
+  const chart = new ApexCharts(
+    document.querySelector("#chartStock"),
+    options
+  );
+
+  chart.render();
 }
