@@ -11,25 +11,24 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ==========================================================
+/* =========================
    ROLES
-========================================================== */
+========================= */
 const ROLES = {
   OPERATEUR: "operateur",
   ADMIN: "admin",
   DIRECTEUR: "directeur"
 };
 
-/* ==========================================================
+/* =========================
    DOM
-========================================================== */
+========================= */
 const table = document.getElementById("inventoryTable");
 const addBtn = document.getElementById("addProductBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const userNameEl = document.getElementById("userName");
 const userRoleEl = document.getElementById("userRole");
-
-const searchInput = document.getElementById("inventorySearch"); // 🔥 nouveau champ recherche
+const searchInput = document.getElementById("inventorySearch");
 
 const modal = new bootstrap.Modal(document.getElementById("productModal"));
 const saveBtn = document.getElementById("saveProductBtn");
@@ -45,13 +44,16 @@ const usdBlock = document.getElementById("usdBlock");
 const cdfBlock = document.getElementById("cdfBlock");
 const productForm = document.getElementById("productForm");
 
+/* =========================
+   VARIABLES
+========================= */
 let currentUser = null;
 let editingId = null;
-let inventoryCache = []; // 🔥 cache pour filtre dynamique
+let inventoryCache = [];
 
-/* ==========================================================
+/* =========================
    AUTH
-========================================================== */
+========================= */
 onAuthStateChanged(auth, async (user) => {
   if (!user) return location.replace("../login.html");
 
@@ -75,73 +77,76 @@ onAuthStateChanged(auth, async (user) => {
   await loadInventory();
 });
 
-/* ==========================================================
+/* =========================
    LOGOUT
-========================================================== */
+========================= */
 logoutBtn.onclick = async () => {
   await signOut(auth);
   location.replace("../login.html");
 };
 
-/* ==========================================================
+/* =========================
    LOAD INVENTORY
-========================================================== */
+========================= */
 async function loadInventory() {
   table.innerHTML = "";
   inventoryCache = [];
 
   const snap = await getDocs(collection(db, "inventory"));
 
-  let index = 1;
-
   snap.forEach(d => {
-    const data = { id: d.id, index: index++, ...d.data() };
-    inventoryCache.push(data);
+    inventoryCache.push({ id: d.id, ...d.data() });
   });
 
   renderTable(inventoryCache);
 }
 
-/* ==========================================================
-   RENDER TABLE (réutilisable pour filtre)
-========================================================== */
-function renderTable(dataList) {
+/* =========================
+   RENDER TABLE
+========================= */
+function renderTable(data) {
   table.innerHTML = "";
 
-  dataList.forEach(p => {
+  if (data.length === 0) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="8" class="text-center py-6 text-muted">
+          Aucun produit trouvé
+        </td>
+      </tr>`;
+    return;
+  }
 
+  let index = 1;
+
+  data.forEach(p => {
     const low = p.quantity <= p.minQuantity;
 
     table.innerHTML += `
-      <tr class="hover:bg-slate-50 transition text-sm">
-        <td class="px-4 py-3 fw-semibold">${p.index}</td>
-        <td class="px-4 py-3 font-medium">${p.name}</td>
-        <td class="px-4 py-3">${p.category}</td>
-        <td class="px-4 py-3">${p.quantity}</td>
-        <td class="px-4 py-3">${p.minQuantity}</td>
-        <td class="px-4 py-3">
+      <tr class="hover:bg-slate-50 transition">
+        <td class="px-6 py-4 font-semibold">${index++}</td>
+        <td class="px-6 py-4 font-medium">${p.name}</td>
+        <td class="px-6 py-4">${p.category}</td>
+        <td class="px-6 py-4 text-center">${p.quantity}</td>
+        <td class="px-6 py-4 text-center">${p.minQuantity}</td>
+        <td class="px-6 py-4">
           ${p.pricing?.usd ? p.pricing.usd + " USD" : ""}
           ${p.pricing?.cdf ? " / " + p.pricing.cdf + " CDF" : ""}
         </td>
-        <td class="px-4 py-3">${p.createdBy?.name || "-"}</td>
-        <td class="px-4 py-3">${p.createdAt?.toDate()?.toLocaleDateString() || "-"}</td>
-        <td class="px-4 py-3">
+        <td class="px-6 py-4">
           <span class="badge bg-${low ? "danger" : "success"}">
             ${low ? "Stock faible" : "OK"}
           </span>
         </td>
-        <td class="px-4 py-3 text-end">
-
-          <div class="dropdown">
-            <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
-              <i class="bi bi-three-dots-vertical"></i>
-            </button>
-
-            <ul class="dropdown-menu dropdown-menu-end">
-
-              ${
-                currentUser.role === ROLES.DIRECTEUR
-                  ? `
+        <td class="px-6 py-4 text-end">
+          ${
+            currentUser.role === ROLES.DIRECTEUR
+              ? `
+              <div class="dropdown">
+                <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
+                  <i class="bi bi-three-dots-vertical"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
                   <li>
                     <a class="dropdown-item"
                        onclick="editItem('${p.id}')">
@@ -149,47 +154,42 @@ function renderTable(dataList) {
                        Modifier
                     </a>
                   </li>
-
                   <li>
                     <a class="dropdown-item text-danger"
                        onclick="removeItem('${p.id}')">
                        <i class="bi bi-trash me-2"></i>
                        Supprimer
                     </a>
-                  </li>`
-                  : ""
-              }
-
-            </ul>
-          </div>
-
+                  </li>
+                </ul>
+              </div>`
+              : "-"
+          }
         </td>
       </tr>
     `;
   });
 }
 
-/* ==========================================================
-   FILTRE TYPE EXCEL 🔥
-========================================================== */
-searchInput?.addEventListener("input", () => {
-
+/* =========================
+   RECHERCHE TYPE EXCEL
+========================= */
+searchInput.addEventListener("input", () => {
   const term = searchInput.value.toLowerCase();
 
   const filtered = inventoryCache.filter(p =>
     p.name.toLowerCase().includes(term) ||
-    p.category.toLowerCase().includes(term) ||
-    String(p.quantity).includes(term) ||
-    String(p.minQuantity).includes(term)
+    p.category.toLowerCase().includes(term)
   );
 
   renderTable(filtered);
 });
 
-/* ==========================================================
+/* =========================
    CREATE / UPDATE
-========================================================== */
+========================= */
 saveBtn.onclick = async () => {
+  if (!currentUser) return;
 
   const data = {
     name: pName.value.trim(),
@@ -221,14 +221,13 @@ saveBtn.onclick = async () => {
 
   modal.hide();
   productForm.reset();
-  loadInventory();
+  await loadInventory();
 };
 
-/* ==========================================================
+/* =========================
    EDIT
-========================================================== */
+========================= */
 window.editItem = async (id) => {
-
   if (currentUser.role !== ROLES.DIRECTEUR) return;
 
   const snap = await getDoc(doc(db, "inventory", id));
@@ -246,21 +245,20 @@ window.editItem = async (id) => {
   modal.show();
 };
 
-/* ==========================================================
+/* =========================
    DELETE
-========================================================== */
+========================= */
 window.removeItem = async (id) => {
-
   if (currentUser.role !== ROLES.DIRECTEUR) return;
   if (!confirm("Supprimer ce produit ?")) return;
 
   await deleteDoc(doc(db, "inventory", id));
-  loadInventory();
+  await loadInventory();
 };
 
-/* ==========================================================
+/* =========================
    CURRENCY SWITCH
-========================================================== */
+========================= */
 pCurrency.onchange = () => {
   usdBlock.classList.toggle("d-none", pCurrency.value === "CDF");
   cdfBlock.classList.toggle("d-none", pCurrency.value === "USD");
