@@ -37,12 +37,17 @@ let productsCache = [];
 let clientsCache = [];
 let selectedProduct = null;
 let editingId = null;
+let currentUserData = null;
 
 /* ==========================================================
    AUTH
 ========================================================== */
 onAuthStateChanged(auth, async (user) => {
   if (!user) return location.replace("../login.html");
+
+  const userSnap = await getDoc(doc(db, "users", user.uid));
+  currentUserData = userSnap.data();
+
   newTxBtn.classList.remove("d-none");
 
   await preloadData();
@@ -70,34 +75,6 @@ async function preloadData() {
 }
 
 /* ==========================================================
-   FACTURE FORMAT COURT
-   FKM-IN-260212001
-========================================================== */
-async function generateInvoiceNumber() {
-
-  const today = new Date();
-
-  const yy = String(today.getFullYear()).slice(2);
-  const mm = String(today.getMonth() + 1).padStart(2, "0");
-  const dd = String(today.getDate()).padStart(2, "0");
-
-  const base = `${yy}${mm}${dd}`;
-
-  const snap = await getDocs(collection(db, "transactions"));
-
-  let countToday = 0;
-
-  snap.forEach(d => {
-    const inv = d.data().invoiceNumber;
-    if (inv && inv.includes(base)) countToday++;
-  });
-
-  const sequence = String(countToday + 1).padStart(3, "0");
-
-  return `FKM-IN-${base}${sequence}`;
-}
-
-/* ==========================================================
    RECHERCHE PRODUIT
 ========================================================== */
 productSearch.oninput = () => {
@@ -110,11 +87,10 @@ productSearch.oninput = () => {
     .forEach(p => {
 
       const btn = document.createElement("button");
-      btn.className = "list-group-item list-group-item-action";
+      btn.className = "list-group-item list-group-item-action text-sm";
       btn.textContent = p.name;
 
       btn.onclick = () => {
-
         selectedProduct = p;
         productSearch.value = p.name;
         productResults.innerHTML = "";
@@ -123,7 +99,6 @@ productSearch.oninput = () => {
         const currency = p.pricing?.usd ? "USD" : "CDF";
 
         unitPrice.value = `${price} ${currency}`;
-
         updateTotal();
       };
 
@@ -135,14 +110,10 @@ productSearch.oninput = () => {
    CALCUL TOTAL
 ========================================================== */
 function updateTotal() {
-
   const qty = Number(txQty.value) || 0;
-  const priceRaw = unitPrice.value.split(" ")[0];
-  const currency = unitPrice.value.split(" ")[1] || "";
-
-  const total = qty * Number(priceRaw);
-
-  totalPrice.value = `${total} ${currency}`;
+  const [priceRaw, currency] = unitPrice.value.split(" ");
+  const total = qty * Number(priceRaw || 0);
+  totalPrice.value = `${total} ${currency || ""}`;
 }
 
 txQty.oninput = updateTotal;
@@ -171,17 +142,12 @@ saveBtn.onclick = async () => {
   };
 
   if (editingId) {
-
     await updateDoc(doc(db, "transactions", editingId), data);
     editingId = null;
-
   } else {
-
-    const invoiceNumber = await generateInvoiceNumber();
-
     await addDoc(collection(db, "transactions"), {
       ...data,
-      invoiceNumber,
+      invoiceNumber: "FACTURE-A-PART",
       status: "pending",
       createdAt: serverTimestamp()
     });
@@ -207,26 +173,26 @@ async function loadTransactions() {
     const t = d.data();
 
     table.innerHTML += `
-      <tr>
-        <td class="px-4 py-3 fw-bold">${t.invoiceNumber}</td>
-        <td class="px-4 py-3">${t.createdAt?.toDate().toLocaleDateString() || "-"}</td>
-        <td class="px-4 py-3">${t.partnerName}</td>
-        <td class="px-4 py-3">${t.productName}</td>
-        <td class="px-4 py-3">${t.quantity}</td>
-        <td class="px-4 py-3">${t.total} ${t.currency}</td>
-        <td class="px-4 py-3">
+      <tr class="text-sm">
+        <td class="px-3 py-2 fw-semibold">${t.invoiceNumber}</td>
+        <td class="px-3 py-2">${t.createdAt?.toDate().toLocaleDateString() || "-"}</td>
+        <td class="px-3 py-2">${t.partnerName}</td>
+        <td class="px-3 py-2">${t.productName}</td>
+        <td class="px-3 py-2">${t.quantity}</td>
+        <td class="px-3 py-2 fw-semibold">${t.total} ${t.currency}</td>
+        <td class="px-3 py-2">
           <span class="badge bg-${
             t.status === "approved" ? "success" :
             t.status === "rejected" ? "danger" :
             "warning"
           }">${t.status}</span>
         </td>
-        <td class="px-4 py-3 text-end">
+        <td class="px-3 py-2 text-end">
 
           <div class="dropdown">
-            <button class="btn btn-sm btn-light dropdown-toggle"
+            <button class="btn btn-sm btn-light"
                     data-bs-toggle="dropdown">
-              Actions
+              <i class="bi bi-three-dots-vertical"></i>
             </button>
 
             <ul class="dropdown-menu dropdown-menu-end">
@@ -234,28 +200,35 @@ async function loadTransactions() {
               <li>
                 <a class="dropdown-item"
                    onclick="validateTx('${d.id}')">
-                   Approuver
+                   <i class="bi bi-check-circle me-2 text-success"></i>
                 </a>
               </li>
 
               <li>
                 <a class="dropdown-item"
                    onclick="rejectTx('${d.id}')">
-                   Rejeter
+                   <i class="bi bi-x-circle me-2 text-danger"></i>
+                </a>
+              </li>
+
+              <li>
+                <a class="dropdown-item"
+                   onclick="editTx('${d.id}')">
+                   <i class="bi bi-pencil-square me-2 text-primary"></i>
                 </a>
               </li>
 
               <li>
                 <a class="dropdown-item"
                    onclick="printInvoice('${d.id}')">
-                   Imprimer
+                   <i class="bi bi-printer me-2 text-secondary"></i>
                 </a>
               </li>
 
               <li>
                 <a class="dropdown-item text-danger"
                    onclick="deleteTx('${d.id}')">
-                   Supprimer
+                   <i class="bi bi-trash me-2"></i>
                 </a>
               </li>
 
@@ -269,27 +242,29 @@ async function loadTransactions() {
 }
 
 /* ==========================================================
-   IMPRESSION
+   EDIT LOGIC
 ========================================================== */
-window.printInvoice = async (id) => {
+window.editTx = async (id) => {
 
   const snap = await getDoc(doc(db, "transactions", id));
   const t = snap.data();
 
-  const win = window.open("", "_blank");
+  if (t.status === "approved") return;
 
-  win.document.write(`
-    <h3>FKM ENERGY</h3>
-    <hr>
-    <p><strong>Facture :</strong> ${t.invoiceNumber}</p>
-    <p><strong>Date :</strong> ${new Date().toLocaleDateString()}</p>
-    <p><strong>Client :</strong> ${t.partnerName}</p>
-    <p><strong>Produit :</strong> ${t.productName}</p>
-    <p><strong>Quantité :</strong> ${t.quantity}</p>
-    <p><strong>Total :</strong> ${t.total} ${t.currency}</p>
-  `);
+  if (t.status === "rejected" && currentUserData.role !== "directeur") return;
 
-  win.print();
+  editingId = id;
+
+  selectedProduct = productsCache.find(p => p.id === t.productId);
+
+  productSearch.value = t.productName;
+  partnerSearch.value = t.partnerName;
+  txQty.value = t.quantity;
+
+  unitPrice.value = `${t.unitPrice} ${t.currency}`;
+  updateTotal();
+
+  modal.show();
 };
 
 /* ==========================================================
@@ -330,6 +305,29 @@ window.deleteTx = async (id) => {
   if (!confirm("Supprimer cette transaction ?")) return;
   await deleteDoc(doc(db, "transactions", id));
   loadTransactions();
+};
+
+/* ==========================================================
+   PRINT
+========================================================== */
+window.printInvoice = async (id) => {
+
+  const snap = await getDoc(doc(db, "transactions", id));
+  const t = snap.data();
+
+  const win = window.open("", "_blank");
+
+  win.document.write(`
+    <h3>FKM ENERGY</h3>
+    <hr>
+    <p><strong>Facture :</strong> ${t.invoiceNumber}</p>
+    <p><strong>Client :</strong> ${t.partnerName}</p>
+    <p><strong>Produit :</strong> ${t.productName}</p>
+    <p><strong>Quantité :</strong> ${t.quantity}</p>
+    <p><strong>Total :</strong> ${t.total} ${t.currency}</p>
+  `);
+
+  win.print();
 };
 
 newTxBtn.onclick = () => modal.show();
