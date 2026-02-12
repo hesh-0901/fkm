@@ -315,9 +315,20 @@ function renderTable(data) {
             "warning"
           }">${t.status}</span>
         </td>
-        <td class="px-3 py-2 text-end">
-          ${renderActions(t.id, t)}
-        </td>
+       <td class="px-3 py-2 text-end">
+
+  <button 
+    class="btn btn-sm btn-outline-primary me-2"
+    onclick="printInvoice('${t.id}')"
+    title="Imprimer la facture"
+  >
+    <i class="bi bi-receipt"></i>
+  </button>
+
+  ${renderActions(t.id, t)}
+
+</td>
+
       </tr>
     `;
   });
