@@ -19,18 +19,19 @@ body{font-family:Inter,system-ui}
 
 <div class="flex min-h-screen">
 
+<!-- SIDEBAR CONSERVÉE -->
 <div id="sidebar-container"></div>
 
-<main class="flex-1 p-6 space-y-6">
+<main class="flex-1 p-6 space-y-6 overflow-x-hidden">
 
 <!-- HEADER -->
 <div class="bg-white rounded-xl shadow-sm px-6 py-4 flex justify-between items-center">
   <div>
-    <h1 class="text-base font-semibold">Module Ventes</h1>
-    <p class="text-xs text-slate-500">Transactions commerciales</p>
+    <h1 class="text-sm font-semibold">Module Ventes</h1>
+    <p class="text-xs text-slate-500">Gestion commerciale</p>
   </div>
   <button id="newTxBtn"
-    class="px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+    class="px-3 py-2 text-xs bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
     <i class="bi bi-plus-lg"></i>
   </button>
 </div>
