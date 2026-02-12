@@ -130,26 +130,32 @@
     </div>
 
     <!-- ================= GRAPHIQUES ================= -->
-    <div class="grid lg:grid-cols-2 gap-6">
+<div class="grid lg:grid-cols-2 gap-6">
 
-<div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100 hover:shadow-2xl transition">
-  <div class="flex items-center justify-between mb-4">
-    <h3 class="font-semibold text-base">Activités récentes</h3>
-    <i class="bi bi-activity text-primary text-3xl"></i>
+  <!-- ================= ACTIVITÉS RÉCENTES ================= -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100 hover:shadow-2xl transition">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-semibold text-base">Activités récentes</h3>
+      <i class="bi bi-activity text-primary text-3xl"></i>
+    </div>
+
+    <div id="recentActivities"
+         class="space-y-3 max-h-80 overflow-y-auto pr-2">
+    </div>
   </div>
-  <div id="recentActivities" class="space-y-3 max-h-80 overflow-y-auto"></div>
+
+  <!-- ================= TOP PRODUITS ================= -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100 hover:shadow-2xl transition">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-semibold text-base">Top produits en stock</h3>
+      <i class="bi bi-bar-chart-fill text-primary text-3xl"></i>
+    </div>
+
+    <div id="stockChart"></div>
+  </div>
+
 </div>
 
-
-      <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100 hover:shadow-2xl transition">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="font-semibold text-base">Top produits en stock</h3>
-          <i class="bi bi-bar-chart-fill text-primary text-3xl"></i>
-        </div>
-        <div id="stockChart"></div>
-      </div>
-
-    </div>
 
     <!-- ================= ALERTES ================= -->
     <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
