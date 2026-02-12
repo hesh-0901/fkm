@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Facture</title>
+
+<style>
+@page {
+  size: A4;
+  margin: 15mm;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  color: #000;
+}
+
+.invoice-container {
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.logo img {
+  width: 150px;
+}
+
+.company-info {
+  text-align: right;
+  font-size: 13px;
+}
+
+.invoice-title {
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  border-top: 2px solid #000;
+  border-bottom: 2px solid #000;
+  padding: 8px 0;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.meta div {
+  font-size: 14px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+table th, table td {
+  border: 1px solid #000;
+  padding: 8px;
+  text-align: center;
+}
+
+table th {
+  background: #f3f3f3;
+}
+
+.total-section {
+  width: 40%;
+  margin-left: auto;
+  border: 1px solid #000;
+}
+
+.total-section td {
+  padding: 8px;
+}
+
+.footer {
+  text-align: center;
+  font-size: 12px;
+  margin-top: 30px;
+}
+
+.print-btn {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.print-btn button {
+  padding: 10px 20px;
+  border: none;
+  background: #0B5C6B;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+@media print {
+  .print-btn {
+    display: none;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="print-btn">
+  <button onclick="window.print()">Imprimer</button>
+</div>
+
+<div class="invoice-container">
+
+  <div class="header">
+    <div class="logo">
+      <img src="../assets/logofkm.png" alt="Logo">
+    </div>
+    <div class="company-info">
+      <strong>FKM ENERGY</strong><br>
+      RCCM: CD/LUB/0000<br>
+      N° IMPOT: A123456<br>
+      Lubumbashi, RDC<br>
+      Tel: +243 xxx xxx xxx
+    </div>
+  </div>
+
+  <div class="invoice-title">
+    FACTURE
+  </div>
+
+  <div class="meta">
+    <div>
+      <strong>Facture N° :</strong> <span id="invoiceNumber"></span><br>
+      <strong>Date :</strong> <span id="invoiceDate"></span>
+    </div>
+    <div>
+      <strong>Client :</strong><br>
+      <span id="clientName"></span>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Produit</th>
+        <th>Quantité</th>
+        <th>Prix Unitaire</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td id="productName"></td>
+        <td id="quantity"></td>
+        <td id="unitPrice"></td>
+        <td id="totalAmount"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="total-section">
+    <tr>
+      <td><strong>Total :</strong></td>
+      <td id="grandTotal"></td>
+    </tr>
+  </table>
+
+  <div class="footer">
+    Merci pour votre confiance.<br>
+    Les marchandises vendues ne sont ni reprises ni échangées.
+  </div>
+
+</div>
+
+</body>
+</html>
