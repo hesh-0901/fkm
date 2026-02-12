@@ -34,13 +34,10 @@ tailwind.config = {
 
 <div class="flex min-h-screen">
 
-<!-- SIDEBAR -->
 <div id="sidebar-container"></div>
 
-<!-- MAIN -->
 <main id="mainContent" class="flex-1 px-8 py-8 space-y-8 overflow-x-hidden">
 
-<!-- TOPBAR -->
 <div class="bg-white rounded-2xl shadow-md px-8 py-5 flex items-center justify-between border border-slate-100">
 
   <div class="flex items-center gap-4">
@@ -78,7 +75,6 @@ tailwind.config = {
 
   <div class="flex items-center gap-4">
 
-    <!-- ✅ Champ unique de recherche -->
     <input id="inventorySearch"
       placeholder="Rechercher un produit..."
       class="px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary focus:outline-none text-sm">
@@ -90,6 +86,36 @@ tailwind.config = {
     </button>
 
   </div>
+</div>
+
+<!-- ✅ FILTRE AVANCÉ AJOUTÉ -->
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex flex-wrap items-center gap-4">
+
+  <div class="flex items-center gap-2">
+    <i class="bi bi-funnel text-primary text-lg"></i>
+    <span class="text-sm font-semibold">Filtres :</span>
+  </div>
+
+  <!-- Filtre catégorie -->
+  <select id="filterCategory"
+    class="px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-primary focus:outline-none">
+    <option value="">Toutes catégories</option>
+  </select>
+
+  <!-- Filtre stock faible -->
+  <select id="filterStock"
+    class="px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-primary focus:outline-none">
+    <option value="">Tous stocks</option>
+    <option value="low">Stock faible uniquement</option>
+    <option value="ok">Stock normal uniquement</option>
+  </select>
+
+  <!-- Reset filtre -->
+  <button id="resetFilters"
+    class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-sm transition">
+    Réinitialiser
+  </button>
+
 </div>
 
 <!-- TABLE -->
@@ -123,39 +149,32 @@ tailwind.config = {
 </main>
 </div>
 
-  <!-- MODAL PRODUIT -->
+<!-- MODAL PRODUIT (inchangé) -->
 <div class="modal fade" id="productModal" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content rounded-xl">
-
       <div class="modal-header">
         <h5 class="modal-title">Produit</h5>
         <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-
       <div class="modal-body">
         <form id="productForm" class="row g-3">
-
           <div class="col-md-6">
             <label class="form-label">Nom</label>
             <input id="pName" class="form-control" required>
           </div>
-
           <div class="col-md-6">
             <label class="form-label">Catégorie</label>
             <input id="pCategory" class="form-control" required>
           </div>
-
           <div class="col-md-4">
             <label class="form-label">Quantité</label>
             <input id="pQty" type="number" min="0" class="form-control" required>
           </div>
-
           <div class="col-md-4">
             <label class="form-label">Stock minimum</label>
             <input id="pMinQty" type="number" min="0" value="0" class="form-control">
           </div>
-
           <div class="col-md-4">
             <label class="form-label">Devise</label>
             <select id="pCurrency" class="form-select">
@@ -163,29 +182,23 @@ tailwind.config = {
               <option value="CDF">CDF</option>
             </select>
           </div>
-
           <div class="col-md-6" id="usdBlock">
             <label class="form-label">Prix USD</label>
             <input id="pUsd" type="number" min="0" class="form-control">
           </div>
-
           <div class="col-md-6 d-none" id="cdfBlock">
             <label class="form-label">Prix CDF</label>
             <input id="pCdf" type="number" min="0" class="form-control">
           </div>
-
         </form>
       </div>
-
       <div class="modal-footer">
         <button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
         <button class="btn btn-success" id="saveProductBtn">Enregistrer</button>
       </div>
-
     </div>
   </div>
 </div>
-
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../js/sidebar.js"></script>
