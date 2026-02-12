@@ -76,37 +76,98 @@
       </div>
     </div>
 
-    <!-- ================= HEADER ACTIONS IDENTIQUE INVENTAIRE ================= -->
-    <div class="flex items-center justify-between">
-      <h2 class="font-semibold text-base">Liste des transactions</h2>
+<!-- ================= HEADER ACTIONS ================= -->
+<div class="flex flex-col gap-4">
 
-      <button id="newTxBtn"
-              class="d-none items-center gap-2 px-4 py-2 rounded-lg bg-success text-white hover:bg-green-700 transition">
-        <i class="bi bi-plus-lg"></i>
-        Nouvelle transaction
-      </button>
+  <!-- Ligne 1 : Titre + bouton -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-lg font-semibold">Liste des transactions</h2>
+      <p class="text-xs text-muted">Recherche & filtres avancés</p>
     </div>
 
-    <!-- ================= TABLE ================= -->
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-sm">
-          <thead class="bg-slate-50 border-b">
-            <tr class="text-left text-slate-600">
-              <th class="px-4 py-3">Facture</th>
-              <th class="px-4 py-3">Date</th>
-              <th class="px-4 py-3">Client</th>
-              <th class="px-4 py-3">Produit</th>
-              <th class="px-4 py-3">Qté</th>
-              <th class="px-4 py-3">Total</th>
-              <th class="px-4 py-3">Statut</th>
-              <th class="px-4 py-3 text-end">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="txTable" class="divide-y"></tbody>
-        </table>
-      </div>
-    </div>
+    <button id="newTxBtn"
+      class="d-none flex items-center gap-2 px-5 py-2.5 rounded-xl 
+             bg-gradient-to-r from-success to-emerald-600 
+             text-white shadow-md hover:scale-105 transition">
+      <i class="bi bi-plus-lg text-lg"></i>
+      Nouvelle transaction
+    </button>
+  </div>
+
+  <!-- Ligne 2 : Recherche + Filtres -->
+  <div class="flex flex-wrap items-center gap-4">
+
+    <!-- Recherche -->
+    <input id="txSearch"
+      placeholder="Rechercher facture, client, produit..."
+      class="px-4 py-2 rounded-xl border border-slate-200 
+             focus:ring-2 focus:ring-primary focus:outline-none text-sm w-72">
+
+    <!-- Filtre statut -->
+    <select id="statusFilter"
+      class="px-4 py-2 rounded-xl border border-slate-200 text-sm">
+      <option value="ALL">Tous statuts</option>
+      <option value="PENDING">En attente</option>
+      <option value="APPROVED">Approuvées</option>
+      <option value="REJECTED">Rejetées</option>
+    </select>
+
+    <!-- Filtres rapides -->
+    <select id="quickDateFilter"
+      class="px-4 py-2 rounded-xl border border-slate-200 text-sm">
+      <option value="ALL">Toutes dates</option>
+      <option value="TODAY">Aujourd’hui</option>
+      <option value="7DAYS">7 derniers jours</option>
+      <option value="30DAYS">30 derniers jours</option>
+    </select>
+
+    <!-- Plage personnalisée -->
+    <input type="date" id="startDate"
+      class="px-3 py-2 rounded-xl border border-slate-200 text-sm">
+
+    <input type="date" id="endDate"
+      class="px-3 py-2 rounded-xl border border-slate-200 text-sm">
+
+    <!-- Reset -->
+    <button id="resetFilters"
+      class="px-4 py-2 rounded-xl border border-slate-200 text-sm hover:bg-slate-100 transition">
+      Reset
+    </button>
+
+  </div>
+</div>
+
+
+<!-- ================= TABLE ================= -->
+<div class="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
+
+  <div class="overflow-x-auto">
+
+    <table class="min-w-full text-sm">
+
+      <thead class="bg-slate-50 border-b text-xs uppercase tracking-wide text-slate-500">
+        <tr>
+          <th class="px-6 py-4">#</th>
+          <th class="px-6 py-4">Facture</th>
+          <th class="px-6 py-4">Date</th>
+          <th class="px-6 py-4">Client</th>
+          <th class="px-6 py-4">Produit</th>
+          <th class="px-6 py-4 text-center">Qté</th>
+          <th class="px-6 py-4">Total</th>
+          <th class="px-6 py-4">Statut</th>
+          <th class="px-6 py-4 text-end">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody id="txTable" class="divide-y divide-slate-100">
+      </tbody>
+
+    </table>
+
+  </div>
+</div>
+
 
   </main>
 </div>
