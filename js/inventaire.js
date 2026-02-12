@@ -28,7 +28,11 @@ const addBtn = document.getElementById("addProductBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const userNameEl = document.getElementById("userName");
 const userRoleEl = document.getElementById("userRole");
+
 const searchInput = document.getElementById("inventorySearch");
+const filterCategory = document.getElementById("filterCategory");
+const filterStock = document.getElementById("filterStock");
+const resetFilters = document.getElementById("resetFilters");
 
 const modal = new bootstrap.Modal(document.getElementById("productModal"));
 const saveBtn = document.getElementById("saveProductBtn");
@@ -89,16 +93,58 @@ logoutBtn.onclick = async () => {
    LOAD INVENTORY
 ========================= */
 async function loadInventory() {
-  table.innerHTML = "";
   inventoryCache = [];
-
   const snap = await getDocs(collection(db, "inventory"));
 
   snap.forEach(d => {
     inventoryCache.push({ id: d.id, ...d.data() });
   });
 
-  renderTable(inventoryCache);
+  populateCategoryFilter();
+  applyFilters();
+}
+
+/* =========================
+   REMPLIR FILTRE CATÉGORIE
+========================= */
+function populateCategoryFilter() {
+  const categories = [...new Set(inventoryCache.map(p => p.category))];
+
+  filterCategory.innerHTML = `<option value="">Toutes catégories</option>`;
+
+  categories.forEach(cat => {
+    filterCategory.innerHTML += `<option value="${cat}">${cat}</option>`;
+  });
+}
+
+/* =========================
+   FILTRAGE GLOBAL (EXCEL STYLE)
+========================= */
+function applyFilters() {
+  const term = searchInput.value.toLowerCase();
+  const selectedCategory = filterCategory.value;
+  const stockFilter = filterStock.value;
+
+  const filtered = inventoryCache.filter(p => {
+
+    const matchSearch =
+      p.name.toLowerCase().includes(term) ||
+      p.category.toLowerCase().includes(term);
+
+    const matchCategory =
+      selectedCategory === "" || p.category === selectedCategory;
+
+    const isLow = p.quantity <= p.minQuantity;
+
+    const matchStock =
+      stockFilter === "" ||
+      (stockFilter === "low" && isLow) ||
+      (stockFilter === "ok" && !isLow);
+
+    return matchSearch && matchCategory && matchStock;
+  });
+
+  renderTable(filtered);
 }
 
 /* =========================
@@ -172,17 +218,17 @@ function renderTable(data) {
 }
 
 /* =========================
-   RECHERCHE TYPE EXCEL
+   EVENTS FILTRE
 ========================= */
-searchInput.addEventListener("input", () => {
-  const term = searchInput.value.toLowerCase();
+searchInput.addEventListener("input", applyFilters);
+filterCategory.addEventListener("change", applyFilters);
+filterStock.addEventListener("change", applyFilters);
 
-  const filtered = inventoryCache.filter(p =>
-    p.name.toLowerCase().includes(term) ||
-    p.category.toLowerCase().includes(term)
-  );
-
-  renderTable(filtered);
+resetFilters.addEventListener("click", () => {
+  searchInput.value = "";
+  filterCategory.value = "";
+  filterStock.value = "";
+  applyFilters();
 });
 
 /* =========================
