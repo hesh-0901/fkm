@@ -54,6 +54,13 @@ onAuthStateChanged(auth, async (user) => {
   await loadTransactions();
 });
 
+import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const logoutBtn = document.getElementById("logoutBtn");
+const userNameEl = document.getElementById("userName");
+const userRoleEl = document.getElementById("userRole");
+
+
 /* ==========================================================
    PRELOAD DATA
 ========================================================== */
