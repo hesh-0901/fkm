@@ -16,7 +16,9 @@ import {
   increment
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* DOM */
+/* =========================
+   DOM
+========================= */
 const table = document.getElementById("txTable");
 const modal = new bootstrap.Modal(document.getElementById("txModal"));
 const saveBtn = document.getElementById("saveTxBtn");
@@ -34,13 +36,26 @@ const logoutBtn = document.getElementById("logoutBtn");
 const userNameEl = document.getElementById("userName");
 const userFunctionEl = document.getElementById("userFunction");
 
-/* VARIABLES */
+/* FILTRES */
+const searchInput = document.getElementById("txSearch");
+const statusFilter = document.getElementById("statusFilter");
+const quickDateFilter = document.getElementById("quickDateFilter");
+const startDateInput = document.getElementById("startDate");
+const endDateInput = document.getElementById("endDate");
+const resetBtn = document.getElementById("resetFilters");
+
+/* =========================
+   VARIABLES
+========================= */
 let productsCache = [];
+let txCache = [];
 let selectedProduct = null;
 let editingId = null;
 let currentUserData = null;
 
-/* AUTH */
+/* =========================
+   AUTH
+========================= */
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) return location.replace("../login.html");
@@ -57,13 +72,17 @@ onAuthStateChanged(auth, async (user) => {
   await loadTransactions();
 });
 
-/* LOGOUT */
+/* =========================
+   LOGOUT
+========================= */
 logoutBtn.onclick = async () => {
   await signOut(auth);
   location.replace("../login.html");
 };
 
-/* LOAD PRODUCTS */
+/* =========================
+   PRELOAD PRODUCTS
+========================= */
 async function preloadProducts() {
   const snap = await getDocs(collection(db, "inventory"));
   productsCache = [];
@@ -72,140 +91,177 @@ async function preloadProducts() {
   });
 }
 
-/* SEARCH PRODUCT */
-productSearch.oninput = () => {
-
-  const term = productSearch.value.toLowerCase();
-  productResults.innerHTML = "";
-
-  productsCache
-    .filter(p => p.name.toLowerCase().includes(term))
-    .forEach(p => {
-
-      const btn = document.createElement("button");
-      btn.className = "list-group-item list-group-item-action text-sm";
-      btn.textContent = p.name;
-
-      btn.onclick = () => {
-        selectedProduct = p;
-        productSearch.value = p.name;
-        productResults.innerHTML = "";
-
-        const price = p.pricing?.usd || p.pricing?.cdf || 0;
-        const currency = p.pricing?.usd ? "USD" : "CDF";
-
-        unitPrice.value = `${price} ${currency}`;
-        updateTotal();
-      };
-
-      productResults.appendChild(btn);
-    });
-};
-
-/* CALCUL TOTAL */
-function updateTotal() {
-  const qty = Number(txQty.value) || 0;
-  const [price, currency] = unitPrice.value.split(" ");
-  totalPrice.value = `${qty * Number(price || 0)} ${currency || ""}`;
-}
-txQty.oninput = updateTotal;
-
-/* SAVE */
-saveBtn.onclick = async () => {
-
-  if (!selectedProduct) return;
-
-  const quantity = Number(txQty.value);
-  const price = selectedProduct.pricing?.usd || selectedProduct.pricing?.cdf || 0;
-  const currency = selectedProduct.pricing?.usd ? "USD" : "CDF";
-  const total = quantity * price;
-
-  const data = {
-    productId: selectedProduct.id,
-    productName: selectedProduct.name,
-    quantity,
-    unitPrice: price,
-    total,
-    currency,
-    partnerName: partnerSearch.value,
-    updatedAt: serverTimestamp()
-  };
-
-  if (editingId) {
-    await updateDoc(doc(db, "transactions", editingId), data);
-    editingId = null;
-  } else {
-    await addDoc(collection(db, "transactions"), {
-      ...data,
-      status: "pending",
-      createdAt: serverTimestamp()
-    });
-  }
-
-  modal.hide();
-  document.getElementById("txForm").reset();
-  selectedProduct = null;
-  loadTransactions();
-};
-
-/* LOAD TABLE */
+/* =========================
+   LOAD TRANSACTIONS
+========================= */
 async function loadTransactions() {
 
-  table.innerHTML = "";
-
+  txCache = [];
   const snap = await getDocs(collection(db, "transactions"));
 
   snap.forEach(d => {
+    txCache.push({ id: d.id, ...d.data() });
+  });
 
-    const t = d.data();
+  renderTable(txCache);
+}
+
+/* =========================
+   RENDER TABLE
+========================= */
+function renderTable(data) {
+
+  table.innerHTML = "";
+
+  if (data.length === 0) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="9" class="text-center py-6 text-muted">
+          Aucune transaction trouvée
+        </td>
+      </tr>`;
+    return;
+  }
+
+  let index = 1;
+
+  data.forEach(t => {
+
+    const badgeClass =
+      t.status === "approved" ? "success" :
+      t.status === "rejected" ? "danger" :
+      "warning";
 
     table.innerHTML += `
-      <tr class="text-sm">
-        <td class="px-3 py-2 fw-semibold">${t.invoiceNumber || "-"}</td>
-        <td class="px-3 py-2">${t.createdAt?.toDate().toLocaleDateString() || "-"}</td>
-        <td class="px-3 py-2">${t.partnerName}</td>
-        <td class="px-3 py-2">${t.productName}</td>
-        <td class="px-3 py-2">${t.quantity}</td>
-        <td class="px-3 py-2 fw-semibold">${t.total} ${t.currency}</td>
-        <td class="px-3 py-2">
-          <span class="badge bg-${
-            t.status === "approved" ? "success" :
-            t.status === "rejected" ? "danger" :
-            "warning"
-          }">${t.status}</span>
+      <tr class="hover:bg-slate-50 transition">
+        <td class="px-6 py-4 font-semibold">${index++}</td>
+        <td class="px-6 py-4 font-medium">${t.invoiceNumber || "-"}</td>
+        <td class="px-6 py-4">${t.createdAt?.toDate()?.toLocaleDateString() || "-"}</td>
+        <td class="px-6 py-4">${t.partnerName}</td>
+        <td class="px-6 py-4">${t.productName}</td>
+        <td class="px-6 py-4 text-center">${t.quantity}</td>
+        <td class="px-6 py-4 font-semibold">${t.total} ${t.currency}</td>
+        <td class="px-6 py-4">
+          <span class="badge bg-${badgeClass}">
+            ${t.status}
+          </span>
         </td>
-        <td class="px-3 py-2 text-end">
-
+        <td class="px-6 py-4 text-end">
           <div class="dropdown">
-            <button class="btn btn-sm btn-light"
-                    data-bs-toggle="dropdown">
+            <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
               <i class="bi bi-three-dots-vertical"></i>
             </button>
-
             <ul class="dropdown-menu dropdown-menu-end">
 
-              <li><a class="dropdown-item" onclick="validateTx('${d.id}')">
-                <i class="bi bi-check-circle text-success"></i></a></li>
+              <li><a class="dropdown-item" onclick="validateTx('${t.id}')">
+                <i class="bi bi-check-circle text-success me-2"></i>Valider</a></li>
 
-              <li><a class="dropdown-item" onclick="rejectTx('${d.id}')">
-                <i class="bi bi-x-circle text-danger"></i></a></li>
+              <li><a class="dropdown-item" onclick="rejectTx('${t.id}')">
+                <i class="bi bi-x-circle text-danger me-2"></i>Rejeter</a></li>
 
-              <li><a class="dropdown-item" onclick="editTx('${d.id}')">
-                <i class="bi bi-pencil-square text-primary"></i></a></li>
+              <li><a class="dropdown-item" onclick="editTx('${t.id}')">
+                <i class="bi bi-pencil-square text-primary me-2"></i>Modifier</a></li>
 
-              <li><a class="dropdown-item text-danger" onclick="deleteTx('${d.id}')">
-                <i class="bi bi-trash"></i></a></li>
+              <li><a class="dropdown-item text-danger" onclick="deleteTx('${t.id}')">
+                <i class="bi bi-trash me-2"></i>Supprimer</a></li>
 
             </ul>
           </div>
-
         </td>
       </tr>
     `;
   });
 }
 
-/* VALIDATE */
+/* =========================
+   RECHERCHE + FILTRES
+========================= */
+function applyFilters() {
+
+  let filtered = [...txCache];
+
+  const term = searchInput?.value?.toLowerCase() || "";
+  const status = statusFilter?.value || "ALL";
+  const quick = quickDateFilter?.value || "ALL";
+  const start = startDateInput?.value;
+  const end = endDateInput?.value;
+
+  /* Recherche */
+  if (term) {
+    filtered = filtered.filter(t =>
+      t.partnerName?.toLowerCase().includes(term) ||
+      t.productName?.toLowerCase().includes(term) ||
+      t.invoiceNumber?.toLowerCase().includes(term)
+    );
+  }
+
+  /* Statut */
+  if (status !== "ALL") {
+    filtered = filtered.filter(t => t.status === status);
+  }
+
+  /* Filtres rapides date */
+  if (quick !== "ALL") {
+
+    const now = new Date();
+    let limitDate = new Date();
+
+    if (quick === "TODAY") {
+      limitDate.setHours(0,0,0,0);
+    }
+
+    if (quick === "7DAYS") {
+      limitDate.setDate(now.getDate() - 7);
+    }
+
+    if (quick === "30DAYS") {
+      limitDate.setDate(now.getDate() - 30);
+    }
+
+    filtered = filtered.filter(t => {
+      const d = t.createdAt?.toDate();
+      return d && d >= limitDate;
+    });
+  }
+
+  /* Plage personnalisée */
+  if (start) {
+    const startD = new Date(start);
+    filtered = filtered.filter(t =>
+      t.createdAt?.toDate() >= startD
+    );
+  }
+
+  if (end) {
+    const endD = new Date(end);
+    endD.setHours(23,59,59,999);
+    filtered = filtered.filter(t =>
+      t.createdAt?.toDate() <= endD
+    );
+  }
+
+  renderTable(filtered);
+}
+
+/* EVENTS FILTRES */
+searchInput?.addEventListener("input", applyFilters);
+statusFilter?.addEventListener("change", applyFilters);
+quickDateFilter?.addEventListener("change", applyFilters);
+startDateInput?.addEventListener("change", applyFilters);
+endDateInput?.addEventListener("change", applyFilters);
+
+resetBtn?.addEventListener("click", () => {
+  searchInput.value = "";
+  statusFilter.value = "ALL";
+  quickDateFilter.value = "ALL";
+  startDateInput.value = "";
+  endDateInput.value = "";
+  renderTable(txCache);
+});
+
+/* =========================
+   VALIDATE
+========================= */
 window.validateTx = async (id) => {
 
   const snap = await getDoc(doc(db, "transactions", id));
@@ -221,45 +277,26 @@ window.validateTx = async (id) => {
     status: "approved"
   });
 
-  loadTransactions();
+  await loadTransactions();
 };
 
-/* REJECT */
+/* =========================
+   REJECT
+========================= */
 window.rejectTx = async (id) => {
   await updateDoc(doc(db, "transactions", id), {
     status: "rejected"
   });
-  loadTransactions();
+  await loadTransactions();
 };
 
-/* EDIT */
-window.editTx = async (id) => {
-
-  const snap = await getDoc(doc(db, "transactions", id));
-  const t = snap.data();
-
-  if (t.status === "approved") return;
-
-  if (t.status === "rejected" && currentUserData.role !== "directeur") return;
-
-  editingId = id;
-  selectedProduct = productsCache.find(p => p.id === t.productId);
-
-  productSearch.value = t.productName;
-  partnerSearch.value = t.partnerName;
-  txQty.value = t.quantity;
-
-  unitPrice.value = `${t.unitPrice} ${t.currency}`;
-  updateTotal();
-
-  modal.show();
-};
-
-/* DELETE */
+/* =========================
+   DELETE
+========================= */
 window.deleteTx = async (id) => {
   if (!confirm("Supprimer cette transaction ?")) return;
   await deleteDoc(doc(db, "transactions", id));
-  loadTransactions();
+  await loadTransactions();
 };
 
 newTxBtn.onclick = () => modal.show();
