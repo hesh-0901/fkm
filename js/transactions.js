@@ -1,3 +1,8 @@
+/* ============================================================
+   FKM ENERGY - TRANSACTIONS MODULE
+   Version optimisée & commentée
+============================================================ */
+
 import { auth, db } from "./firebase.config.js";
 import {
   onAuthStateChanged,
@@ -18,9 +23,10 @@ import {
   orderBy
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================================
-   DOM
-================================ */
+/* ============================================================
+   DOM REFERENCES
+============================================================ */
+
 const table = document.getElementById("txTable");
 const modal = new bootstrap.Modal(document.getElementById("txModal"));
 const saveBtn = document.getElementById("saveTxBtn");
@@ -45,18 +51,20 @@ const startDate = document.getElementById("startDate");
 const endDate = document.getElementById("endDate");
 const resetFilters = document.getElementById("resetFilters");
 
-/* ================================
-   VARIABLES
-================================ */
+/* ============================================================
+   STATE VARIABLES
+============================================================ */
+
 let productsCache = [];
 let transactionsCache = [];
 let selectedProduct = null;
 let editingId = null;
 let currentUserData = null;
 
-/* ================================
-   AUTH
-================================ */
+/* ============================================================
+   AUTHENTICATION HANDLING
+============================================================ */
+
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) return location.replace("../login.html");
@@ -73,25 +81,28 @@ onAuthStateChanged(auth, async (user) => {
   await loadTransactions();
 });
 
-/* ================================
+/* ============================================================
    LOGOUT
-================================ */
+============================================================ */
+
 logoutBtn.onclick = async () => {
   await signOut(auth);
   location.replace("../login.html");
 };
 
-/* ================================
-   LOAD PRODUCTS
-================================ */
+/* ============================================================
+   LOAD INVENTORY PRODUCTS (CACHED)
+============================================================ */
+
 async function preloadProducts() {
   const snap = await getDocs(collection(db, "inventory"));
   productsCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-/* ================================
-   PRODUCT SEARCH
-================================ */
+/* ============================================================
+   PRODUCT SEARCH AUTOCOMPLETE
+============================================================ */
+
 productSearch.oninput = () => {
 
   const term = productSearch.value.toLowerCase();
@@ -108,6 +119,7 @@ productSearch.oninput = () => {
       btn.textContent = p.name;
 
       btn.onclick = () => {
+
         selectedProduct = p;
         productSearch.value = p.name;
         productResults.innerHTML = "";
@@ -123,19 +135,22 @@ productSearch.oninput = () => {
     });
 };
 
-/* ================================
-   TOTAL CALC
-================================ */
+/* ============================================================
+   TOTAL CALCULATION
+============================================================ */
+
 function updateTotal() {
   const qty = Number(txQty.value) || 0;
   const [price, currency] = unitPrice.value.split(" ");
   totalPrice.value = `${qty * Number(price || 0)} ${currency || ""}`;
 }
+
 txQty.oninput = updateTotal;
 
-/* ================================
-   GENERATE INVOICE
-================================ */
+/* ============================================================
+   GENERATE UNIQUE INVOICE NUMBER
+============================================================ */
+
 function generateInvoiceNumber() {
   const now = new Date();
   return `FKM-IN-${now.getFullYear()}${(now.getMonth()+1)
@@ -143,9 +158,10 @@ function generateInvoiceNumber() {
     .toString().padStart(2,"0")}${Date.now().toString().slice(-3)}`;
 }
 
-/* ================================
-   SAVE
-================================ */
+/* ============================================================
+   SAVE / UPDATE TRANSACTION
+============================================================ */
+
 saveBtn.onclick = async () => {
 
   if (!selectedProduct || !txQty.value || !partnerSearch.value) {
@@ -159,7 +175,6 @@ saveBtn.onclick = async () => {
   const total = quantity * price;
 
   const data = {
-    invoiceNumber: editingId ? undefined : generateInvoiceNumber(),
     productId: selectedProduct.id,
     productName: selectedProduct.name,
     quantity,
@@ -171,12 +186,12 @@ saveBtn.onclick = async () => {
   };
 
   if (editingId) {
-    delete data.invoiceNumber;
     await updateDoc(doc(db, "transactions", editingId), data);
     editingId = null;
   } else {
     await addDoc(collection(db, "transactions"), {
       ...data,
+      invoiceNumber: generateInvoiceNumber(),
       status: "pending",
       createdAt: serverTimestamp()
     });
@@ -185,15 +200,21 @@ saveBtn.onclick = async () => {
   modal.hide();
   document.getElementById("txForm").reset();
   selectedProduct = null;
-  loadTransactions();
+
+  await loadTransactions();
 };
 
-/* ================================
-   LOAD TRANSACTIONS
-================================ */
+/* ============================================================
+   LOAD TRANSACTIONS (CACHED)
+============================================================ */
+
 async function loadTransactions() {
 
-  const q = query(collection(db, "transactions"), orderBy("createdAt", "desc"));
+  const q = query(
+    collection(db, "transactions"),
+    orderBy("createdAt", "desc")
+  );
+
   const snap = await getDocs(q);
 
   transactionsCache = snap.docs.map(d => ({
@@ -204,9 +225,10 @@ async function loadTransactions() {
   applyFilters();
 }
 
-/* ================================
-   APPLY FILTERS
-================================ */
+/* ============================================================
+   FILTER ENGINE
+============================================================ */
+
 function applyFilters() {
 
   let filtered = [...transactionsCache];
@@ -217,6 +239,7 @@ function applyFilters() {
   const start = startDate.value;
   const end = endDate.value;
 
+  /* ---------- Search ---------- */
   if (search) {
     filtered = filtered.filter(t =>
       t.invoiceNumber?.toLowerCase().includes(search) ||
@@ -225,12 +248,14 @@ function applyFilters() {
     );
   }
 
+  /* ---------- Status ---------- */
   if (status !== "ALL") {
     filtered = filtered.filter(t =>
       t.status?.toUpperCase() === status
     );
   }
 
+  /* ---------- Quick Date Filters ---------- */
   if (quick !== "ALL") {
 
     const now = new Date();
@@ -238,12 +263,10 @@ function applyFilters() {
     filtered = filtered.filter(t => {
 
       if (!t.createdAt) return false;
-
       const date = t.createdAt.toDate();
 
-      if (quick === "TODAY") {
+      if (quick === "TODAY")
         return date.toDateString() === now.toDateString();
-      }
 
       if (quick === "7DAYS") {
         const past = new Date();
@@ -261,6 +284,7 @@ function applyFilters() {
     });
   }
 
+  /* ---------- Custom Range ---------- */
   if (start && end) {
 
     const startObj = new Date(start);
@@ -277,17 +301,16 @@ function applyFilters() {
   renderTable(filtered);
 }
 
-/* ================================
-   RENDER TABLE
-================================ */
+/* ============================================================
+   TABLE RENDERING (Optimized)
+============================================================ */
+
 function renderTable(data) {
 
-  table.innerHTML = "";
-
-  if (data.length === 0) {
+  if (!data.length) {
     table.innerHTML = `
       <tr>
-        <td colspan="9" class="text-center py-4 text-muted">
+        <td colspan="9" class="text-center py-6 text-muted">
           Aucune transaction trouvée
         </td>
       </tr>
@@ -295,71 +318,57 @@ function renderTable(data) {
     return;
   }
 
-  data.forEach((t, index) => {
+  table.innerHTML = data.map((t, index) => {
 
     const created = t.createdAt?.toDate().toLocaleDateString() || "-";
 
-    table.innerHTML += `
+    return `
       <tr class="text-sm">
-        <td class="px-3 py-2">${index + 1}</td>
-        <td class="px-3 py-2 fw-semibold">${t.invoiceNumber}</td>
-        <td class="px-3 py-2">${created}</td>
-        <td class="px-3 py-2">${t.partnerName}</td>
-        <td class="px-3 py-2">${t.productName}</td>
-        <td class="px-3 py-2 text-center">${t.quantity}</td>
-        <td class="px-3 py-2 fw-semibold">${t.total} ${t.currency}</td>
-        <td class="px-3 py-2">
+        <td class="px-6 py-4">${index + 1}</td>
+        <td class="px-6 py-4 font-semibold">${t.invoiceNumber}</td>
+        <td class="px-6 py-4">${created}</td>
+        <td class="px-6 py-4">${t.partnerName}</td>
+        <td class="px-6 py-4">${t.productName}</td>
+        <td class="px-6 py-4 text-center">${t.quantity}</td>
+        <td class="px-6 py-4 font-semibold">${t.total} ${t.currency}</td>
+        <td class="px-6 py-4">
           <span class="badge bg-${
             t.status === "approved" ? "success" :
             t.status === "rejected" ? "danger" :
             "warning"
           }">${t.status}</span>
         </td>
-<td class="px-6 py-4 text-end">
-  <div class="flex items-center justify-end gap-2">
+        <td class="px-6 py-4 text-end">
+          <div class="flex items-center justify-end gap-2">
 
-    ${t.status === "approved" ? `
-    <button 
-      onclick="printInvoice('${t.id}')"
-      title="Imprimer la facture"
-      class="group inline-flex items-center justify-center
-             w-10 h-10
-             rounded-xl
-             bg-primary/5
-             border border-primary/20
-             text-primary
-             hover:bg-primary
-             hover:text-white
-             transition-all duration-300 ease-in-out
-             shadow-sm hover:shadow-md
-             active:scale-95"
-    >
-      <i class="bi bi-receipt text-base transition-transform duration-300 group-hover:scale-110"></i>
-    </button>
-    ` : ""}
+            ${t.status === "approved" ? `
+              <button 
+                onclick="printInvoice('${t.id}')"
+                title="Imprimer la facture"
+                class="group inline-flex items-center justify-center
+                       w-10 h-10 rounded-xl
+                       bg-primary/5 border border-primary/20
+                       text-primary
+                       hover:bg-primary hover:text-white
+                       transition-all duration-300
+                       shadow-sm hover:shadow-md active:scale-95">
+                <i class="bi bi-receipt text-base transition-transform duration-300 group-hover:scale-110"></i>
+              </button>
+            ` : ""}
 
-    ${renderActions(t.id, t)}
+            ${renderActions(t.id, t)}
 
-  </div>
-</td>
-
-
-
-  <span class="ml-2">
-    ${renderActions(t.id, t)}
-  </span>
-
-</td>
-
-
+          </div>
+        </td>
       </tr>
     `;
-  });
+  }).join("");
 }
 
-/* ================================
-   ACTIONS
-================================ */
+/* ============================================================
+   ACTION DROPDOWN
+============================================================ */
+
 function renderActions(id, t) {
 
   const canValidate =
@@ -376,21 +385,21 @@ function renderActions(id, t) {
 
         ${canValidate && t.status === "pending" ? `
         <li><a class="dropdown-item" onclick="validateTx('${id}')">
-          <i class="bi bi-check-circle text-success"></i> Approuver
+          Approuver
         </a></li>` : ""}
 
         ${canValidate && t.status === "pending" ? `
         <li><a class="dropdown-item" onclick="rejectTx('${id}')">
-          <i class="bi bi-x-circle text-danger"></i> Rejeter
+          Rejeter
         </a></li>` : ""}
 
         ${t.status !== "approved" ? `
         <li><a class="dropdown-item" onclick="editTx('${id}')">
-          <i class="bi bi-pencil-square text-primary"></i> Modifier
+          Modifier
         </a></li>` : ""}
 
         <li><a class="dropdown-item text-danger" onclick="deleteTx('${id}')">
-          <i class="bi bi-trash"></i> Supprimer
+          Supprimer
         </a></li>
 
       </ul>
@@ -398,9 +407,10 @@ function renderActions(id, t) {
   `;
 }
 
-/* ================================
-   VALIDATE
-================================ */
+/* ============================================================
+   VALIDATE / REJECT / EDIT / DELETE
+============================================================ */
+
 window.validateTx = async (id) => {
 
   if (!["admin","directeur"].includes(currentUserData.role)) return;
@@ -419,12 +429,9 @@ window.validateTx = async (id) => {
     updatedAt: serverTimestamp()
   });
 
-  loadTransactions();
+  await loadTransactions();
 };
 
-/* ================================
-   REJECT
-================================ */
 window.rejectTx = async (id) => {
 
   if (!["admin","directeur"].includes(currentUserData.role)) return;
@@ -434,12 +441,9 @@ window.rejectTx = async (id) => {
     updatedAt: serverTimestamp()
   });
 
-  loadTransactions();
+  await loadTransactions();
 };
 
-/* ================================
-   EDIT
-================================ */
 window.editTx = async (id) => {
 
   const snap = await getDoc(doc(db, "transactions", id));
@@ -459,20 +463,18 @@ window.editTx = async (id) => {
   modal.show();
 };
 
-/* ================================
-   DELETE
-================================ */
 window.deleteTx = async (id) => {
 
   if (!confirm("Supprimer cette transaction ?")) return;
 
   await deleteDoc(doc(db, "transactions", id));
-  loadTransactions();
+  await loadTransactions();
 };
 
-/* ================================
+/* ============================================================
    FILTER EVENTS
-================================ */
+============================================================ */
+
 txSearch.addEventListener("input", applyFilters);
 statusFilter.addEventListener("change", applyFilters);
 quickDateFilter.addEventListener("change", applyFilters);
