@@ -1,4 +1,3 @@
-// js/inventaire.js
 import { auth, db } from "./firebase.config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
@@ -12,26 +11,21 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* =========================
-   ROLES
-========================= */
+/* ROLES */
 const ROLES = {
   OPERATEUR: "operateur",
   ADMIN: "admin",
   DIRECTEUR: "directeur"
 };
 
-/* =========================
-   DOM
-========================= */
+/* DOM */
 const table = document.getElementById("inventoryTable");
 const addBtn = document.getElementById("addProductBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const userNameEl = document.getElementById("userName");
 const userRoleEl = document.getElementById("userRole");
 
-const modalEl = document.getElementById("productModal");
-const modal = new bootstrap.Modal(modalEl);
+const modal = new bootstrap.Modal(document.getElementById("productModal"));
 const saveBtn = document.getElementById("saveProductBtn");
 
 const pName = document.getElementById("pName");
@@ -46,30 +40,24 @@ const cdfBlock = document.getElementById("cdfBlock");
 const productForm = document.getElementById("productForm");
 
 let currentUser = null;
+let editingId = null;
 
-/* =========================
-   AUTH
-========================= */
+/* AUTH */
 onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    location.replace("../login.html");
-    return;
-  }
+  if (!user) return location.replace("../login.html");
 
   const snap = await getDoc(doc(db, "users", user.uid));
-  if (!snap.exists()) return;
-
   const data = snap.data();
 
   currentUser = {
     uid: user.uid,
-    name: data.name || "—",
-    fonction: data.fonction || "",
+    name: data.name,
+    fonction: data.fonction,
     role: data.role
   };
 
   userNameEl.textContent = currentUser.name;
-  userRoleEl.textContent = currentUser.fonction || currentUser.role;
+  userRoleEl.textContent = currentUser.fonction;
 
   if ([ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) {
     addBtn.classList.remove("d-none");
@@ -78,140 +66,79 @@ onAuthStateChanged(auth, async (user) => {
   loadInventory();
 });
 
-/* =========================
-   LOGOUT
-========================= */
+/* LOGOUT */
 logoutBtn.onclick = async () => {
   await signOut(auth);
   location.replace("../login.html");
 };
 
-/* =========================
-   LOAD INVENTORY
-   ➜ Version modernisée
-   ➜ Ajout numérotation
-   ➜ Actions en dropdown
-========================= */
+/* LOAD INVENTORY */
 async function loadInventory() {
-
   table.innerHTML = "";
   const snap = await getDocs(collection(db, "inventory"));
 
-  if (snap.empty) {
-    table.innerHTML = `
-      <tr>
-        <td colspan="9" class="text-center text-muted py-4">
-          Aucun produit enregistré
-        </td>
-      </tr>`;
-    return;
-  }
-
   let index = 1;
 
-  snap.forEach((d) => {
-
+  snap.forEach(d => {
     const p = d.data();
-    const lowStock = p.quantity <= p.minQuantity;
+    const low = p.quantity <= p.minQuantity;
 
     table.innerHTML += `
-      <tr class="text-sm align-middle">
-
-        <!-- NUMERO -->
-        <td class="px-3 py-2 fw-semibold">${index++}</td>
-
-        <!-- PRODUIT -->
-        <td class="px-3 py-2">${p.name}</td>
-
-        <!-- CATEGORIE -->
-        <td class="px-3 py-2">${p.category}</td>
-
-        <!-- QUANTITE -->
-        <td class="px-3 py-2">${p.quantity}</td>
-
-        <!-- STOCK MIN -->
-        <td class="px-3 py-2">${p.minQuantity}</td>
-
-        <!-- PRIX -->
-        <td class="px-3 py-2">
+      <tr>
+        <td class="px-4 py-3 fw-semibold">${index++}</td>
+        <td class="px-4 py-3">${p.name}</td>
+        <td class="px-4 py-3">${p.category}</td>
+        <td class="px-4 py-3">${p.quantity}</td>
+        <td class="px-4 py-3">${p.minQuantity}</td>
+        <td class="px-4 py-3">
           ${p.pricing?.usd ? p.pricing.usd + " USD" : ""}
           ${p.pricing?.cdf ? " / " + p.pricing.cdf + " CDF" : ""}
         </td>
-
-        <!-- STATUT -->
-        <td class="px-3 py-2">
-          <span class="badge bg-${
-            p.status === "PENDING"
-              ? "warning"
-              : lowStock
-              ? "danger"
-              : "success"
-          }">
-            ${p.status || "OK"}
+        <td class="px-4 py-3">${p.createdBy?.name || "-"}</td>
+        <td class="px-4 py-3">${p.createdAt?.toDate()?.toLocaleDateString() || "-"}</td>
+        <td class="px-4 py-3">
+          <span class="badge bg-${low ? "danger" : "success"}">
+            ${low ? "Stock faible" : "OK"}
           </span>
         </td>
-
-        <!-- ACTIONS -->
-        <td class="px-3 py-2 text-end">
-
+        <td class="px-4 py-3 text-end">
           <div class="dropdown">
-            <button class="btn btn-sm btn-light"
-                    data-bs-toggle="dropdown">
+            <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
               <i class="bi bi-three-dots-vertical"></i>
             </button>
-
             <ul class="dropdown-menu dropdown-menu-end">
-
-              ${
-                [ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role) &&
-                p.status === "PENDING"
-                  ? `
-                  <li>
-                    <a class="dropdown-item"
-                       onclick="approve('${d.id}')">
-                      <i class="bi bi-check-circle me-2 text-success"></i>
-                      Valider
-                    </a>
-                  </li>
-                  `
-                  : ""
-              }
-
               ${
                 currentUser.role === ROLES.DIRECTEUR
                   ? `
                   <li>
-                    <a class="dropdown-item text-danger"
-                       onclick="removeItem('${d.id}')">
-                      <i class="bi bi-trash me-2"></i>
-                      Supprimer
+                    <a class="dropdown-item"
+                       onclick="editItem('${d.id}')">
+                       <i class="bi bi-pencil-square me-2 text-primary"></i>
+                       Modifier
                     </a>
                   </li>
-                  `
+                  <li>
+                    <a class="dropdown-item text-danger"
+                       onclick="removeItem('${d.id}')">
+                       <i class="bi bi-trash me-2"></i>
+                       Supprimer
+                    </a>
+                  </li>`
                   : ""
               }
-
             </ul>
           </div>
-
         </td>
       </tr>
     `;
   });
 }
 
-/* =========================
-   CREATE PRODUCT
-========================= */
+/* CREATE / UPDATE */
 saveBtn.onclick = async () => {
-
   if (!currentUser) return;
 
-  if (![ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) {
-    return;
-  }
-
-  await addDoc(collection(db, "inventory"), {
+  const data = {
     name: pName.value.trim(),
     category: pCategory.value.trim(),
     quantity: Number(pQty.value),
@@ -221,41 +148,50 @@ saveBtn.onclick = async () => {
       usd: Number(pUsd.value || 0),
       cdf: Number(pCdf.value || 0)
     },
-    status: "PENDING",
-    createdBy: {
-      uid: currentUser.uid,
-      name: currentUser.name,
-      role: currentUser.role
-    },
-    createdAt: serverTimestamp(),
     updatedAt: serverTimestamp()
-  });
+  };
+
+  if (editingId) {
+    await updateDoc(doc(db, "inventory", editingId), data);
+    editingId = null;
+  } else {
+    await addDoc(collection(db, "inventory"), {
+      ...data,
+      createdBy: {
+        uid: currentUser.uid,
+        name: currentUser.name,
+        role: currentUser.role
+      },
+      createdAt: serverTimestamp()
+    });
+  }
 
   modal.hide();
   productForm.reset();
   loadInventory();
 };
 
-/* =========================
-   VALIDATE PRODUCT
-========================= */
-window.approve = async (id) => {
+/* EDIT */
+window.editItem = async (id) => {
+  if (currentUser.role !== ROLES.DIRECTEUR) return;
 
-  if (![ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) return;
+  const snap = await getDoc(doc(db, "inventory", id));
+  const p = snap.data();
 
-  await updateDoc(doc(db, "inventory", id), {
-    status: "VALIDATED",
-    updatedAt: serverTimestamp()
-  });
+  editingId = id;
 
-  loadInventory();
+  pName.value = p.name;
+  pCategory.value = p.category;
+  pQty.value = p.quantity;
+  pMinQty.value = p.minQuantity;
+  pUsd.value = p.pricing?.usd || "";
+  pCdf.value = p.pricing?.cdf || "";
+
+  modal.show();
 };
 
-/* =========================
-   DELETE PRODUCT
-========================= */
+/* DELETE */
 window.removeItem = async (id) => {
-
   if (currentUser.role !== ROLES.DIRECTEUR) return;
   if (!confirm("Supprimer ce produit ?")) return;
 
@@ -263,17 +199,10 @@ window.removeItem = async (id) => {
   loadInventory();
 };
 
-/* =========================
-   CURRENCY UI
-========================= */
+/* CURRENCY SWITCH */
 pCurrency.onchange = () => {
   usdBlock.classList.toggle("d-none", pCurrency.value === "CDF");
   cdfBlock.classList.toggle("d-none", pCurrency.value === "USD");
 };
 
-/* =========================
-   OPEN MODAL
-========================= */
-addBtn.onclick = () => {
-  modal.show();
-};
+addBtn.onclick = () => modal.show();
