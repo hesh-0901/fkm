@@ -316,26 +316,33 @@ function renderTable(data) {
           }">${t.status}</span>
         </td>
 <td class="px-6 py-4 text-end">
+  <div class="flex items-center justify-end gap-2">
 
-${t.status === "approved" ? `
-<button 
-  onclick="printInvoice('${t.id}')"
-  title="Imprimer la facture"
-  class="group relative inline-flex items-center justify-center
-         w-10 h-10
-         rounded-xl
-         bg-primary/5
-         border border-primary/20
-         text-primary
-         hover:bg-primary
-         hover:text-white
-         transition-all duration-300 ease-in-out
-         shadow-sm hover:shadow-lg
-         active:scale-95"
->
-  <i class="bi bi-receipt text-base transition-transform duration-300 group-hover:scale-110"></i>
-</button>
-` : ""}
+    ${t.status === "approved" ? `
+    <button 
+      onclick="printInvoice('${t.id}')"
+      title="Imprimer la facture"
+      class="group inline-flex items-center justify-center
+             w-10 h-10
+             rounded-xl
+             bg-primary/5
+             border border-primary/20
+             text-primary
+             hover:bg-primary
+             hover:text-white
+             transition-all duration-300 ease-in-out
+             shadow-sm hover:shadow-md
+             active:scale-95"
+    >
+      <i class="bi bi-receipt text-base transition-transform duration-300 group-hover:scale-110"></i>
+    </button>
+    ` : ""}
+
+    ${renderActions(t.id, t)}
+
+  </div>
+</td>
+
 
 
   <span class="ml-2">
