@@ -493,3 +493,38 @@ resetFilters.addEventListener("click", () => {
 });
 
 newTxBtn.onclick = () => modal.show();
+/* ============================================================
+  PRINT INVOICE
+============================================================ */
+window.printInvoice = async (id) => {
+
+  const snap = await getDoc(doc(db, "transactions", id));
+  const t = snap.data();
+
+  if (!t) return;
+
+  // Ouvre la page facture dans une nouvelle fenêtre
+  const invoiceWindow = window.open(
+    "../partials/facture.html",
+    "_blank"
+  );
+
+  invoiceWindow.onload = () => {
+
+    invoiceWindow.document.getElementById("invoiceNumber").textContent = t.invoiceNumber;
+    invoiceWindow.document.getElementById("invoiceDate").textContent =
+      t.createdAt?.toDate().toLocaleDateString() || "-";
+
+    invoiceWindow.document.getElementById("clientName").textContent = t.partnerName;
+    invoiceWindow.document.getElementById("productName").textContent = t.productName;
+    invoiceWindow.document.getElementById("quantity").textContent = t.quantity;
+    invoiceWindow.document.getElementById("unitPrice").textContent =
+      t.unitPrice + " " + t.currency;
+
+    invoiceWindow.document.getElementById("totalAmount").textContent =
+      t.total + " " + t.currency;
+
+    invoiceWindow.document.getElementById("grandTotal").textContent =
+      t.total + " " + t.currency;
+  };
+};
