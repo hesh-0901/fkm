@@ -1,166 +1,180 @@
 <aside
   id="sidebar"
-  class="fixed inset-y-0 left-0 w-72 bg-slate-900 text-slate-200 flex flex-col border-r border-slate-800 transition-all duration-300"
+  class="fixed inset-y-0 left-0 w-72 
+         bg-gradient-to-b from-slate-900 via-slate-950 to-black 
+         text-slate-200 flex flex-col 
+         border-r border-slate-800 
+         shadow-2xl
+         transition-all duration-300"
 >
 
   <!-- HEADER -->
-  <div class="flex items-center justify-between px-6 h-16 border-b border-slate-800">
-    <span class="text-lg font-semibold tracking-wide text-white">
+  <div class="flex items-center justify-between px-6 h-16 
+              border-b border-slate-800/60">
+
+    <span class="text-lg font-semibold tracking-wide 
+                 bg-gradient-to-r from-primary to-emerald-400 
+                 bg-clip-text text-transparent">
       FKM ENERGY
     </span>
+
     <button
       id="sidebarToggleInternal"
       title="Réduire"
-      class="text-slate-400 hover:text-white transition"
+      class="text-slate-400 hover:text-white transition text-lg"
     >
       ❮
     </button>
   </div>
 
   <!-- NAV -->
-  <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+  <nav class="flex-1 overflow-y-auto px-3 py-6 space-y-8">
 
-    <!-- PILOTAGE -->
+    <!-- SECTION -->
     <div>
-      <div class="px-3 text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+      <div class="px-3 text-[11px] font-semibold uppercase 
+                  tracking-widest text-slate-500 mb-3">
         Pilotage
       </div>
 
-      <a
-        href="../admin/dashboard.html"
-        class="sidebar-link group flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition"
-      >
-        <!-- Icon -->
-        <svg class="h-5 w-5 text-slate-400 group-hover:text-primary" fill="none" stroke="currentColor" stroke-width="2"
-             viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M3 13h8V3H3v10zm10 8h8V3h-8v18zM3 21h8v-6H3v6z" />
-        </svg>
-        <span class="label text-sm">Dashboard</span>
+      <a href="../admin/dashboard.html"
+         class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
+                rounded-xl hover:bg-slate-800/60 transition">
+
+        <i class="bi bi-grid text-lg text-slate-400 
+                  group-hover:text-primary transition"></i>
+
+        <span class="label text-sm font-medium">
+          Dashboard
+        </span>
       </a>
     </div>
 
     <!-- STOCK -->
     <div>
-      <div class="px-3 text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+      <div class="px-3 text-[11px] font-semibold uppercase 
+                  tracking-widest text-slate-500 mb-3">
         Stock
       </div>
 
-      <a
-        href="../admin/inventaire.html"
-        class="sidebar-link group flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition"
-      >
-        <svg class="h-5 w-5 text-slate-400 group-hover:text-primary" fill="none" stroke="currentColor" stroke-width="2"
-             viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M20 13V7a2 2 0 00-2-2H6a2 2 0 00-2 2v6m16 0l-8 5-8-5m16 0l-8-5-8 5" />
-        </svg>
-        <span class="label text-sm">Inventaire</span>
+      <a href="../admin/inventaire.html"
+         class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
+                rounded-xl hover:bg-slate-800/60 transition">
+
+        <i class="bi bi-box-seam text-lg text-slate-400 
+                  group-hover:text-emerald-400 transition"></i>
+
+        <span class="label text-sm font-medium">
+          Inventaire
+        </span>
       </a>
 
-      <a
-        href="../admin/transactions.html"
-        class="sidebar-link group flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition"
-      >
-        <svg class="h-5 w-5 text-slate-400 group-hover:text-primary" fill="none" stroke="currentColor" stroke-width="2"
-             viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-        </svg>
-        <span class="label text-sm">Transactions</span>
+      <a href="../admin/transactions.html"
+         class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
+                rounded-xl hover:bg-slate-800/60 transition">
+
+        <i class="bi bi-arrow-left-right text-lg text-slate-400 
+                  group-hover:text-amber-400 transition"></i>
+
+        <span class="label text-sm font-medium">
+          Transactions
+        </span>
       </a>
     </div>
 
     <!-- PARTENAIRES -->
     <div>
-      <div class="px-3 text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+      <div class="px-3 text-[11px] font-semibold uppercase 
+                  tracking-widest text-slate-500 mb-3">
         Partenaires
       </div>
 
-      <a
-        href="../pages/clients.html"
-        class="sidebar-link group flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition"
-      >
-        <svg class="h-5 w-5 text-slate-400 group-hover:text-primary" fill="none" stroke="currentColor" stroke-width="2"
-             viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m4-4a4 4 0 100-8 4 4 0 000 8z" />
-        </svg>
-        <span class="label text-sm">Clients</span>
+      <a href="../pages/clients.html"
+         class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
+                rounded-xl hover:bg-slate-800/60 transition">
+
+        <i class="bi bi-people text-lg text-slate-400 
+                  group-hover:text-primary transition"></i>
+
+        <span class="label text-sm font-medium">
+          Clients
+        </span>
       </a>
 
-      <a
-        href="../pages/fournisseurs.html"
-        class="sidebar-link group flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition"
-      >
-        <svg class="h-5 w-5 text-slate-400 group-hover:text-primary" fill="none" stroke="currentColor" stroke-width="2"
-             viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m4 0V9l-7-5-7 5v8" />
-        </svg>
-        <span class="label text-sm">Fournisseurs</span>
+      <a href="../pages/fournisseurs.html"
+         class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
+                rounded-xl hover:bg-slate-800/60 transition">
+
+        <i class="bi bi-building text-lg text-slate-400 
+                  group-hover:text-indigo-400 transition"></i>
+
+        <span class="label text-sm font-medium">
+          Fournisseurs
+        </span>
       </a>
     </div>
 
     <!-- FINANCE -->
     <div>
-      <div class="px-3 text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+      <div class="px-3 text-[11px] font-semibold uppercase 
+                  tracking-widest text-slate-500 mb-3">
         Finance
       </div>
 
-      <a
-        href="../pages/taux-devises.html"
-        class="sidebar-link group flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition"
-      >
-        <svg class="h-5 w-5 text-slate-400 group-hover:text-primary" fill="none" stroke="currentColor" stroke-width="2"
-             viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V6m0 10v2" />
-        </svg>
-        <span class="label text-sm">Taux & Devises</span>
+      <a href="../pages/taux-devises.html"
+         class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
+                rounded-xl hover:bg-slate-800/60 transition">
+
+        <i class="bi bi-currency-exchange text-lg text-slate-400 
+                  group-hover:text-green-400 transition"></i>
+
+        <span class="label text-sm font-medium">
+          Taux & Devises
+        </span>
       </a>
 
-      <a
-        href="../pages/rapports-financiers.html"
-        class="sidebar-link group flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition"
-      >
-        <svg class="h-5 w-5 text-slate-400 group-hover:text-primary" fill="none" stroke="currentColor" stroke-width="2"
-             viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M11 3v18m4-10v10m4-6v6" />
-        </svg>
-        <span class="label text-sm">Rapports financiers</span>
+      <a href="../pages/rapports-financiers.html"
+         class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
+                rounded-xl hover:bg-slate-800/60 transition">
+
+        <i class="bi bi-bar-chart-line text-lg text-slate-400 
+                  group-hover:text-primary transition"></i>
+
+        <span class="label text-sm font-medium">
+          Rapports financiers
+        </span>
       </a>
     </div>
 
     <!-- ADMIN -->
     <div>
-      <div class="px-3 text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+      <div class="px-3 text-[11px] font-semibold uppercase 
+                  tracking-widest text-slate-500 mb-3">
         Administration
       </div>
 
-      <a
-        href="../pages/utilisateurs.html"
-        class="sidebar-link group flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition"
-      >
-        <svg class="h-5 w-5 text-slate-400 group-hover:text-primary" fill="none" stroke="currentColor" stroke-width="2"
-             viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M5.121 17.804A9 9 0 1118.88 6.196M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-        <span class="label text-sm">Utilisateurs</span>
+      <a href="../pages/utilisateurs.html"
+         class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
+                rounded-xl hover:bg-slate-800/60 transition">
+
+        <i class="bi bi-person-gear text-lg text-slate-400 
+                  group-hover:text-emerald-400 transition"></i>
+
+        <span class="label text-sm font-medium">
+          Utilisateurs
+        </span>
       </a>
 
-      <a
-        href="../pages/audit-securite.html"
-        class="sidebar-link group flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition"
-      >
-        <svg class="h-5 w-5 text-slate-400 group-hover:text-primary" fill="none" stroke="currentColor" stroke-width="2"
-             viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M12 3l7 4v5c0 5-3.5 9-7 9s-7-4-7-9V7l7-4z" />
-        </svg>
-        <span class="label text-sm">Audit & Sécurité</span>
+      <a href="../pages/audit-securite.html"
+         class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
+                rounded-xl hover:bg-slate-800/60 transition">
+
+        <i class="bi bi-shield-lock text-lg text-slate-400 
+                  group-hover:text-red-400 transition"></i>
+
+        <span class="label text-sm font-medium">
+          Audit & Sécurité
+        </span>
       </a>
     </div>
 
