@@ -7,211 +7,170 @@ import {
   getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ==========================================================
+/* ==============================
    DOM
-========================================================== */
+============================== */
 const userNameEl = document.getElementById("userName");
-const userRoleEl = document.getElementById("userRole");
+const userFunctionEl = document.getElementById("userFunction");
 const logoutBtn = document.getElementById("logoutBtn");
 
-const kpiMonth = document.getElementById("kpiMonth");
-const kpiTotal = document.getElementById("kpiTotal");
-const kpiCritical = document.getElementById("kpiCritical");
-const kpiPending = document.getElementById("kpiPending");
+const totalRevenueEl = document.getElementById("totalRevenue");
+const pendingCountEl = document.getElementById("pendingCount");
+const lowStockCountEl = document.getElementById("lowStockCount");
+const totalProductsEl = document.getElementById("totalProducts");
 
-const alertsContainer = document.getElementById("alertsContainer");
+const alertsList = document.getElementById("alertsList");
 
-/* ==========================================================
+/* ==============================
    AUTH
-========================================================== */
+============================== */
 onAuthStateChanged(auth, async (user) => {
-  if (!user) return location.replace("../login.html");
 
-  const snap = await getDoc(doc(db, "users", user.uid));
-  if (!snap.exists()) return;
+  if (!user) {
+    location.replace("../login.html");
+    return;
+  }
 
-  const me = snap.data();
+  const userSnap = await getDoc(doc(db, "users", user.uid));
+  const userData = userSnap.data();
 
-  userNameEl.textContent = me.name || "—";
-  userRoleEl.textContent = me.fonction || "—";
+  userNameEl.textContent = userData.name || "—";
+  userFunctionEl.textContent = userData.fonction || "—";
 
   await loadDashboard();
 });
 
-/* ==========================================================
+/* ==============================
    LOGOUT
-========================================================== */
+============================== */
 logoutBtn.onclick = async () => {
   await signOut(auth);
   location.replace("../login.html");
 };
 
-/* ==========================================================
-   MAIN DASHBOARD LOADER
-========================================================== */
+/* ==============================
+   LOAD DASHBOARD DATA
+============================== */
 async function loadDashboard() {
 
-  const txSnap = await getDocs(collection(db, "transactions"));
-  const invSnap = await getDocs(collection(db, "inventory"));
+  const [txSnap, invSnap] = await Promise.all([
+    getDocs(collection(db, "transactions")),
+    getDocs(collection(db, "inventory"))
+  ]);
 
+  /* ==============================
+     VARIABLES AGREGATION
+  ============================== */
   let totalRevenue = 0;
-  let monthRevenue = 0;
   let pendingCount = 0;
+  let approvedCount = 0;
+  let rejectedCount = 0;
 
-  let statusCount = {
-    approved: 0,
-    pending: 0,
-    rejected: 0
-  };
+  let monthlyRevenue = {};
+  let lowStockCount = 0;
+  let totalProducts = invSnap.size;
 
-  let revenueLast7Days = {};
-  let productSales = {};
-
-  const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
-
-  /* =========================
-     TRANSACTIONS ANALYSIS
-  ========================= */
-  txSnap.forEach(d => {
-    const t = d.data();
-    if (!t.createdAt) return;
-
-    const date = t.createdAt.toDate();
-    const dayKey = date.toISOString().slice(0, 10);
-
-    statusCount[t.status]++;
-
-    if (t.status === "approved") {
-
-      totalRevenue += t.total || 0;
-
-      if (date.getMonth() === currentMonth &&
-          date.getFullYear() === currentYear) {
-        monthRevenue += t.total || 0;
-      }
-
-      // 7 derniers jours
-      const diffDays = (now - date) / (1000 * 60 * 60 * 24);
-      if (diffDays <= 7) {
-        revenueLast7Days[dayKey] =
-          (revenueLast7Days[dayKey] || 0) + (t.total || 0);
-      }
-
-      // Top produits
-      productSales[t.productName] =
-        (productSales[t.productName] || 0) + t.quantity;
-    }
+  /* ==============================
+     TRANSACTIONS LOOP
+  ============================== */
+  txSnap.forEach(doc => {
+    const t = doc.data();
 
     if (t.status === "pending") pendingCount++;
+    if (t.status === "approved") {
+      approvedCount++;
+      totalRevenue += t.total || 0;
+
+      const date = t.createdAt?.toDate();
+      if (date) {
+        const month = date.getMonth() + 1;
+        monthlyRevenue[month] = (monthlyRevenue[month] || 0) + (t.total || 0);
+      }
+    }
+    if (t.status === "rejected") rejectedCount++;
   });
 
-  /* =========================
-     INVENTORY ANALYSIS
-  ========================= */
-  let criticalCount = 0;
-  let outOfStock = 0;
-
-  invSnap.forEach(d => {
-    const p = d.data();
-    if (p.quantity <= p.minQuantity) criticalCount++;
-    if (p.quantity === 0) outOfStock++;
+  /* ==============================
+     INVENTORY LOOP
+  ============================== */
+  invSnap.forEach(doc => {
+    const p = doc.data();
+    if (p.quantity <= p.minQuantity) lowStockCount++;
   });
 
-  /* =========================
-     KPI UPDATE
-  ========================= */
-  kpiTotal.textContent = totalRevenue.toLocaleString();
-  kpiMonth.textContent = monthRevenue.toLocaleString();
-  kpiCritical.textContent = criticalCount;
-  kpiPending.textContent = pendingCount;
+  /* ==============================
+     UPDATE KPI UI
+  ============================== */
+  totalRevenueEl.textContent = totalRevenue.toLocaleString() + " USD";
+  pendingCountEl.textContent = pendingCount;
+  lowStockCountEl.textContent = lowStockCount;
+  totalProductsEl.textContent = totalProducts;
 
-  /* =========================
+  /* ==============================
      ALERTES INTELLIGENTES
-  ========================= */
-  alertsContainer.innerHTML = "";
+  ============================== */
+  alertsList.innerHTML = "";
 
-  if (criticalCount > 0) {
-    alertsContainer.innerHTML += alertBox(
-      "danger",
-      `⚠️ ${criticalCount} produit(s) en stock critique`
-    );
+  if (pendingCount > 0) {
+    alertsList.innerHTML += `
+      <li class="text-warning">
+        <i class="bi bi-exclamation-circle me-2"></i>
+        ${pendingCount} transaction(s) en attente de validation
+      </li>`;
   }
 
-  if (outOfStock > 0) {
-    alertsContainer.innerHTML += alertBox(
-      "danger",
-      `🚨 ${outOfStock} produit(s) en rupture totale`
-    );
+  if (lowStockCount > 0) {
+    alertsList.innerHTML += `
+      <li class="text-danger">
+        <i class="bi bi-box-seam me-2"></i>
+        ${lowStockCount} produit(s) en stock critique
+      </li>`;
   }
 
-  if (pendingCount > 5) {
-    alertsContainer.innerHTML += alertBox(
-      "warning",
-      `⏳ Trop de transactions en attente (${pendingCount})`
-    );
+  if (pendingCount === 0 && lowStockCount === 0) {
+    alertsList.innerHTML += `
+      <li class="text-success">
+        <i class="bi bi-check-circle me-2"></i>
+        Système stable – aucune alerte critique
+      </li>`;
   }
 
-  /* =========================
-     CHART 1 - CA 7 JOURS
-  ========================= */
-  const sortedDays = Object.keys(revenueLast7Days).sort();
-  const revenueData = sortedDays.map(d => revenueLast7Days[d]);
-
-  new ApexCharts(document.querySelector("#chartRevenue"), {
-    chart: { type: "area", height: 300 },
-    series: [{ name: "CA", data: revenueData }],
-    xaxis: { categories: sortedDays },
-    colors: ["#0B5C6B"],
-    dataLabels: { enabled: false },
-    stroke: { curve: "smooth" }
-  }).render();
-
-  /* =========================
-     CHART 2 - DONUT STATUS
-  ========================= */
-  new ApexCharts(document.querySelector("#chartStatus"), {
-    chart: { type: "donut", height: 300 },
-    series: [
-      statusCount.approved,
-      statusCount.pending,
-      statusCount.rejected
-    ],
-    labels: ["Approuvées", "En attente", "Rejetées"],
-    colors: ["#2E7D32", "#D4A017", "#DC2626"]
-  }).render();
-
-  /* =========================
-     CHART 3 - TOP PRODUITS
-  ========================= */
-  const topProducts = Object.entries(productSales)
-    .sort((a,b) => b[1] - a[1])
-    .slice(0,5);
-
-  new ApexCharts(document.querySelector("#chartProducts"), {
-    chart: { type: "bar", height: 300 },
+  /* ==============================
+     APEX CHART - SALES
+  ============================== */
+  const salesOptions = {
+    chart: {
+      type: 'area',
+      height: 300,
+      toolbar: { show: false }
+    },
     series: [{
-      name: "Quantité vendue",
-      data: topProducts.map(p => p[1])
+      name: "Ventes",
+      data: Array.from({ length: 12 }, (_, i) => monthlyRevenue[i+1] || 0)
     }],
     xaxis: {
-      categories: topProducts.map(p => p[0])
+      categories: ["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Aoû","Sep","Oct","Nov","Déc"]
     },
-    colors: ["#0B5C6B"]
-  }).render();
-}
+    colors: ['#0B5C6B'],
+    stroke: { curve: 'smooth' },
+    dataLabels: { enabled: false }
+  };
 
-/* ==========================================================
-   ALERT COMPONENT
-========================================================== */
-function alertBox(type, message) {
-  return `
-    <div class="p-4 rounded-lg border-l-4
-      ${type === "danger"
-        ? "bg-red-50 border-red-500 text-red-700"
-        : "bg-yellow-50 border-yellow-500 text-yellow-700"}">
-      ${message}
-    </div>
-  `;
+  new ApexCharts(document.querySelector("#salesChart"), salesOptions).render();
+
+  /* ==============================
+     APEX CHART - STATUS
+  ============================== */
+  const statusOptions = {
+    chart: {
+      type: 'donut',
+      height: 300
+    },
+    series: [approvedCount, pendingCount, rejectedCount],
+    labels: ["Approuvées", "En attente", "Rejetées"],
+    colors: ["#2E7D32", "#D4A017", "#DC2626"],
+    legend: { position: 'bottom' }
+  };
+
+  new ApexCharts(document.querySelector("#statusChart"), statusOptions).render();
 }
