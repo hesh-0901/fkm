@@ -38,10 +38,18 @@ const logoutBtn = document.getElementById("logoutBtn");
 const userNameEl = document.getElementById("userName");
 const userFunctionEl = document.getElementById("userFunction");
 
+const txSearch = document.getElementById("txSearch");
+const statusFilter = document.getElementById("statusFilter");
+const quickDateFilter = document.getElementById("quickDateFilter");
+const startDate = document.getElementById("startDate");
+const endDate = document.getElementById("endDate");
+const resetFilters = document.getElementById("resetFilters");
+
 /* ================================
    VARIABLES
 ================================ */
 let productsCache = [];
+let transactionsCache = [];
 let selectedProduct = null;
 let editingId = null;
 let currentUserData = null;
@@ -100,7 +108,6 @@ productSearch.oninput = () => {
       btn.textContent = p.name;
 
       btn.onclick = () => {
-
         selectedProduct = p;
         productSearch.value = p.name;
         productResults.innerHTML = "";
@@ -152,7 +159,7 @@ saveBtn.onclick = async () => {
   const total = quantity * price;
 
   const data = {
-    invoiceNumber: generateInvoiceNumber(),
+    invoiceNumber: editingId ? undefined : generateInvoiceNumber(),
     productId: selectedProduct.id,
     productName: selectedProduct.name,
     quantity,
@@ -160,16 +167,17 @@ saveBtn.onclick = async () => {
     total,
     currency,
     partnerName: partnerSearch.value,
-    status: "pending",
     updatedAt: serverTimestamp()
   };
 
   if (editingId) {
+    delete data.invoiceNumber;
     await updateDoc(doc(db, "transactions", editingId), data);
     editingId = null;
   } else {
     await addDoc(collection(db, "transactions"), {
       ...data,
+      status: "pending",
       createdAt: serverTimestamp()
     });
   }
@@ -181,27 +189,124 @@ saveBtn.onclick = async () => {
 };
 
 /* ================================
-   LOAD TABLE
+   LOAD TRANSACTIONS
 ================================ */
 async function loadTransactions() {
-
-  table.innerHTML = "";
 
   const q = query(collection(db, "transactions"), orderBy("createdAt", "desc"));
   const snap = await getDocs(q);
 
-  snap.forEach(d => {
+  transactionsCache = snap.docs.map(d => ({
+    id: d.id,
+    ...d.data()
+  }));
 
-    const t = d.data();
+  applyFilters();
+}
+
+/* ================================
+   APPLY FILTERS
+================================ */
+function applyFilters() {
+
+  let filtered = [...transactionsCache];
+
+  const search = txSearch.value.toLowerCase();
+  const status = statusFilter.value;
+  const quick = quickDateFilter.value;
+  const start = startDate.value;
+  const end = endDate.value;
+
+  if (search) {
+    filtered = filtered.filter(t =>
+      t.invoiceNumber?.toLowerCase().includes(search) ||
+      t.partnerName?.toLowerCase().includes(search) ||
+      t.productName?.toLowerCase().includes(search)
+    );
+  }
+
+  if (status !== "ALL") {
+    filtered = filtered.filter(t =>
+      t.status?.toUpperCase() === status
+    );
+  }
+
+  if (quick !== "ALL") {
+
+    const now = new Date();
+
+    filtered = filtered.filter(t => {
+
+      if (!t.createdAt) return false;
+
+      const date = t.createdAt.toDate();
+
+      if (quick === "TODAY") {
+        return date.toDateString() === now.toDateString();
+      }
+
+      if (quick === "7DAYS") {
+        const past = new Date();
+        past.setDate(now.getDate() - 7);
+        return date >= past;
+      }
+
+      if (quick === "30DAYS") {
+        const past = new Date();
+        past.setDate(now.getDate() - 30);
+        return date >= past;
+      }
+
+      return true;
+    });
+  }
+
+  if (start && end) {
+
+    const startObj = new Date(start);
+    const endObj = new Date(end);
+    endObj.setHours(23,59,59,999);
+
+    filtered = filtered.filter(t => {
+      if (!t.createdAt) return false;
+      const date = t.createdAt.toDate();
+      return date >= startObj && date <= endObj;
+    });
+  }
+
+  renderTable(filtered);
+}
+
+/* ================================
+   RENDER TABLE
+================================ */
+function renderTable(data) {
+
+  table.innerHTML = "";
+
+  if (data.length === 0) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="9" class="text-center py-4 text-muted">
+          Aucune transaction trouvée
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  data.forEach((t, index) => {
+
     const created = t.createdAt?.toDate().toLocaleDateString() || "-";
 
     table.innerHTML += `
       <tr class="text-sm">
+        <td class="px-3 py-2">${index + 1}</td>
         <td class="px-3 py-2 fw-semibold">${t.invoiceNumber}</td>
         <td class="px-3 py-2">${created}</td>
         <td class="px-3 py-2">${t.partnerName}</td>
         <td class="px-3 py-2">${t.productName}</td>
-        <td class="px-3 py-2">${t.quantity}</td>
+        <td class="px-3 py-2 text-center">${t.quantity}</td>
         <td class="px-3 py-2 fw-semibold">${t.total} ${t.currency}</td>
         <td class="px-3 py-2">
           <span class="badge bg-${
@@ -211,7 +316,7 @@ async function loadTransactions() {
           }">${t.status}</span>
         </td>
         <td class="px-3 py-2 text-end">
-          ${renderActions(d.id, t)}
+          ${renderActions(t.id, t)}
         </td>
       </tr>
     `;
@@ -219,7 +324,7 @@ async function loadTransactions() {
 }
 
 /* ================================
-   ACTION BUTTONS
+   ACTIONS
 ================================ */
 function renderActions(id, t) {
 
@@ -330,5 +435,25 @@ window.deleteTx = async (id) => {
   await deleteDoc(doc(db, "transactions", id));
   loadTransactions();
 };
+
+/* ================================
+   FILTER EVENTS
+================================ */
+txSearch.addEventListener("input", applyFilters);
+statusFilter.addEventListener("change", applyFilters);
+quickDateFilter.addEventListener("change", applyFilters);
+startDate.addEventListener("change", applyFilters);
+endDate.addEventListener("change", applyFilters);
+
+resetFilters.addEventListener("click", () => {
+
+  txSearch.value = "";
+  statusFilter.value = "ALL";
+  quickDateFilter.value = "ALL";
+  startDate.value = "";
+  endDate.value = "";
+
+  applyFilters();
+});
 
 newTxBtn.onclick = () => modal.show();
