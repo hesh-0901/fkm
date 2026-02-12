@@ -1,9 +1,5 @@
-/* ============================================================
-   FKM ENERGY - UTILISATEURS MODULE (STABLE VERSION)
-============================================================ */
-
 import { initializeApp, getApps } from
-  "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
 import { auth, db } from "./firebase.config.js";
 
@@ -23,18 +19,12 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ============================================================
-   SECONDARY AUTH (évite logout directeur)
-============================================================ */
-
+/* SECONDARY AUTH */
 const firebaseApp = getApps()[0];
 const secondaryApp = initializeApp(firebaseApp.options, "Secondary");
 const secondaryAuth = getAuth(secondaryApp);
 
-/* ============================================================
-   DOM
-============================================================ */
-
+/* DOM */
 const table = document.getElementById("usersTable");
 const addBtn = document.getElementById("addUserBtn");
 const logoutBtn = document.getElementById("logoutBtn");
@@ -54,18 +44,25 @@ const modal = new bootstrap.Modal(document.getElementById("userModal"));
 
 let currentUser = null;
 
-/* ============================================================
-   AUTH CHECK
-============================================================ */
-
+/* AUTH */
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) return location.replace("../login.html");
 
   const snap = await getDoc(doc(db, "users", user.uid));
-  if (!snap.exists()) return;
+  if (!snap.exists()) {
+    await signOut(auth);
+    return location.replace("../login.html");
+  }
 
   const data = snap.data();
+
+  /* 🔒 BLOQUAGE SI DISABLED */
+  if (data.status === "disabled") {
+    alert("Compte désactivé.");
+    await signOut(auth);
+    return location.replace("../login.html");
+  }
 
   currentUser = {
     uid: user.uid,
@@ -74,30 +71,23 @@ onAuthStateChanged(auth, async (user) => {
     role: data.role
   };
 
-  /* HEADER INFO */
   userNameEl.textContent = currentUser.name;
   userRoleEl.textContent = currentUser.fonction;
 
   if (currentUser.role === "directeur") {
-    addBtn.classList.remove("d-none");
+    addBtn.classList.remove("hidden");
   }
 
   loadUsers();
 });
 
-/* ============================================================
-   LOGOUT
-============================================================ */
-
+/* LOGOUT */
 logoutBtn.onclick = async () => {
   await signOut(auth);
   location.replace("../login.html");
 };
 
-/* ============================================================
-   CREATE USER (AUTH + FIRESTORE)
-============================================================ */
-
+/* CREATE USER */
 saveBtn.onclick = async () => {
 
   if (currentUser.role !== "directeur") return;
@@ -110,7 +100,7 @@ saveBtn.onclick = async () => {
   const confirmPassword = uConfirmPassword.value;
 
   if (!name || !username || !fonction || !password) {
-    alert("Veuillez remplir tous les champs.");
+    alert("Champs obligatoires.");
     return;
   }
 
@@ -120,7 +110,7 @@ saveBtn.onclick = async () => {
   }
 
   if (password.length < 6) {
-    alert("Le mot de passe doit contenir au moins 6 caractères.");
+    alert("Mot de passe minimum 6 caractères.");
     return;
   }
 
@@ -128,14 +118,12 @@ saveBtn.onclick = async () => {
 
   try {
 
-    /* Création Firebase Auth */
     const cred = await createUserWithEmailAndPassword(
       secondaryAuth,
       email,
       password
     );
 
-    /* Création Firestore */
     await setDoc(doc(db, "users", cred.user.uid), {
       name,
       username,
@@ -148,17 +136,14 @@ saveBtn.onclick = async () => {
 
     modal.hide();
     document.getElementById("userForm").reset();
-    await loadUsers();
+    loadUsers();
 
   } catch (err) {
     alert(err.message);
   }
 };
 
-/* ============================================================
-   LOAD USERS
-============================================================ */
-
+/* LOAD USERS */
 async function loadUsers() {
 
   table.innerHTML = "";
@@ -170,16 +155,14 @@ async function loadUsers() {
     const u = d.data();
 
     table.innerHTML += `
-      <tr class="hover:bg-slate-50 transition">
+      <tr class="hover:bg-slate-50">
 
         <td class="px-6 py-4 font-medium">${u.name}</td>
-
-        <td class="px-6 py-4 text-muted">${u.username}</td>
-
+        <td class="px-6 py-4">${u.username}</td>
         <td class="px-6 py-4">${u.fonction}</td>
 
         <td class="px-6 py-4">
-          <span class="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">
+          <span class="px-2 py-1 text-xs rounded-full bg-slate-200">
             ${u.role}
           </span>
         </td>
@@ -194,17 +177,17 @@ async function loadUsers() {
           </span>
         </td>
 
-        <td class="px-6 py-4 text-end">
+        <td class="px-6 py-4 text-right">
           ${
             currentUser.role === "directeur"
               ? `
                 <button 
                   onclick="toggleUserStatus('${d.id}', '${u.status}')"
-                  class="px-3 py-1 text-xs rounded-lg ${
+                  class="text-sm ${
                     u.status === "active"
-                      ? "bg-red-100 text-red-600 hover:bg-red-200"
-                      : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                  } transition">
+                      ? "text-red-600"
+                      : "text-emerald-600"
+                  }">
                   ${
                     u.status === "active"
                       ? "Désactiver"
@@ -215,21 +198,22 @@ async function loadUsers() {
               : ""
           }
         </td>
-
       </tr>
     `;
   });
 }
 
-/* ============================================================
-   ACTIVER / DESACTIVER
-============================================================ */
-
-window.toggleUserStatus = async (id, currentStatus) => {
+/* TOGGLE STATUS */
+window.toggleUserStatus = async (id, status) => {
 
   if (currentUser.role !== "directeur") return;
 
-  const newStatus = currentStatus === "active"
+  if (id === currentUser.uid) {
+    alert("Impossible de se désactiver soi-même.");
+    return;
+  }
+
+  const newStatus = status === "active"
     ? "disabled"
     : "active";
 
@@ -237,11 +221,7 @@ window.toggleUserStatus = async (id, currentStatus) => {
     status: newStatus
   }, { merge: true });
 
-  await loadUsers();
+  loadUsers();
 };
-
-/* ============================================================
-   OPEN MODAL
-============================================================ */
 
 addBtn.onclick = () => modal.show();
