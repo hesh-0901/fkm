@@ -38,13 +38,13 @@
 
 <div class="flex min-h-screen">
 
-  <!-- SIDEBAR -->
+  <!-- SIDEBAR (IDENTIQUE INVENTAIRE) -->
   <div id="sidebar-container"></div>
 
   <!-- MAIN -->
-  <main class="flex-1 px-6 py-6 space-y-6 overflow-x-hidden">
+  <main id="mainContent" class="flex-1 px-6 py-6 space-y-6 overflow-x-hidden">
 
-    <!-- ================= TOPBAR ================= -->
+    <!-- TOPBAR (IDENTIQUE INVENTAIRE) -->
     <div class="bg-white rounded-xl shadow-sm px-6 py-4 flex items-center justify-between">
 
       <div class="flex items-center gap-3">
@@ -72,15 +72,14 @@
       </div>
     </div>
 
-    <!-- ================= KPI ================= -->
+    <!-- ================= KPI PREMIUM ================= -->
     <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
 
-      <!-- Produits -->
-      <div class="relative bg-gradient-to-br from-primary to-primaryDark text-white rounded-2xl shadow-xl p-6 overflow-hidden hover:-translate-y-1 transition">
+      <div class="relative bg-gradient-to-br from-primary to-primaryDark text-white rounded-2xl shadow-xl p-6 overflow-hidden transform hover:-translate-y-1 transition duration-300">
         <div class="absolute -right-6 -top-6 text-white/10 text-8xl">
           <i class="bi bi-box-seam"></i>
         </div>
-        <div class="flex justify-between items-center">
+        <div class="flex items-center justify-between">
           <div>
             <p class="text-sm opacity-80">Produits</p>
             <h2 id="totalProducts" class="text-4xl font-bold mt-2">0</h2>
@@ -89,12 +88,11 @@
         </div>
       </div>
 
-      <!-- Stock critique -->
-      <div class="relative bg-gradient-to-br from-red-500 to-red-700 text-white rounded-2xl shadow-xl p-6 overflow-hidden hover:-translate-y-1 transition">
+      <div class="relative bg-gradient-to-br from-red-500 to-red-700 text-white rounded-2xl shadow-xl p-6 overflow-hidden transform hover:-translate-y-1 transition duration-300">
         <div class="absolute -right-6 -top-6 text-white/10 text-8xl">
           <i class="bi bi-exclamation-triangle"></i>
         </div>
-        <div class="flex justify-between items-center">
+        <div class="flex items-center justify-between">
           <div>
             <p class="text-sm opacity-80">Stock critique</p>
             <h2 id="lowStock" class="text-4xl font-bold mt-2">0</h2>
@@ -103,12 +101,11 @@
         </div>
       </div>
 
-      <!-- Pending -->
-      <div class="relative bg-gradient-to-br from-amber-400 to-amber-600 text-white rounded-2xl shadow-xl p-6 overflow-hidden hover:-translate-y-1 transition">
+      <div class="relative bg-gradient-to-br from-amber-400 to-amber-600 text-white rounded-2xl shadow-xl p-6 overflow-hidden transform hover:-translate-y-1 transition duration-300">
         <div class="absolute -right-6 -top-6 text-white/10 text-8xl">
           <i class="bi bi-hourglass-split"></i>
         </div>
-        <div class="flex justify-between items-center">
+        <div class="flex items-center justify-between">
           <div>
             <p class="text-sm opacity-90">Transactions Pending</p>
             <h2 id="pendingTx" class="text-4xl font-bold mt-2">0</h2>
@@ -117,12 +114,11 @@
         </div>
       </div>
 
-      <!-- Approved -->
-      <div class="relative bg-gradient-to-br from-emerald-500 to-emerald-700 text-white rounded-2xl shadow-xl p-6 overflow-hidden hover:-translate-y-1 transition">
+      <div class="relative bg-gradient-to-br from-emerald-500 to-emerald-700 text-white rounded-2xl shadow-xl p-6 overflow-hidden transform hover:-translate-y-1 transition duration-300">
         <div class="absolute -right-6 -top-6 text-white/10 text-8xl">
           <i class="bi bi-check-circle"></i>
         </div>
-        <div class="flex justify-between items-center">
+        <div class="flex items-center justify-between">
           <div>
             <p class="text-sm opacity-90">Ventes approuvées</p>
             <h2 id="approvedTx" class="text-4xl font-bold mt-2">0</h2>
@@ -133,33 +129,18 @@
 
     </div>
 
-    <!-- ================= ACTIVITÉS + STOCK ================= -->
+    <!-- ================= GRAPHIQUES ================= -->
     <div class="grid lg:grid-cols-2 gap-6">
 
-      <!-- ACTIVITÉS PREMIUM -->
-      <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
-
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="font-semibold text-base">Activités récentes</h3>
-          <i class="bi bi-activity text-primary text-3xl"></i>
+      <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100 hover:shadow-2xl transition">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold text-base">Transactions par statut</h3>
+          <i class="bi bi-pie-chart-fill text-primary text-3xl"></i>
         </div>
-
-        <!-- Timeline -->
-        <div class="relative">
-
-          <!-- Ligne verticale -->
-          <div class="absolute left-3 top-0 bottom-0 w-[2px] bg-slate-200"></div>
-
-          <!-- Container -->
-          <div id="recentActivities"
-               class="space-y-6 max-h-96 overflow-y-auto pr-2">
-          </div>
-
-        </div>
+        <div id="txChart"></div>
       </div>
 
-      <!-- STOCK -->
-      <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
+      <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100 hover:shadow-2xl transition">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold text-base">Top produits en stock</h3>
           <i class="bi bi-bar-chart-fill text-primary text-3xl"></i>
