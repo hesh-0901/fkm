@@ -71,122 +71,77 @@
       </div>
     </div>
 
-    <!-- CONTENU DASHBOARD (ON NE CHANGE RIEN) -->
-
-   <!-- ================= KPI PREMIUM ================= -->
+   <!-- ================= KPI PREMIUM COLOR ================= -->
 <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
 
   <!-- PRODUITS -->
-  <div class="relative bg-gradient-to-br from-primary to-primaryDark text-white rounded-2xl shadow-lg p-6 overflow-hidden">
-    <div class="absolute -right-6 -top-6 text-white/10 text-8xl">
-      <i class="bi bi-box-seam"></i>
+  <div class="relative bg-gradient-to-br from-indigo-500 via-primary to-primaryDark 
+              text-white rounded-3xl shadow-2xl p-6 overflow-hidden 
+              hover:scale-105 transition duration-300">
+
+    <div class="absolute -right-8 -top-8 text-white/10 text-[120px]">
+      <i class="bi bi-box-seam-fill"></i>
     </div>
-    <div class="flex items-center justify-between">
-      <div>
-        <p class="text-sm opacity-80">Produits</p>
-        <h2 id="totalProducts" class="text-3xl font-bold mt-2">0</h2>
-      </div>
-      <div class="text-4xl">
-        <i class="bi bi-box"></i>
-      </div>
+
+    <div class="flex flex-col gap-2 relative z-10">
+      <i class="bi bi-box text-4xl"></i>
+      <p class="text-sm opacity-80">Produits enregistrés</p>
+      <h2 id="totalProducts" class="text-4xl font-extrabold tracking-tight">0</h2>
     </div>
   </div>
+
 
   <!-- STOCK FAIBLE -->
-  <div class="relative bg-gradient-to-br from-red-500 to-red-600 text-white rounded-2xl shadow-lg p-6 overflow-hidden">
-    <div class="absolute -right-6 -top-6 text-white/10 text-8xl">
-      <i class="bi bi-exclamation-triangle"></i>
+  <div class="relative bg-gradient-to-br from-red-500 to-rose-700 
+              text-white rounded-3xl shadow-2xl p-6 overflow-hidden
+              hover:scale-105 transition duration-300">
+
+    <div class="absolute -right-8 -top-8 text-white/10 text-[120px]">
+      <i class="bi bi-exclamation-diamond-fill"></i>
     </div>
-    <div class="flex items-center justify-between">
-      <div>
-        <p class="text-sm opacity-80">Stock critique</p>
-        <h2 id="lowStock" class="text-3xl font-bold mt-2">0</h2>
-      </div>
-      <div class="text-4xl">
-        <i class="bi bi-graph-down"></i>
-      </div>
+
+    <div class="flex flex-col gap-2 relative z-10">
+      <i class="bi bi-graph-down-arrow text-4xl"></i>
+      <p class="text-sm opacity-80">Stock critique</p>
+      <h2 id="lowStock" class="text-4xl font-extrabold">0</h2>
     </div>
   </div>
 
-  <!-- EN ATTENTE -->
-  <div class="relative bg-gradient-to-br from-amber-400 to-amber-600 text-white rounded-2xl shadow-lg p-6 overflow-hidden">
-    <div class="absolute -right-6 -top-6 text-white/10 text-8xl">
+
+  <!-- PENDING -->
+  <div class="relative bg-gradient-to-br from-amber-400 via-orange-500 to-amber-600
+              text-white rounded-3xl shadow-2xl p-6 overflow-hidden
+              hover:scale-105 transition duration-300">
+
+    <div class="absolute -right-8 -top-8 text-white/10 text-[120px]">
       <i class="bi bi-hourglass-split"></i>
     </div>
-    <div class="flex items-center justify-between">
-      <div>
-        <p class="text-sm opacity-90">Transactions Pending</p>
-        <h2 id="pendingTx" class="text-3xl font-bold mt-2">0</h2>
-      </div>
-      <div class="text-4xl">
-        <i class="bi bi-clock-history"></i>
-      </div>
+
+    <div class="flex flex-col gap-2 relative z-10">
+      <i class="bi bi-clock-history text-4xl"></i>
+      <p class="text-sm opacity-90">Transactions Pending</p>
+      <h2 id="pendingTx" class="text-4xl font-extrabold">0</h2>
     </div>
   </div>
+
 
   <!-- APPROUVÉES -->
-  <div class="relative bg-gradient-to-br from-emerald-500 to-emerald-700 text-white rounded-2xl shadow-lg p-6 overflow-hidden">
-    <div class="absolute -right-6 -top-6 text-white/10 text-8xl">
-      <i class="bi bi-check-circle"></i>
+  <div class="relative bg-gradient-to-br from-emerald-500 via-green-600 to-emerald-700
+              text-white rounded-3xl shadow-2xl p-6 overflow-hidden
+              hover:scale-105 transition duration-300">
+
+    <div class="absolute -right-8 -top-8 text-white/10 text-[120px]">
+      <i class="bi bi-check-circle-fill"></i>
     </div>
-    <div class="flex items-center justify-between">
-      <div>
-        <p class="text-sm opacity-90">Ventes approuvées</p>
-        <h2 id="approvedTx" class="text-3xl font-bold mt-2">0</h2>
-      </div>
-      <div class="text-4xl">
-        <i class="bi bi-currency-dollar"></i>
-      </div>
+
+    <div class="flex flex-col gap-2 relative z-10">
+      <i class="bi bi-currency-dollar text-4xl"></i>
+      <p class="text-sm opacity-90">Ventes approuvées</p>
+      <h2 id="approvedTx" class="text-4xl font-extrabold">0</h2>
     </div>
   </div>
 
 </div>
-
-
-<!-- ================= GRAPHIQUES ================= -->
-<div class="grid lg:grid-cols-2 gap-6">
-
-  <!-- STATUT -->
-  <div class="bg-white rounded-2xl shadow-lg p-6 border border-slate-100">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="font-semibold text-base">Transactions par statut</h3>
-      <i class="bi bi-pie-chart text-primary text-2xl"></i>
-    </div>
-    <div id="txChart"></div>
-  </div>
-
-  <!-- STOCK -->
-  <div class="bg-white rounded-2xl shadow-lg p-6 border border-slate-100">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="font-semibold text-base">Top produits en stock</h3>
-      <i class="bi bi-bar-chart-line text-primary text-2xl"></i>
-    </div>
-    <div id="stockChart"></div>
-  </div>
-
-</div>
-
-
-<!-- ================= ALERTES INTELLIGENTES ================= -->
-<div class="bg-white rounded-2xl shadow-lg p-6 border border-slate-100">
-
-  <div class="flex items-center justify-between mb-4">
-    <h3 class="font-semibold text-base">Alertes intelligentes</h3>
-    <i class="bi bi-bell-fill text-amber-500 text-2xl"></i>
-  </div>
-
-  <div id="alertsList" class="space-y-3 text-sm">
-
-    <!-- Exemple visuel -->
-    <div class="flex items-start gap-3 bg-red-50 border border-red-200 rounded-lg p-3">
-      <i class="bi bi-exclamation-triangle-fill text-red-600 text-xl"></i>
-      <div>
-        <p class="font-medium text-red-700">Stock critique détecté</p>
-        <p class="text-red-600 text-xs">Certains produits sont sous le seuil minimum.</p>
-      </div>
-    </div>
-
-  </div>
 
 </div>
 
