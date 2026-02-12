@@ -23,7 +23,7 @@
             success: "#2E7D32",
             warning: "#D4A017",
             danger: "#DC2626",
-            bg: "#F5F7FA",
+            bg: "#F4F6FA",
             muted: "#6B7280"
           }
         }
@@ -42,66 +42,75 @@
   <div id="sidebar-container"></div>
 
   <!-- MAIN -->
-  <main id="mainContent" class="flex-1 px-6 py-6 space-y-6 overflow-x-hidden">
+  <main id="mainContent" class="flex-1 px-8 py-8 space-y-8 overflow-x-hidden">
 
     <!-- TOPBAR -->
-    <div class="bg-white rounded-xl shadow-sm px-6 py-4 flex items-center justify-between">
+    <div class="bg-white rounded-2xl shadow-md px-8 py-5 flex items-center justify-between border border-slate-100">
 
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-4">
         <button id="toggleSidebar"
                 class="p-2 rounded-lg border border-slate-200 hover:bg-slate-100 transition">
-          <i class="bi bi-list"></i>
+          <i class="bi bi-list text-lg"></i>
         </button>
         <div>
-          <h1 class="text-lg font-semibold leading-tight">Inventaire</h1>
-          <p class="text-xs text-muted">Gestion des produits et stocks</p>
+          <h1 class="text-xl font-bold tracking-tight">Inventaire</h1>
+          <p class="text-sm text-muted">Gestion des produits et contrôle des stocks</p>
         </div>
       </div>
 
       <div class="flex items-center gap-6">
         <div class="text-right">
-          <div id="userName" class="font-semibold leading-tight">—</div>
-          <div id="userRole" class="text-sm text-muted">—</div>
+          <div id="userName" class="font-semibold leading-tight"></div>
+          <div id="userRole" class="text-sm text-muted"></div>
         </div>
 
         <button id="logoutBtn"
                 class="px-4 py-2 rounded-lg border border-red-200 text-danger hover:bg-red-50 transition">
-          <i class="bi bi-box-arrow-right"></i>
+          <i class="bi bi-box-arrow-right text-lg"></i>
         </button>
       </div>
     </div>
 
     <!-- HEADER ACTIONS -->
     <div class="flex items-center justify-between">
-      <h2 class="font-semibold text-base">Liste des produits</h2>
+      <div>
+        <h2 class="text-lg font-semibold">Liste des produits</h2>
+        <p class="text-xs text-muted">Vue détaillée et statut du stock</p>
+      </div>
 
       <button id="addProductBtn"
-              class="d-none items-center gap-2 px-4 py-2 rounded-lg bg-success text-white hover:bg-green-700 transition">
-        <i class="bi bi-plus-lg"></i>
+              class="d-none flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-success to-emerald-600 text-white shadow-md hover:scale-105 transition">
+        <i class="bi bi-plus-lg text-lg"></i>
         Nouveau produit
       </button>
     </div>
 
     <!-- TABLE -->
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div class="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
+
       <div class="overflow-x-auto">
+
         <table class="min-w-full text-sm">
-          <thead class="bg-slate-50 border-b">
-            <tr class="text-left text-slate-600">
-              <th class="px-4 py-3">#</th>
-              <th class="px-4 py-3">Produit</th>
-              <th class="px-4 py-3">Catégorie</th>
-              <th class="px-4 py-3">Qté</th>
-              <th class="px-4 py-3">Stock min</th>
-              <th class="px-4 py-3">Prix</th>
-              <th class="px-4 py-3">Opérateur</th>
-              <th class="px-4 py-3">Créé le</th>
-              <th class="px-4 py-3">Statut</th>
-              <th class="px-4 py-3 text-end">Actions</th>
+
+          <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b text-slate-600 text-xs uppercase tracking-wide">
+            <tr>
+              <th class="px-5 py-4">#</th>
+              <th class="px-5 py-4">Produit</th>
+              <th class="px-5 py-4">Catégorie</th>
+              <th class="px-5 py-4">Qté</th>
+              <th class="px-5 py-4">Stock min</th>
+              <th class="px-5 py-4">Prix</th>
+              <th class="px-5 py-4">Opérateur</th>
+              <th class="px-5 py-4">Créé le</th>
+              <th class="px-5 py-4">Statut</th>
+              <th class="px-5 py-4 text-end">Actions</th>
             </tr>
           </thead>
-          <tbody id="inventoryTable" class="divide-y"></tbody>
+
+          <tbody id="inventoryTable" class="divide-y divide-slate-100 bg-white"></tbody>
+
         </table>
+
       </div>
     </div>
 
@@ -111,39 +120,42 @@
 <!-- MODAL -->
 <div class="modal fade" id="productModal" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content rounded-xl">
+    <div class="modal-content rounded-2xl shadow-xl border-0">
 
-      <div class="modal-header">
-        <h5 class="modal-title">Produit</h5>
+      <div class="modal-header border-b bg-slate-50 rounded-t-2xl">
+        <h5 class="modal-title fw-semibold">
+          <i class="bi bi-box-seam me-2 text-primary"></i>
+          Produit
+        </h5>
         <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
 
-      <div class="modal-body">
-        <form id="productForm" class="row g-3">
+      <div class="modal-body p-4">
+        <form id="productForm" class="row g-4">
 
           <div class="col-md-6">
-            <label class="form-label">Nom</label>
-            <input id="pName" class="form-control" required>
+            <label class="form-label text-sm fw-semibold">Nom</label>
+            <input id="pName" class="form-control rounded-lg" required>
           </div>
 
           <div class="col-md-6">
-            <label class="form-label">Catégorie</label>
-            <input id="pCategory" class="form-control" required>
+            <label class="form-label text-sm fw-semibold">Catégorie</label>
+            <input id="pCategory" class="form-control rounded-lg" required>
           </div>
 
           <div class="col-md-4">
-            <label class="form-label">Quantité</label>
-            <input id="pQty" type="number" min="0" class="form-control" required>
+            <label class="form-label text-sm fw-semibold">Quantité</label>
+            <input id="pQty" type="number" min="0" class="form-control rounded-lg" required>
           </div>
 
           <div class="col-md-4">
-            <label class="form-label">Stock minimum</label>
-            <input id="pMinQty" type="number" min="0" value="0" class="form-control">
+            <label class="form-label text-sm fw-semibold">Stock minimum</label>
+            <input id="pMinQty" type="number" min="0" value="0" class="form-control rounded-lg">
           </div>
 
           <div class="col-md-4">
-            <label class="form-label">Devise</label>
-            <select id="pCurrency" class="form-select">
+            <label class="form-label text-sm fw-semibold">Devise</label>
+            <select id="pCurrency" class="form-select rounded-lg">
               <option value="USD">USD</option>
               <option value="CDF">CDF</option>
               <option value="BOTH">USD & CDF</option>
@@ -151,21 +163,25 @@
           </div>
 
           <div class="col-md-6" id="usdBlock">
-            <label class="form-label">Prix USD</label>
-            <input id="pUsd" type="number" min="0" class="form-control">
+            <label class="form-label text-sm fw-semibold">Prix USD</label>
+            <input id="pUsd" type="number" min="0" class="form-control rounded-lg">
           </div>
 
           <div class="col-md-6 d-none" id="cdfBlock">
-            <label class="form-label">Prix CDF</label>
-            <input id="pCdf" type="number" min="0" class="form-control">
+            <label class="form-label text-sm fw-semibold">Prix CDF</label>
+            <input id="pCdf" type="number" min="0" class="form-control rounded-lg">
           </div>
 
         </form>
       </div>
 
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-        <button class="btn btn-success" id="saveProductBtn">Enregistrer</button>
+      <div class="modal-footer bg-slate-50 rounded-b-2xl">
+        <button class="btn btn-outline-secondary rounded-lg px-4" data-bs-dismiss="modal">
+          Annuler
+        </button>
+        <button class="btn btn-success rounded-lg px-4" id="saveProductBtn">
+          Enregistrer
+        </button>
       </div>
 
     </div>
