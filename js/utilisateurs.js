@@ -1,5 +1,5 @@
 /* ============================================================
-   FKM ENERGY - UTILISATEURS MODULE (ENTERPRISE VERSION)
+   FKM ENERGY - UTILISATEURS MODULE (STABLE VERSION)
 ============================================================ */
 
 import { initializeApp, getApps } from
@@ -24,7 +24,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ============================================================
-   SECONDARY AUTH (création utilisateur sans logout directeur)
+   SECONDARY AUTH (évite logout directeur)
 ============================================================ */
 
 const firebaseApp = getApps()[0];
@@ -47,16 +47,15 @@ const uRole = document.getElementById("uRole");
 const uPassword = document.getElementById("uPassword");
 const uConfirmPassword = document.getElementById("uConfirmPassword");
 
-const modal = new bootstrap.Modal(document.getElementById("userModal"));
-
 const userNameEl = document.getElementById("userName");
-const userFonctionEl = document.getElementById("userFonction");
-const userRoleBadge = document.getElementById("userRoleBadge");
+const userRoleEl = document.getElementById("userRole");
+
+const modal = new bootstrap.Modal(document.getElementById("userModal"));
 
 let currentUser = null;
 
 /* ============================================================
-   AUTHENTICATION CHECK
+   AUTH CHECK
 ============================================================ */
 
 onAuthStateChanged(auth, async (user) => {
@@ -66,25 +65,21 @@ onAuthStateChanged(auth, async (user) => {
   const snap = await getDoc(doc(db, "users", user.uid));
   if (!snap.exists()) return;
 
-  currentUser = snap.data();
+  const data = snap.data();
 
-  /* ===== HEADER INFO ===== */
+  currentUser = {
+    uid: user.uid,
+    name: data.name,
+    fonction: data.fonction,
+    role: data.role
+  };
+
+  /* HEADER INFO */
   userNameEl.textContent = currentUser.name;
-  userFonctionEl.textContent = currentUser.fonction;
-
-  userRoleBadge.textContent = currentUser.role;
-  userRoleBadge.className =
-    "px-2 py-0.5 rounded-full text-[10px] font-medium " +
-    (
-      currentUser.role === "directeur"
-        ? "bg-purple-100 text-purple-700"
-        : currentUser.role === "admin"
-        ? "bg-primary/10 text-primary"
-        : "bg-slate-100 text-slate-600"
-    );
+  userRoleEl.textContent = currentUser.fonction;
 
   if (currentUser.role === "directeur") {
-    addBtn.classList.remove("hidden");
+    addBtn.classList.remove("d-none");
   }
 
   loadUsers();
@@ -133,14 +128,14 @@ saveBtn.onclick = async () => {
 
   try {
 
-    /* Création dans Firebase Auth */
+    /* Création Firebase Auth */
     const cred = await createUserWithEmailAndPassword(
       secondaryAuth,
       email,
       password
     );
 
-    /* Création dans Firestore */
+    /* Création Firestore */
     await setDoc(doc(db, "users", cred.user.uid), {
       name,
       username,
@@ -227,7 +222,7 @@ async function loadUsers() {
 }
 
 /* ============================================================
-   ACTIVER / DESACTIVER UTILISATEUR
+   ACTIVER / DESACTIVER
 ============================================================ */
 
 window.toggleUserStatus = async (id, currentStatus) => {
