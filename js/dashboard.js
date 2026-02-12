@@ -2,7 +2,7 @@ import { auth, db } from "./firebase.config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
   collection,
-  getDocs,
+  onSnapshot,
   doc,
   getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -21,21 +21,26 @@ const userNameEl = document.getElementById("userName");
 const userRoleEl = document.getElementById("userRole");
 const logoutBtn = document.getElementById("logoutBtn");
 
+const txChartContainer = document.getElementById("txChart");
+
+let activities = [];
+let txChartInstance = null;
+
 /* ==========================================================
    AUTH
 ========================================================== */
 onAuthStateChanged(auth, async (user) => {
+
   if (!user) return location.replace("../login.html");
 
   const snap = await getDoc(doc(db, "users", user.uid));
   if (!snap.exists()) return;
 
   const data = snap.data();
-
   userNameEl.textContent = data.name || "—";
   userRoleEl.textContent = data.fonction || data.role || "";
 
-  await loadDashboard();
+  initRealtimeDashboard();
 });
 
 /* LOGOUT */
@@ -45,99 +50,147 @@ logoutBtn.onclick = async () => {
 };
 
 /* ==========================================================
-   LOAD DASHBOARD
+   REALTIME DASHBOARD
 ========================================================== */
-async function loadDashboard() {
+function initRealtimeDashboard() {
 
-  const inventorySnap = await getDocs(collection(db, "inventory"));
-  const txSnap = await getDocs(collection(db, "transactions"));
+  /* INVENTORY */
+  onSnapshot(collection(db, "inventory"), (snap) => {
 
-  let totalProducts = 0;
-  let lowStock = 0;
+    let totalProducts = 0;
+    let lowStock = 0;
+    let stockData = [];
 
-  let pending = 0;
-  let approved = 0;
-  let rejected = 0;
+    snap.forEach(doc => {
+      const p = doc.data();
+      totalProducts++;
 
-  let topProducts = [];
+      if (p.quantity <= p.minQuantity) lowStock++;
 
-  /* INVENTAIRE */
-  inventorySnap.forEach(d => {
-    const p = d.data();
-    totalProducts++;
+      stockData.push({
+        name: p.name,
+        quantity: p.quantity
+      });
 
-    if (p.quantity <= p.minQuantity) lowStock++;
-
-    topProducts.push({
-      name: p.name,
-      quantity: p.quantity
+      pushActivity("Produit mis à jour", p.name, p.updatedAt || p.createdAt);
     });
+
+    totalProductsEl.textContent = totalProducts;
+    lowStockEl.textContent = lowStock;
+
+    renderStockChart(
+      stockData.sort((a,b)=>b.quantity-a.quantity).slice(0,5)
+    );
   });
 
   /* TRANSACTIONS */
-  txSnap.forEach(d => {
-    const t = d.data();
+  onSnapshot(collection(db, "transactions"), (snap) => {
 
-    if (t.status === "pending") pending++;
-    if (t.status === "approved") approved++;
-    if (t.status === "rejected") rejected++;
+    let pending = 0;
+    let approved = 0;
+    let rejected = 0;
+
+    snap.forEach(doc => {
+      const t = doc.data();
+
+      if (t.status === "pending") pending++;
+      if (t.status === "approved") approved++;
+      if (t.status === "rejected") rejected++;
+
+      pushActivity(
+        `Transaction ${t.status}`,
+        t.invoiceNumber,
+        t.updatedAt || t.createdAt
+      );
+    });
+
+    pendingTxEl.textContent = pending;
+    approvedTxEl.textContent = approved;
+
+    renderAlerts(lowStockEl.textContent, pending, rejected);
   });
 
-  /* UPDATE KPI */
-  animateValue(totalProductsEl, totalProducts);
-  animateValue(lowStockEl, lowStock);
-  animateValue(pendingTxEl, pending);
-  animateValue(approvedTxEl, approved);
+  /* USERS */
+  onSnapshot(collection(db, "users"), (snap) => {
+    snap.forEach(doc => {
+      const u = doc.data();
+      pushActivity(
+        "Utilisateur modifié",
+        u.name,
+        u.updatedAt || u.createdAt
+      );
+    });
+  });
 
-  /* GRAPHES */
-  renderTxChart(pending, approved, rejected);
-  renderStockChart(topProducts.sort((a,b)=>b.quantity-a.quantity).slice(0,5));
+  /* CLIENTS */
+  onSnapshot(collection(db, "clients"), (snap) => {
+    snap.forEach(doc => {
+      const c = doc.data();
+      pushActivity(
+        "Client modifié",
+        c.name,
+        c.updatedAt || c.createdAt
+      );
+    });
+  });
 
-  /* ALERTES */
-  renderAlerts(lowStock, pending, rejected);
+  /* FOURNISSEURS */
+  onSnapshot(collection(db, "fournisseurs"), (snap) => {
+    snap.forEach(doc => {
+      const f = doc.data();
+      pushActivity(
+        "Fournisseur modifié",
+        f.name,
+        f.updatedAt || f.createdAt
+      );
+    });
+  });
 }
 
 /* ==========================================================
-   ANIMATION KPI
+   ACTIVITY ENGINE
 ========================================================== */
-function animateValue(element, end) {
-  let start = 0;
-  const duration = 800;
-  const stepTime = Math.abs(Math.floor(duration / end || 1));
+function pushActivity(type, label, timestamp) {
 
-  const timer = setInterval(() => {
-    start += 1;
-    element.textContent = start;
-    if (start >= end) clearInterval(timer);
-  }, stepTime);
+  if (!timestamp) return;
+
+  const date = timestamp.toDate ? timestamp.toDate() : new Date();
+
+  activities.push({
+    type,
+    label,
+    date
+  });
+
+  activities.sort((a,b)=>b.date - a.date);
+
+  renderActivities();
+}
+
+function renderActivities() {
+
+  if (!txChartContainer) return;
+
+  txChartContainer.innerHTML = `
+    <div class="space-y-3 max-h-80 overflow-y-auto">
+      ${activities.slice(0,15).map(a => `
+        <div class="flex items-start gap-3 border-b pb-2">
+          <i class="bi bi-activity text-primary text-lg"></i>
+          <div>
+            <p class="font-medium text-sm">${a.type}</p>
+            <p class="text-xs text-muted">${a.label}</p>
+            <p class="text-[11px] text-slate-400">
+              ${a.date.toLocaleString()}
+            </p>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
 }
 
 /* ==========================================================
-   CHART STATUT TRANSACTIONS
-========================================================== */
-function renderTxChart(pending, approved, rejected) {
-
-  const options = {
-    series: [approved, pending, rejected],
-    chart: {
-      type: 'donut',
-      height: 300
-    },
-    labels: ['Approuvées', 'En attente', 'Rejetées'],
-    colors: ['#2E7D32', '#D4A017', '#DC2626'],
-    legend: {
-      position: 'bottom'
-    },
-    dataLabels: {
-      enabled: true
-    }
-  };
-
-  new ApexCharts(document.querySelector("#txChart"), options).render();
-}
-
-/* ==========================================================
-   CHART STOCK
+   STOCK CHART
 ========================================================== */
 function renderStockChart(products) {
 
@@ -153,12 +206,6 @@ function renderStockChart(products) {
     colors: ['#0B5C6B'],
     xaxis: {
       categories: products.map(p => p.name)
-    },
-    plotOptions: {
-      bar: {
-        borderRadius: 6,
-        horizontal: false
-      }
     }
   };
 
@@ -166,7 +213,7 @@ function renderStockChart(products) {
 }
 
 /* ==========================================================
-   ALERTES INTELLIGENTES
+   ALERTS
 ========================================================== */
 function renderAlerts(lowStock, pending, rejected) {
 
@@ -208,7 +255,7 @@ function renderAlerts(lowStock, pending, rejected) {
     `;
   }
 
-  if (lowStock === 0 && pending === 0 && rejected === 0) {
+  if (lowStock == 0 && pending == 0 && rejected == 0) {
     alertsList.innerHTML = `
       <div class="flex items-start gap-3 bg-emerald-50 border border-emerald-200 rounded-lg p-3">
         <i class="bi bi-check-circle-fill text-emerald-600 text-xl"></i>
