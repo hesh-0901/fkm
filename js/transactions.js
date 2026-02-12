@@ -1,17 +1,18 @@
 import { auth, db } from "./firebase.config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
-collection,
-getDocs,
-addDoc,
-updateDoc,
-deleteDoc,
-doc,
-getDoc,
-serverTimestamp,
-increment
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  getDoc,
+  serverTimestamp,
+  increment
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* DOM */
 const table = document.getElementById("txTable");
 const modal = new bootstrap.Modal(document.getElementById("txModal"));
 const saveBtn = document.getElementById("saveTxBtn");
@@ -20,178 +21,214 @@ const newTxBtn = document.getElementById("newTxBtn");
 const txProduct = document.getElementById("txProduct");
 const txQty = document.getElementById("txQty");
 const partnerSearch = document.getElementById("partnerSearch");
+const unitPrice = document.getElementById("unitPrice");
+const totalPrice = document.getElementById("totalPrice");
 
-const unitPriceEl = document.getElementById("unitPrice");
-const currencyEl = document.getElementById("currency");
-const totalPriceEl = document.getElementById("totalPrice");
-
+/* DATA */
 let productCache = {};
 let currentUser = null;
 
 /* AUTH */
 onAuthStateChanged(auth, async (user) => {
-if (!user) return location.replace("../login.html");
-currentUser = user;
-loadProducts();
-loadTransactions();
+  if (!user) return location.replace("../login.html");
+
+  currentUser = user;
+  newTxBtn.classList.remove("d-none");
+
+  await loadProducts();
+  await loadTransactions();
 });
 
 /* LOAD PRODUCTS */
 async function loadProducts() {
-const snap = await getDocs(collection(db, "inventory"));
-snap.forEach(d => {
-productCache[d.id] = d.data();
-txProduct.innerHTML += `<option value="${d.id}">${d.data().name}</option>`;
-});
-updatePrice();
+  txProduct.innerHTML = "";
+  productCache = {};
+
+  const snap = await getDocs(collection(db, "inventory"));
+
+  snap.forEach(d => {
+    productCache[d.id] = d.data();
+    txProduct.innerHTML += `
+      <option value="${d.id}">
+        ${d.data().name}
+      </option>
+    `;
+  });
+
+  updatePrice();
 }
 
-/* UPDATE PRICE */
+/* AUTO CALCUL */
 function updatePrice() {
-const p = productCache[txProduct.value];
-if (!p) return;
+  const p = productCache[txProduct.value];
+  if (!p) return;
 
-const price = p.pricing?.usd || p.pricing?.cdf || 0;
-const currency = p.pricing?.usd ? "USD" : "CDF";
+  const price = p.pricing?.usd || p.pricing?.cdf || 0;
+  const qty = Number(txQty.value) || 0;
 
-unitPriceEl.textContent = price;
-currencyEl.textContent = currency;
-totalPriceEl.textContent = (price * (txQty.value || 0)) + " " + currency;
+  unitPrice.value = price;
+  totalPrice.value = price * qty;
 }
 
 txProduct.onchange = updatePrice;
 txQty.oninput = updatePrice;
 
-/* CREATE */
+/* CREATE TRANSACTION */
 saveBtn.onclick = async () => {
 
-const p = productCache[txProduct.value];
-if (!p || !txQty.value) return;
+  const p = productCache[txProduct.value];
+  if (!p || !txQty.value) return;
 
-const year = new Date().getFullYear();
-const unique = Date.now();
+  const year = new Date().getFullYear();
+  const unique = Date.now();
 
-const txNumber = `TX-${year}-${unique}`;
-const invoiceNumber = `INV-${year}-${unique}`;
+  const txNumber = `TX-${year}-${unique}`;
+  const invoiceNumber = `INV-${year}-${unique}`;
 
-const price = p.pricing?.usd || p.pricing?.cdf || 0;
-const currency = p.pricing?.usd ? "USD" : "CDF";
-const total = price * Number(txQty.value);
+  const price = p.pricing?.usd || p.pricing?.cdf || 0;
+  const currency = p.pricing?.usd ? "USD" : "CDF";
+  const quantity = Number(txQty.value);
+  const total = price * quantity;
 
-await addDoc(collection(db, "transactions"), {
-txNumber,
-invoiceNumber,
-productId: txProduct.value,
-productName: p.name,
-quantity: Number(txQty.value),
-unitPrice: price,
-total,
-currency,
-partnerName: partnerSearch.value,
-status: "pending",
-createdAt: serverTimestamp()
-});
+  await addDoc(collection(db, "transactions"), {
+    txNumber,
+    invoiceNumber,
+    productId: txProduct.value,
+    productName: p.name,
+    quantity,
+    unitPrice: price,
+    total,
+    currency,
+    partnerName: partnerSearch.value || "Client direct",
+    status: "pending",
+    createdBy: currentUser.uid,
+    createdAt: serverTimestamp()
+  });
 
-modal.hide();
-loadTransactions();
+  modal.hide();
+  document.getElementById("txForm").reset();
+  updatePrice();
+  loadTransactions();
 };
 
 /* LOAD TABLE */
 async function loadTransactions() {
-table.innerHTML = "";
-const snap = await getDocs(collection(db, "transactions"));
+  table.innerHTML = "";
 
-snap.forEach(d => {
-const t = d.data();
+  const snap = await getDocs(collection(db, "transactions"));
 
-table.innerHTML += `
-<tr class="hover:bg-slate-50">
-<td class="px-4 py-2 font-medium">${t.txNumber}</td>
-<td class="px-4 py-2">${t.createdAt?.toDate().toLocaleDateString() || "-"}</td>
-<td class="px-4 py-2">${t.partnerName}</td>
-<td class="px-4 py-2">${t.productName}</td>
-<td class="px-4 py-2 text-right">${t.quantity}</td>
-<td class="px-4 py-2 text-right font-semibold">${t.total} ${t.currency}</td>
-<td class="px-4 py-2">
-<span class="px-2 py-1 rounded-full text-xs ${
-t.status === "approved"
-? "bg-emerald-100 text-emerald-700"
-: t.status === "rejected"
-? "bg-red-100 text-red-700"
-: "bg-amber-100 text-amber-700"
-}">
-${t.status}
-</span>
-</td>
-<td class="px-4 py-2 text-right space-x-3">
+  if (snap.empty) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="9" class="text-center text-muted py-3">
+          Aucune transaction enregistrée
+        </td>
+      </tr>
+    `;
+    return;
+  }
 
-<i class="bi bi-check-circle text-emerald-600 cursor-pointer"
-onclick="validateTx('${d.id}')"></i>
+  snap.forEach(d => {
+    const t = d.data();
 
-<i class="bi bi-x-circle text-red-600 cursor-pointer"
-onclick="rejectTx('${d.id}')"></i>
+    table.innerHTML += `
+      <tr>
+        <td class="px-4 py-3">${t.txNumber}</td>
+        <td class="px-4 py-3">${t.invoiceNumber}</td>
+        <td class="px-4 py-3">
+          ${t.createdAt?.toDate().toLocaleDateString() || "-"}
+        </td>
+        <td class="px-4 py-3">${t.partnerName}</td>
+        <td class="px-4 py-3">${t.productName}</td>
+        <td class="px-4 py-3">${t.quantity}</td>
+        <td class="px-4 py-3">
+          ${t.total} ${t.currency}
+        </td>
+        <td class="px-4 py-3">
+          <span class="badge bg-${
+            t.status === "approved" ? "success" :
+            t.status === "rejected" ? "danger" :
+            "warning"
+          }">
+            ${t.status}
+          </span>
+        </td>
+        <td class="px-4 py-3 text-end">
 
-<i class="bi bi-pencil-square text-slate-600 cursor-pointer"></i>
+          <i class="bi bi-check-circle text-success me-2 cursor-pointer"
+            onclick="validateTx('${d.id}')"></i>
 
-<i class="bi bi-printer text-indigo-600 cursor-pointer"
-onclick="printInvoice('${d.id}')"></i>
+          <i class="bi bi-x-circle text-danger me-2 cursor-pointer"
+            onclick="rejectTx('${d.id}')"></i>
 
-<i class="bi bi-trash text-red-500 cursor-pointer"
-onclick="deleteTx('${d.id}')"></i>
+          <i class="bi bi-printer text-primary me-2 cursor-pointer"
+            onclick="printInvoice('${d.id}')"></i>
 
-</td>
-</tr>
-`;
-});
+          <i class="bi bi-trash text-danger cursor-pointer"
+            onclick="deleteTx('${d.id}')"></i>
+
+        </td>
+      </tr>
+    `;
+  });
 }
 
 /* VALIDATE */
 window.validateTx = async (id) => {
-const txSnap = await getDoc(doc(db, "transactions", id));
-const tx = txSnap.data();
-if (tx.status !== "pending") return;
 
-await updateDoc(doc(db, "inventory", tx.productId), {
-quantity: increment(-tx.quantity)
-});
+  const txSnap = await getDoc(doc(db, "transactions", id));
+  if (!txSnap.exists()) return;
 
-await updateDoc(doc(db, "transactions", id), {
-status: "approved"
-});
+  const tx = txSnap.data();
+  if (tx.status !== "pending") return;
 
-loadTransactions();
+  await updateDoc(doc(db, "inventory", tx.productId), {
+    quantity: increment(-tx.quantity)
+  });
+
+  await updateDoc(doc(db, "transactions", id), {
+    status: "approved"
+  });
+
+  loadTransactions();
 };
 
 /* REJECT */
 window.rejectTx = async (id) => {
-await updateDoc(doc(db, "transactions", id), {
-status: "rejected"
-});
-loadTransactions();
+  await updateDoc(doc(db, "transactions", id), {
+    status: "rejected"
+  });
+
+  loadTransactions();
 };
 
 /* DELETE */
 window.deleteTx = async (id) => {
-if (!confirm("Supprimer cette transaction ?")) return;
-await deleteDoc(doc(db, "transactions", id));
-loadTransactions();
+  if (!confirm("Supprimer cette transaction ?")) return;
+
+  await deleteDoc(doc(db, "transactions", id));
+  loadTransactions();
 };
 
 /* PRINT */
 window.printInvoice = async (id) => {
-const txSnap = await getDoc(doc(db, "transactions", id));
-const t = txSnap.data();
 
-const win = window.open("", "_blank");
-win.document.write(`
-<h2>FKM ENERGY</h2>
-<p>Facture : ${t.invoiceNumber}</p>
-<p>Client : ${t.partnerName}</p>
-<p>Produit : ${t.productName}</p>
-<p>Quantité : ${t.quantity}</p>
-<p>Total : ${t.total} ${t.currency}</p>
-`);
-win.print();
+  const txSnap = await getDoc(doc(db, "transactions", id));
+  if (!txSnap.exists()) return;
+
+  const t = txSnap.data();
+
+  const win = window.open("", "_blank");
+  win.document.write(`
+    <h3>FKM ENERGY</h3>
+    <hr>
+    <p><strong>Facture :</strong> ${t.invoiceNumber}</p>
+    <p><strong>Client :</strong> ${t.partnerName}</p>
+    <p><strong>Produit :</strong> ${t.productName}</p>
+    <p><strong>Quantité :</strong> ${t.quantity}</p>
+    <p><strong>Total :</strong> ${t.total} ${t.currency}</p>
+  `);
+  win.print();
 };
 
 newTxBtn.onclick = () => modal.show();
