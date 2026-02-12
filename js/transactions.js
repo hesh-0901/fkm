@@ -315,19 +315,31 @@ function renderTable(data) {
             "warning"
           }">${t.status}</span>
         </td>
-       <td class="px-3 py-2 text-end">
+<td class="px-6 py-4 text-end">
 
+  ${t.status === "approved" ? `
   <button 
-    class="btn btn-sm btn-outline-primary me-2"
     onclick="printInvoice('${t.id}')"
     title="Imprimer la facture"
-  >
-    <i class="bi bi-receipt"></i>
+    class="inline-flex items-center justify-center
+           w-9 h-9
+           rounded-lg
+           border border-primary/30
+           text-primary
+           hover:bg-primary hover:text-white
+           transition-all duration-200
+           shadow-sm hover:shadow-md
+           active:scale-95">
+      <i class="bi bi-receipt text-sm"></i>
   </button>
+  ` : ""}
 
-  ${renderActions(t.id, t)}
+  <span class="ml-2">
+    ${renderActions(t.id, t)}
+  </span>
 
 </td>
+
 
       </tr>
     `;
