@@ -38,8 +38,10 @@
 
 <div class="flex min-h-screen">
 
+  <!-- SIDEBAR -->
   <div id="sidebar-container"></div>
 
+  <!-- MAIN -->
   <main id="mainContent" class="flex-1 px-6 py-6 space-y-6 overflow-x-hidden">
 
     <!-- TOPBAR -->
@@ -51,7 +53,7 @@
         </button>
         <div>
           <h1 class="text-lg font-semibold leading-tight">Transactions</h1>
-          <p class="text-xs text-muted">Ventes & sorties de stock</p>
+          <p class="text-xs text-muted">Ventes & gestion commerciale</p>
         </div>
       </div>
 
@@ -87,52 +89,81 @@
   </main>
 </div>
 
-<!-- MODAL -->
+<!-- ================= MODAL PROFESSIONNEL ================= -->
 <div class="modal fade" id="txModal" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content rounded-xl">
 
       <div class="modal-header">
-        <h5 class="modal-title">Nouvelle vente</h5>
+        <h5 class="modal-title">
+          <i class="bi bi-receipt me-2"></i>
+          Transaction commerciale
+        </h5>
         <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
 
       <div class="modal-body">
         <form id="txForm" class="row g-3">
 
+          <!-- PRODUIT -->
           <div class="col-md-6">
             <label class="form-label">Produit</label>
-            <select id="txProduct" class="form-select"></select>
+            <input type="text"
+                   id="productSearch"
+                   class="form-control"
+                   placeholder="Rechercher un produit...">
+            <div id="productResults"
+                 class="list-group mt-1"
+                 style="max-height:200px;overflow-y:auto"></div>
           </div>
 
+          <!-- CLIENT -->
           <div class="col-md-6">
             <label class="form-label">Client</label>
-            <input id="partnerSearch" class="form-control"
+            <input type="text"
+                   id="partnerSearch"
+                   class="form-control"
                    placeholder="Rechercher ou saisir le nom">
+            <div id="partnerResults"
+                 class="list-group mt-1"
+                 style="max-height:200px;overflow-y:auto"></div>
           </div>
 
+          <!-- QUANTITE -->
           <div class="col-md-4">
             <label class="form-label">Quantité</label>
-            <input id="txQty" type="number" min="1"
-                   class="form-control" required>
+            <input id="txQty"
+                   type="number"
+                   min="1"
+                   class="form-control">
           </div>
 
+          <!-- PRIX -->
           <div class="col-md-4">
             <label class="form-label">Prix unitaire</label>
-            <input id="unitPrice" class="form-control" readonly>
+            <input id="unitPrice"
+                   class="form-control"
+                   readonly>
           </div>
 
+          <!-- TOTAL -->
           <div class="col-md-4">
             <label class="form-label">Total</label>
-            <input id="totalPrice" class="form-control" readonly>
+            <input id="totalPrice"
+                   class="form-control fw-bold"
+                   readonly>
           </div>
 
         </form>
       </div>
 
       <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-        <button class="btn btn-success" id="saveTxBtn">Enregistrer</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">
+          Annuler
+        </button>
+        <button class="btn btn-success" id="saveTxBtn">
+          Enregistrer
+        </button>
       </div>
 
     </div>
