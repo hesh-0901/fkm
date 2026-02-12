@@ -1,47 +1,45 @@
-// js/utilisateurs.js
 import { auth, db } from "./firebase.config.js";
-import { onAuthStateChanged, signOut } from
-  "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  onAuthStateChanged,
+  signOut,
+  createUserWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
 import {
   collection,
   getDocs,
-  addDoc,
-  deleteDoc,
   doc,
   getDoc,
+  setDoc,
+  deleteDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ROLES */
-const ROLES = {
-  OPERATEUR: "operateur",
-  ADMIN: "admin",
-  DIRECTEUR: "directeur"
-};
-
-/* DOM */
+/* ======================
+   DOM
+====================== */
 const table = document.getElementById("usersTable");
 const addBtn = document.getElementById("addUserBtn");
 const logoutBtn = document.getElementById("logoutBtn");
+
 const userNameEl = document.getElementById("userName");
 const userRoleEl = document.getElementById("userRole");
 
 const modal = new bootstrap.Modal(document.getElementById("userModal"));
-const infoModal = new bootstrap.Modal(document.getElementById("userInfoModal"));
-const infoContent = document.getElementById("userInfoContent");
-
 const saveBtn = document.getElementById("saveUserBtn");
 
 const uName = document.getElementById("uName");
 const uUsername = document.getElementById("uUsername");
 const uFonction = document.getElementById("uFonction");
 const uRole = document.getElementById("uRole");
-const userForm = document.getElementById("userForm");
 
 let currentUser = null;
 
-/* AUTH */
+/* ======================
+   AUTH
+====================== */
 onAuthStateChanged(auth, async (user) => {
+
   if (!user) return location.replace("../login.html");
 
   const snap = await getDoc(doc(db, "users", user.uid));
@@ -50,100 +48,117 @@ onAuthStateChanged(auth, async (user) => {
   currentUser = snap.data();
 
   userNameEl.textContent = currentUser.name;
-  userRoleEl.textContent = currentUser.fonction;
+  userRoleEl.textContent = currentUser.role;
 
-  if (currentUser.role === ROLES.DIRECTEUR) {
-    addBtn.classList.remove("d-none");
+  if (currentUser.role === "directeur") {
+    addBtn.classList.remove("hidden");
   }
 
   loadUsers();
 });
 
-/* LOGOUT */
+/* ======================
+   LOGOUT
+====================== */
 logoutBtn.onclick = async () => {
   await signOut(auth);
   location.replace("../login.html");
 };
 
-/* LOAD USERS */
+/* ======================
+   LOAD USERS
+====================== */
 async function loadUsers() {
+
   table.innerHTML = "";
+
   const snap = await getDocs(collection(db, "users"));
 
   snap.forEach(d => {
+
     const u = d.data();
 
     table.innerHTML += `
-      <tr>
-        <td>${u.name}</td>
-        <td>${u.username}</td>
-        <td>${u.fonction}</td>
-        <td><span class="badge bg-primary">${u.role}</span></td>
-        <td>
-          <span class="badge bg-${u.status === "active" ? "success" : "danger"}">
+      <tr class="hover:bg-slate-50 transition">
+        <td class="px-6 py-4 font-medium">${u.name}</td>
+        <td class="px-6 py-4">${u.username}</td>
+        <td class="px-6 py-4">${u.fonction}</td>
+        <td class="px-6 py-4">
+          <span class="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">
+            ${u.role}
+          </span>
+        </td>
+        <td class="px-6 py-4">
+          <span class="px-2 py-1 text-xs rounded-full
+            ${u.status === "active"
+              ? "bg-emerald-100 text-emerald-600"
+              : "bg-red-100 text-red-600"}">
             ${u.status}
           </span>
         </td>
-        <td>${u.createdAt?.toDate().toLocaleString() || "—"}</td>
-        <td class="text-end">
-
-          <button class="btn btn-sm btn-outline-primary me-1"
-            onclick='showUserInfo(${JSON.stringify(u)})'>
-            <i class="bi bi-info-circle"></i>
+        <td class="px-6 py-4 text-xs text-slate-500">
+          ${u.createdAt?.toDate().toLocaleString() || "—"}
+        </td>
+        <td class="px-6 py-4 text-end">
+          <button onclick="deleteUser('${d.id}')"
+            class="text-danger hover:underline text-sm">
+            Supprimer
           </button>
-
-          ${
-            currentUser.role === ROLES.DIRECTEUR
-              ? `<button class="btn btn-sm btn-outline-danger"
-                   onclick="deleteUser('${d.id}')">Supprimer</button>`
-              : ""
-          }
         </td>
       </tr>
     `;
   });
 }
 
-/* INFO USER */
-window.showUserInfo = (u) => {
-  infoContent.innerHTML = `
-    <div class="space-y-2">
-      <div><strong>Nom :</strong> ${u.name}</div>
-      <div><strong>Identifiant :</strong> ${u.username}</div>
-      <div><strong>Email :</strong> ${u.email}</div>
-      <div><strong>Fonction :</strong> ${u.fonction}</div>
-      <div><strong>Rôle :</strong> ${u.role}</div>
-      <div><strong>Statut :</strong> ${u.status}</div>
-    </div>
-  `;
-  infoModal.show();
-};
+/* ======================
+   PASSWORD GENERATOR
+====================== */
+function generatePassword() {
+  return Math.random().toString(36).slice(-8) + "A1!";
+}
 
-/* CREATE USER (Firestore metadata only) */
+/* ======================
+   CREATE USER
+====================== */
 saveBtn.onclick = async () => {
-  if (currentUser.role !== ROLES.DIRECTEUR) return;
+
+  if (currentUser.role !== "directeur") return;
 
   const username = uUsername.value.trim().toLowerCase();
   const email = `${username}@fkmenergy.com`;
+  const password = generatePassword();
 
-  await addDoc(collection(db, "users"), {
-    name: uName.value.trim(),
-    username,
-    email,
-    fonction: uFonction.value.trim(),
-    role: uRole.value,
-    status: "active",
-    createdAt: serverTimestamp()
-  });
+  try {
 
-  modal.hide();
-  userForm.reset();
-  loadUsers();
+    const cred =
+      await createUserWithEmailAndPassword(auth, email, password);
+
+    await setDoc(doc(db, "users", cred.user.uid), {
+      name: uName.value.trim(),
+      username,
+      fonction: uFonction.value.trim(),
+      role: uRole.value,
+      status: "active",
+      createdAt: serverTimestamp()
+    });
+
+    alert("Utilisateur créé avec succès.");
+
+    modal.hide();
+    loadUsers();
+
+  } catch (err) {
+    alert(err.message);
+  }
 };
 
-/* DELETE USER (Firestore only) */
+/* ======================
+   DELETE USER
+====================== */
 window.deleteUser = async (id) => {
-  if (currentUser.role !== ROLES.DIRECTEUR) return;
+
+  if (currentUser.role !== "directeur") return;
+
   if (!confirm("Supprimer cet utilisateur ?")) return;
 
   await deleteDoc(doc(db, "users", id));
