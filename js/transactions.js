@@ -1,286 +1,334 @@
-// ===============================
-// FKM ENERGY - TRANSACTIONS JS
-// ===============================
+import { auth, db } from "./firebase.config.js";
+import {
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-const txTable = document.getElementById("txTable");
-const txSearch = document.getElementById("txSearch");
-const statusFilter = document.getElementById("statusFilter");
-const quickDateFilter = document.getElementById("quickDateFilter");
-const startDate = document.getElementById("startDate");
-const endDate = document.getElementById("endDate");
-const resetFilters = document.getElementById("resetFilters");
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  getDoc,
+  serverTimestamp,
+  increment,
+  query,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* ================================
+   DOM
+================================ */
+const table = document.getElementById("txTable");
+const modal = new bootstrap.Modal(document.getElementById("txModal"));
+const saveBtn = document.getElementById("saveTxBtn");
 const newTxBtn = document.getElementById("newTxBtn");
-const saveTxBtn = document.getElementById("saveTxBtn");
 
 const productSearch = document.getElementById("productSearch");
 const productResults = document.getElementById("productResults");
 const partnerSearch = document.getElementById("partnerSearch");
+
 const txQty = document.getElementById("txQty");
 const unitPrice = document.getElementById("unitPrice");
 const totalPrice = document.getElementById("totalPrice");
 
-const txModal = new bootstrap.Modal(document.getElementById("txModal"));
+const logoutBtn = document.getElementById("logoutBtn");
+const userNameEl = document.getElementById("userName");
+const userFunctionEl = document.getElementById("userFunction");
 
-let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
-let products = JSON.parse(localStorage.getItem("products")) || [
-  { id: 1, name: "Diesel Premium", price: 750 },
-  { id: 2, name: "Essence Super", price: 820 },
-  { id: 3, name: "Lubrifiant X", price: 1500 }
-];
-
+/* ================================
+   VARIABLES
+================================ */
+let productsCache = [];
 let selectedProduct = null;
+let editingId = null;
+let currentUserData = null;
 
-// ===============================
-// INIT
-// ===============================
+/* ================================
+   AUTH
+================================ */
+onAuthStateChanged(auth, async (user) => {
 
-document.addEventListener("DOMContentLoaded", () => {
-  renderTransactions();
-  attachEvents();
-});
+  if (!user) return location.replace("../login.html");
 
-// ===============================
-// EVENTS
-// ===============================
+  const snap = await getDoc(doc(db, "users", user.uid));
+  currentUserData = snap.data();
 
-function attachEvents() {
+  userNameEl.textContent = currentUserData.name;
+  userFunctionEl.textContent = currentUserData.fonction;
 
   newTxBtn.classList.remove("d-none");
 
-  newTxBtn.addEventListener("click", () => {
-    resetForm();
-    txModal.show();
-  });
+  await preloadProducts();
+  await loadTransactions();
+});
 
-  txQty.addEventListener("input", calculateTotal);
+/* ================================
+   LOGOUT
+================================ */
+logoutBtn.onclick = async () => {
+  await signOut(auth);
+  location.replace("../login.html");
+};
 
-  productSearch.addEventListener("input", searchProducts);
-
-  saveTxBtn.addEventListener("click", saveTransaction);
-
-  txSearch.addEventListener("input", renderTransactions);
-  statusFilter.addEventListener("change", renderTransactions);
-  quickDateFilter.addEventListener("change", renderTransactions);
-  startDate.addEventListener("change", renderTransactions);
-  endDate.addEventListener("change", renderTransactions);
-
-  resetFilters.addEventListener("click", () => {
-    txSearch.value = "";
-    statusFilter.value = "ALL";
-    quickDateFilter.value = "ALL";
-    startDate.value = "";
-    endDate.value = "";
-    renderTransactions();
-  });
+/* ================================
+   LOAD PRODUCTS
+================================ */
+async function preloadProducts() {
+  const snap = await getDocs(collection(db, "inventory"));
+  productsCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-// ===============================
-// RENDER TABLE
-// ===============================
+/* ================================
+   PRODUCT SEARCH
+================================ */
+productSearch.oninput = () => {
 
-function renderTransactions() {
+  const term = productSearch.value.toLowerCase();
+  productResults.innerHTML = "";
 
-  txTable.innerHTML = "";
+  if (!term) return;
 
-  let filtered = filterTransactions();
+  productsCache
+    .filter(p => p.name.toLowerCase().includes(term))
+    .forEach(p => {
 
-  if (filtered.length === 0) {
-    txTable.innerHTML = `
-      <tr>
-        <td colspan="9" class="text-center py-4 text-muted">
-          Aucune transaction trouvée
-        </td>
-      </tr>
-    `;
+      const btn = document.createElement("button");
+      btn.className = "list-group-item list-group-item-action text-sm";
+      btn.textContent = p.name;
+
+      btn.onclick = () => {
+
+        selectedProduct = p;
+        productSearch.value = p.name;
+        productResults.innerHTML = "";
+
+        const price = p.pricing?.usd || p.pricing?.cdf || 0;
+        const currency = p.pricing?.usd ? "USD" : "CDF";
+
+        unitPrice.value = `${price} ${currency}`;
+        updateTotal();
+      };
+
+      productResults.appendChild(btn);
+    });
+};
+
+/* ================================
+   TOTAL CALC
+================================ */
+function updateTotal() {
+  const qty = Number(txQty.value) || 0;
+  const [price, currency] = unitPrice.value.split(" ");
+  totalPrice.value = `${qty * Number(price || 0)} ${currency || ""}`;
+}
+txQty.oninput = updateTotal;
+
+/* ================================
+   GENERATE INVOICE
+================================ */
+function generateInvoiceNumber() {
+  const now = new Date();
+  return `FKM-IN-${now.getFullYear()}${(now.getMonth()+1)
+    .toString().padStart(2,"0")}${now.getDate()
+    .toString().padStart(2,"0")}${Date.now().toString().slice(-3)}`;
+}
+
+/* ================================
+   SAVE
+================================ */
+saveBtn.onclick = async () => {
+
+  if (!selectedProduct || !txQty.value || !partnerSearch.value) {
+    alert("Veuillez remplir tous les champs.");
     return;
   }
 
-  filtered.forEach((tx, index) => {
+  const quantity = Number(txQty.value);
+  const price = selectedProduct.pricing?.usd || selectedProduct.pricing?.cdf || 0;
+  const currency = selectedProduct.pricing?.usd ? "USD" : "CDF";
+  const total = quantity * price;
 
-    const row = document.createElement("tr");
+  const data = {
+    invoiceNumber: generateInvoiceNumber(),
+    productId: selectedProduct.id,
+    productName: selectedProduct.name,
+    quantity,
+    unitPrice: price,
+    total,
+    currency,
+    partnerName: partnerSearch.value,
+    status: "pending",
+    updatedAt: serverTimestamp()
+  };
 
-    row.innerHTML = `
-      <td class="px-6 py-4">${index + 1}</td>
-      <td class="px-6 py-4 fw-semibold">${tx.invoice}</td>
-      <td class="px-6 py-4">${formatDate(tx.date)}</td>
-      <td class="px-6 py-4">${tx.client}</td>
-      <td class="px-6 py-4">${tx.product}</td>
-      <td class="px-6 py-4 text-center">${tx.qty}</td>
-      <td class="px-6 py-4 fw-semibold">${formatCurrency(tx.total)}</td>
-      <td class="px-6 py-4">${renderStatus(tx.status)}</td>
-      <td class="px-6 py-4 text-end">
-        <button class="btn btn-sm btn-danger" onclick="deleteTx('${tx.id}')">
-          <i class="bi bi-trash"></i>
-        </button>
-      </td>
-    `;
-
-    txTable.appendChild(row);
-  });
-}
-
-// ===============================
-// FILTERS
-// ===============================
-
-function filterTransactions() {
-
-  let result = [...transactions];
-
-  const search = txSearch.value.toLowerCase();
-
-  if (search) {
-    result = result.filter(tx =>
-      tx.invoice.toLowerCase().includes(search) ||
-      tx.client.toLowerCase().includes(search) ||
-      tx.product.toLowerCase().includes(search)
-    );
-  }
-
-  if (statusFilter.value !== "ALL") {
-    result = result.filter(tx => tx.status === statusFilter.value);
-  }
-
-  if (quickDateFilter.value !== "ALL") {
-    const now = new Date();
-
-    if (quickDateFilter.value === "TODAY") {
-      result = result.filter(tx =>
-        new Date(tx.date).toDateString() === now.toDateString()
-      );
-    }
-
-    if (quickDateFilter.value === "7DAYS") {
-      const past = new Date();
-      past.setDate(now.getDate() - 7);
-      result = result.filter(tx => new Date(tx.date) >= past);
-    }
-
-    if (quickDateFilter.value === "30DAYS") {
-      const past = new Date();
-      past.setDate(now.getDate() - 30);
-      result = result.filter(tx => new Date(tx.date) >= past);
-    }
-  }
-
-  if (startDate.value && endDate.value) {
-    result = result.filter(tx => {
-      const txDate = new Date(tx.date);
-      return txDate >= new Date(startDate.value) &&
-             txDate <= new Date(endDate.value);
+  if (editingId) {
+    await updateDoc(doc(db, "transactions", editingId), data);
+    editingId = null;
+  } else {
+    await addDoc(collection(db, "transactions"), {
+      ...data,
+      createdAt: serverTimestamp()
     });
   }
 
-  return result;
-}
-
-// ===============================
-// SAVE TRANSACTION
-// ===============================
-
-function saveTransaction() {
-
-  if (!selectedProduct || !partnerSearch.value || !txQty.value) {
-    alert("Veuillez remplir tous les champs");
-    return;
-  }
-
-  const newTx = {
-    id: crypto.randomUUID(),
-    invoice: "FAC-" + Date.now(),
-    date: new Date().toISOString(),
-    client: partnerSearch.value,
-    product: selectedProduct.name,
-    qty: parseInt(txQty.value),
-    total: parseInt(totalPrice.value),
-    status: "PENDING"
-  };
-
-  transactions.push(newTx);
-  localStorage.setItem("transactions", JSON.stringify(transactions));
-
-  txModal.hide();
-  renderTransactions();
-}
-
-// ===============================
-// DELETE
-// ===============================
-
-window.deleteTx = function(id) {
-  if (!confirm("Supprimer cette transaction ?")) return;
-
-  transactions = transactions.filter(tx => tx.id !== id);
-  localStorage.setItem("transactions", JSON.stringify(transactions));
-  renderTransactions();
+  modal.hide();
+  document.getElementById("txForm").reset();
+  selectedProduct = null;
+  loadTransactions();
 };
 
-// ===============================
-// PRODUCTS
-// ===============================
+/* ================================
+   LOAD TABLE
+================================ */
+async function loadTransactions() {
 
-function searchProducts() {
+  table.innerHTML = "";
 
-  const query = productSearch.value.toLowerCase();
-  productResults.innerHTML = "";
+  const q = query(collection(db, "transactions"), orderBy("createdAt", "desc"));
+  const snap = await getDocs(q);
 
-  if (!query) return;
+  snap.forEach(d => {
 
-  const results = products.filter(p =>
-    p.name.toLowerCase().includes(query)
-  );
+    const t = d.data();
+    const created = t.createdAt?.toDate().toLocaleDateString() || "-";
 
-  results.forEach(p => {
-    const item = document.createElement("a");
-    item.className = "list-group-item list-group-item-action";
-    item.textContent = `${p.name} - ${formatCurrency(p.price)}`;
-
-    item.onclick = () => {
-      selectedProduct = p;
-      productSearch.value = p.name;
-      unitPrice.value = p.price;
-      productResults.innerHTML = "";
-      calculateTotal();
-    };
-
-    productResults.appendChild(item);
+    table.innerHTML += `
+      <tr class="text-sm">
+        <td class="px-3 py-2 fw-semibold">${t.invoiceNumber}</td>
+        <td class="px-3 py-2">${created}</td>
+        <td class="px-3 py-2">${t.partnerName}</td>
+        <td class="px-3 py-2">${t.productName}</td>
+        <td class="px-3 py-2">${t.quantity}</td>
+        <td class="px-3 py-2 fw-semibold">${t.total} ${t.currency}</td>
+        <td class="px-3 py-2">
+          <span class="badge bg-${
+            t.status === "approved" ? "success" :
+            t.status === "rejected" ? "danger" :
+            "warning"
+          }">${t.status}</span>
+        </td>
+        <td class="px-3 py-2 text-end">
+          ${renderActions(d.id, t)}
+        </td>
+      </tr>
+    `;
   });
 }
 
-// ===============================
-// UTILS
-// ===============================
+/* ================================
+   ACTION BUTTONS
+================================ */
+function renderActions(id, t) {
 
-function calculateTotal() {
-  if (!selectedProduct || !txQty.value) return;
-  totalPrice.value = selectedProduct.price * txQty.value;
+  const canValidate =
+    ["admin", "directeur"].includes(currentUserData.role);
+
+  return `
+    <div class="dropdown">
+      <button class="btn btn-sm btn-light"
+              data-bs-toggle="dropdown">
+        <i class="bi bi-three-dots-vertical"></i>
+      </button>
+
+      <ul class="dropdown-menu dropdown-menu-end">
+
+        ${canValidate && t.status === "pending" ? `
+        <li><a class="dropdown-item" onclick="validateTx('${id}')">
+          <i class="bi bi-check-circle text-success"></i> Approuver
+        </a></li>` : ""}
+
+        ${canValidate && t.status === "pending" ? `
+        <li><a class="dropdown-item" onclick="rejectTx('${id}')">
+          <i class="bi bi-x-circle text-danger"></i> Rejeter
+        </a></li>` : ""}
+
+        ${t.status !== "approved" ? `
+        <li><a class="dropdown-item" onclick="editTx('${id}')">
+          <i class="bi bi-pencil-square text-primary"></i> Modifier
+        </a></li>` : ""}
+
+        <li><a class="dropdown-item text-danger" onclick="deleteTx('${id}')">
+          <i class="bi bi-trash"></i> Supprimer
+        </a></li>
+
+      </ul>
+    </div>
+  `;
 }
 
-function formatCurrency(value) {
-  return new Intl.NumberFormat("fr-FR").format(value) + " FCFA";
-}
+/* ================================
+   VALIDATE
+================================ */
+window.validateTx = async (id) => {
 
-function formatDate(date) {
-  return new Date(date).toLocaleDateString("fr-FR");
-}
+  if (!["admin","directeur"].includes(currentUserData.role)) return;
 
-function renderStatus(status) {
+  const snap = await getDoc(doc(db, "transactions", id));
+  const t = snap.data();
 
-  const map = {
-    PENDING: "badge bg-warning text-dark",
-    APPROVED: "badge bg-success",
-    REJECTED: "badge bg-danger"
-  };
+  if (t.status !== "pending") return;
 
-  return `<span class="${map[status]}">${status}</span>`;
-}
+  await updateDoc(doc(db, "inventory", t.productId), {
+    quantity: increment(-t.quantity)
+  });
 
-function resetForm() {
-  selectedProduct = null;
-  productSearch.value = "";
-  partnerSearch.value = "";
-  txQty.value = "";
-  unitPrice.value = "";
-  totalPrice.value = "";
-}
+  await updateDoc(doc(db, "transactions", id), {
+    status: "approved",
+    updatedAt: serverTimestamp()
+  });
+
+  loadTransactions();
+};
+
+/* ================================
+   REJECT
+================================ */
+window.rejectTx = async (id) => {
+
+  if (!["admin","directeur"].includes(currentUserData.role)) return;
+
+  await updateDoc(doc(db, "transactions", id), {
+    status: "rejected",
+    updatedAt: serverTimestamp()
+  });
+
+  loadTransactions();
+};
+
+/* ================================
+   EDIT
+================================ */
+window.editTx = async (id) => {
+
+  const snap = await getDoc(doc(db, "transactions", id));
+  const t = snap.data();
+
+  if (t.status === "approved") return;
+
+  editingId = id;
+  selectedProduct = productsCache.find(p => p.id === t.productId);
+
+  productSearch.value = t.productName;
+  partnerSearch.value = t.partnerName;
+  txQty.value = t.quantity;
+  unitPrice.value = `${t.unitPrice} ${t.currency}`;
+  updateTotal();
+
+  modal.show();
+};
+
+/* ================================
+   DELETE
+================================ */
+window.deleteTx = async (id) => {
+
+  if (!confirm("Supprimer cette transaction ?")) return;
+
+  await deleteDoc(doc(db, "transactions", id));
+  loadTransactions();
+};
+
+newTxBtn.onclick = () => modal.show();
