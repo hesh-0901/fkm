@@ -32,7 +32,6 @@ const userRoleEl = document.getElementById("userRole");
 
 const modalEl = document.getElementById("productModal");
 const modal = new bootstrap.Modal(modalEl);
-
 const saveBtn = document.getElementById("saveProductBtn");
 
 const pName = document.getElementById("pName");
@@ -89,38 +88,58 @@ logoutBtn.onclick = async () => {
 
 /* =========================
    LOAD INVENTORY
+   ➜ Version modernisée
+   ➜ Ajout numérotation
+   ➜ Actions en dropdown
 ========================= */
 async function loadInventory() {
+
   table.innerHTML = "";
   const snap = await getDocs(collection(db, "inventory"));
 
   if (snap.empty) {
     table.innerHTML = `
       <tr>
-        <td colspan="9" class="text-center text-muted">
+        <td colspan="9" class="text-center text-muted py-4">
           Aucun produit enregistré
         </td>
       </tr>`;
     return;
   }
 
+  let index = 1;
+
   snap.forEach((d) => {
+
     const p = d.data();
     const lowStock = p.quantity <= p.minQuantity;
 
     table.innerHTML += `
-      <tr>
-        <td>${p.name}</td>
-        <td>${p.category}</td>
-        <td>${p.quantity}</td>
-        <td>${p.minQuantity}</td>
-        <td>
+      <tr class="text-sm align-middle">
+
+        <!-- NUMERO -->
+        <td class="px-3 py-2 fw-semibold">${index++}</td>
+
+        <!-- PRODUIT -->
+        <td class="px-3 py-2">${p.name}</td>
+
+        <!-- CATEGORIE -->
+        <td class="px-3 py-2">${p.category}</td>
+
+        <!-- QUANTITE -->
+        <td class="px-3 py-2">${p.quantity}</td>
+
+        <!-- STOCK MIN -->
+        <td class="px-3 py-2">${p.minQuantity}</td>
+
+        <!-- PRIX -->
+        <td class="px-3 py-2">
           ${p.pricing?.usd ? p.pricing.usd + " USD" : ""}
           ${p.pricing?.cdf ? " / " + p.pricing.cdf + " CDF" : ""}
         </td>
-        <td>${p.createdBy?.name || "—"}</td>
-        <td>${p.createdAt?.toDate?.().toLocaleString() || "—"}</td>
-        <td>
+
+        <!-- STATUT -->
+        <td class="px-3 py-2">
           <span class="badge bg-${
             p.status === "PENDING"
               ? "warning"
@@ -131,20 +150,50 @@ async function loadInventory() {
             ${p.status || "OK"}
           </span>
         </td>
-        <td class="text-end">
-          ${
-            [ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role) &&
-            p.status === "PENDING"
-              ? `<button class="btn btn-sm btn-outline-success me-1"
-                   onclick="approve('${d.id}')">Valider</button>`
-              : ""
-          }
-          ${
-            currentUser.role === ROLES.DIRECTEUR
-              ? `<button class="btn btn-sm btn-outline-danger"
-                   onclick="removeItem('${d.id}')">Supprimer</button>`
-              : ""
-          }
+
+        <!-- ACTIONS -->
+        <td class="px-3 py-2 text-end">
+
+          <div class="dropdown">
+            <button class="btn btn-sm btn-light"
+                    data-bs-toggle="dropdown">
+              <i class="bi bi-three-dots-vertical"></i>
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end">
+
+              ${
+                [ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role) &&
+                p.status === "PENDING"
+                  ? `
+                  <li>
+                    <a class="dropdown-item"
+                       onclick="approve('${d.id}')">
+                      <i class="bi bi-check-circle me-2 text-success"></i>
+                      Valider
+                    </a>
+                  </li>
+                  `
+                  : ""
+              }
+
+              ${
+                currentUser.role === ROLES.DIRECTEUR
+                  ? `
+                  <li>
+                    <a class="dropdown-item text-danger"
+                       onclick="removeItem('${d.id}')">
+                      <i class="bi bi-trash me-2"></i>
+                      Supprimer
+                    </a>
+                  </li>
+                  `
+                  : ""
+              }
+
+            </ul>
+          </div>
+
         </td>
       </tr>
     `;
@@ -155,6 +204,7 @@ async function loadInventory() {
    CREATE PRODUCT
 ========================= */
 saveBtn.onclick = async () => {
+
   if (!currentUser) return;
 
   if (![ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) {
@@ -190,6 +240,7 @@ saveBtn.onclick = async () => {
    VALIDATE PRODUCT
 ========================= */
 window.approve = async (id) => {
+
   if (![ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) return;
 
   await updateDoc(doc(db, "inventory", id), {
@@ -204,6 +255,7 @@ window.approve = async (id) => {
    DELETE PRODUCT
 ========================= */
 window.removeItem = async (id) => {
+
   if (currentUser.role !== ROLES.DIRECTEUR) return;
   if (!confirm("Supprimer ce produit ?")) return;
 
