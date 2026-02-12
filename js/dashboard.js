@@ -12,34 +12,25 @@ const userNameEl = document.getElementById("userName");
 const userRoleEl = document.getElementById("userRole");
 const logoutBtn = document.getElementById("logoutBtn");
 
-const kpiProducts = document.getElementById("kpiProducts");
-const kpiLowStock = document.getElementById("kpiLowStock");
-const kpiPending = document.getElementById("kpiPending");
-const kpiApproved = document.getElementById("kpiApproved");
+const kpiContainer = document.getElementById("kpiContainer");
+const financeContainer = document.getElementById("financeContainer");
 
-const alertsList = document.getElementById("alertsList");
-const activityList = document.getElementById("activityList");
-const usersList = document.getElementById("usersList");
-
-let lineChart;
+let transactions = [];
+let inventory = [];
+let currentRange = "all";
 
 /* AUTH */
-onAuthStateChanged(auth, async user => {
+onAuthStateChanged(auth, async (user) => {
   if (!user) return location.replace("../login.html");
 
   const snap = await getDoc(doc(db, "users", user.uid));
-  const me = snap.data();
+  const data = snap.data();
 
-  userNameEl.textContent = me.name;
-  userRoleEl.textContent = me.fonction || me.role;
+  userNameEl.textContent = data.name;
+  userRoleEl.textContent = data.fonction;
 
-  await Promise.all([
-    loadKPIs(),
-    loadAlerts(),
-    loadActivity(),
-    loadUsers(),
-    loadLineChart()
-  ]);
+  await loadData();
+  renderDashboard();
 });
 
 /* LOGOUT */
@@ -48,130 +39,102 @@ logoutBtn.onclick = async () => {
   location.replace("../login.html");
 };
 
-/* KPIs */
-async function loadKPIs() {
+/* LOAD DATA */
+async function loadData() {
+  const txSnap = await getDocs(collection(db, "transactions"));
+  transactions = txSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
   const invSnap = await getDocs(collection(db, "inventory"));
-  let low = 0;
-
-  invSnap.forEach(d => {
-    const p = d.data();
-    if (p.quantity <= p.minQuantity) low++;
-  });
-
-  kpiProducts.textContent = invSnap.size;
-  kpiLowStock.textContent = low;
-
-  const txSnap = await getDocs(collection(db, "transactions"));
-  let pending = 0, approved = 0;
-
-  txSnap.forEach(d => {
-    const t = d.data();
-    if (t.status === "pending") pending++;
-    if (t.status === "approved") approved++;
-  });
-
-  kpiPending.textContent = pending;
-  kpiApproved.textContent = approved;
+  inventory = invSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-/* LINE CHART – flux dans le temps */
-async function loadLineChart() {
-  const txSnap = await getDocs(collection(db, "transactions"));
-  const map = {};
+/* FILTER */
+document.querySelectorAll(".filter-btn").forEach(btn => {
+  btn.onclick = () => {
+    currentRange = btn.dataset.range;
+    renderDashboard();
+  };
+});
 
-  txSnap.forEach(d => {
-    const t = d.data();
-    if (t.status !== "approved" || !t.createdAt) return;
+/* FILTER LOGIC */
+function filterTransactions() {
+  if (currentRange === "all") return transactions;
 
-    const date = t.createdAt.toDate().toISOString().slice(0, 10);
-    if (!map[date]) map[date] = { in: 0, out: 0 };
+  const now = new Date();
+  return transactions.filter(t => {
+    const date = t.createdAt?.toDate();
+    if (!date) return false;
 
-    map[date][t.type] += t.quantity;
-  });
+    if (currentRange === "today")
+      return date.toDateString() === now.toDateString();
 
-  const labels = Object.keys(map).sort();
-  const inData = labels.map(d => map[d].in);
-  const outData = labels.map(d => map[d].out);
-
-  const ctx = document.getElementById("txLineChart");
-
-  if (lineChart) lineChart.destroy();
-
-  lineChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "Entrées",
-          data: inData,
-          borderColor: "#2E7D32",
-          backgroundColor: "rgba(46,125,50,0.15)",
-          tension: 0.3,
-          fill: true
-        },
-        {
-          label: "Sorties",
-          data: outData,
-          borderColor: "#DC2626",
-          backgroundColor: "rgba(220,38,38,0.15)",
-          tension: 0.3,
-          fill: true
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { position: "bottom" }
-      }
-    }
+    const days = parseInt(currentRange);
+    const diff = (now - date) / (1000 * 60 * 60 * 24);
+    return diff <= days;
   });
 }
 
-/* ALERTS */
-async function loadAlerts() {
-  alertsList.innerHTML = "";
-  const invSnap = await getDocs(collection(db, "inventory"));
+/* RENDER */
+function renderDashboard() {
 
-  invSnap.forEach(d => {
-    const p = d.data();
-    if (p.quantity <= p.minQuantity) {
-      alertsList.innerHTML += `
-        <li class="text-danger flex items-center gap-2">
-          <i class="bi bi-exclamation-circle"></i>
-          ${p.name} : stock critique
-        </li>`;
-    }
-  });
+  const data = filterTransactions();
+
+  const total = data.length;
+  const approved = data.filter(t => t.status === "approved");
+  const pending = data.filter(t => t.status === "pending");
+  const rejected = data.filter(t => t.status === "rejected");
+
+  const sum = arr => arr.reduce((acc, t) => acc + (t.total || 0), 0);
+
+  renderKPIs(total, approved.length, pending.length, rejected.length);
+  renderFinance(sum(approved), sum(pending), sum(rejected));
+  renderCharts(approved.length, pending.length, rejected.length);
 }
 
-/* ACTIVITY */
-async function loadActivity() {
-  activityList.innerHTML = "";
-  const txSnap = await getDocs(collection(db, "transactions"));
-
-  txSnap.docs.slice(-10).reverse().forEach(d => {
-    const t = d.data();
-    activityList.innerHTML += `
-      <li class="flex items-center gap-2">
-        <i class="bi bi-arrow-repeat"></i>
-        ${t.createdBy?.name} • ${t.productName} • ${t.type} • ${t.quantity}
-      </li>`;
-  });
+/* KPI */
+function renderKPIs(total, approved, pending, rejected) {
+  kpiContainer.innerHTML = `
+    ${card("Total", total, "primary")}
+    ${card("Approved", approved, "emerald")}
+    ${card("Pending", pending, "amber")}
+    ${card("Rejected", rejected, "red")}
+  `;
 }
 
-/* USERS */
-async function loadUsers() {
-  usersList.innerHTML = "";
-  const usersSnap = await getDocs(collection(db, "users"));
+function renderFinance(a, p, r) {
+  financeContainer.innerHTML = `
+    ${card("CA Validé", a + " USD", "emerald")}
+    ${card("En attente", p + " USD", "amber")}
+    ${card("Refusé", r + " USD", "red")}
+    ${card("Stock critique", inventory.filter(i => i.quantity <= i.minQuantity).length, "danger")}
+  `;
+}
 
-  usersSnap.forEach(d => {
-    const u = d.data();
-    usersList.innerHTML += `
-      <li class="flex items-center gap-2">
-        <i class="bi bi-person"></i>
-        ${u.name} <span class="text-muted text-xs">(${u.role})</span>
-      </li>`;
-  });
+function card(title, value, color) {
+  return `
+    <div class="bg-white p-4 rounded-xl shadow-sm">
+      <div class="text-xs text-muted">${title}</div>
+      <div class="text-2xl font-bold text-${color}-600">${value}</div>
+    </div>
+  `;
+}
+
+/* CHARTS */
+function renderCharts(a, p, r) {
+
+  new ApexCharts(document.querySelector("#areaChart"), {
+    chart: { type: 'area', height: 300 },
+    series: [
+      { name: 'Approved', data: [a] },
+      { name: 'Pending', data: [p] },
+      { name: 'Rejected', data: [r] }
+    ],
+    xaxis: { categories: ['Transactions'] }
+  }).render();
+
+  new ApexCharts(document.querySelector("#donutChart"), {
+    chart: { type: 'donut', height: 300 },
+    series: [a, p, r],
+    labels: ['Approved', 'Pending', 'Rejected']
+  }).render();
 }
