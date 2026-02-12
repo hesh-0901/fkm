@@ -1,191 +1,146 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Inventaire | FKM ENERGY</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8" />
+<title>Inventaire | FKM ENERGY</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Bootstrap Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: "#0B5C6B",
-            primaryDark: "#083F4A",
-            success: "#2E7D32",
-            warning: "#D4A017",
-            danger: "#DC2626",
-            bg: "#F4F6FA",
-            muted: "#6B7280"
-          }
-        }
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: "#0B5C6B",
+        primaryDark: "#083F4A",
+        success: "#10B981",
+        warning: "#F59E0B",
+        danger: "#EF4444",
+        bg: "#F3F6FB",
+        muted: "#6B7280"
       }
     }
-  </script>
+  }
+}
+</script>
 
-  <link rel="icon" href="data:,">
+<link rel="icon" href="data:,">
 </head>
 
 <body class="bg-bg text-slate-800">
 
 <div class="flex min-h-screen">
 
-  <!-- SIDEBAR -->
-  <div id="sidebar-container"></div>
+<!-- SIDEBAR -->
+<div id="sidebar-container"></div>
 
-  <!-- MAIN -->
-  <main id="mainContent" class="flex-1 px-8 py-8 space-y-8 overflow-x-hidden">
+<!-- MAIN -->
+<main id="mainContent" class="flex-1 px-8 py-8 space-y-8 overflow-x-hidden">
 
-    <!-- TOPBAR -->
-    <div class="bg-white rounded-2xl shadow-md px-8 py-5 flex items-center justify-between border border-slate-100">
+<!-- TOPBAR -->
+<div class="bg-white rounded-2xl shadow-md px-8 py-5 flex items-center justify-between border border-slate-100">
 
-      <div class="flex items-center gap-4">
-        <button id="toggleSidebar"
-                class="p-2 rounded-lg border border-slate-200 hover:bg-slate-100 transition">
-          <i class="bi bi-list text-lg"></i>
-        </button>
-        <div>
-          <h1 class="text-xl font-bold tracking-tight">Inventaire</h1>
-          <p class="text-sm text-muted">Gestion des produits et contrôle des stocks</p>
-        </div>
-      </div>
+  <div class="flex items-center gap-4">
+    <button id="toggleSidebar"
+      class="p-2 rounded-lg border border-slate-200 hover:bg-slate-100 transition">
+      <i class="bi bi-list text-lg"></i>
+    </button>
 
-      <div class="flex items-center gap-6">
-        <div class="text-right">
-          <div id="userName" class="font-semibold leading-tight"></div>
-          <div id="userRole" class="text-sm text-muted"></div>
-        </div>
-
-        <button id="logoutBtn"
-                class="px-4 py-2 rounded-lg border border-red-200 text-danger hover:bg-red-50 transition">
-          <i class="bi bi-box-arrow-right text-lg"></i>
-        </button>
-      </div>
-    </div>
-
-    <!-- HEADER ACTIONS -->
-    <div class="flex items-center justify-between">
-      <div>
-        <h2 class="text-lg font-semibold">Liste des produits</h2>
-        <p class="text-xs text-muted">Vue détaillée et statut du stock</p>
-      </div>
-
-      <button id="addProductBtn"
-              class="d-none flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-success to-emerald-600 text-white shadow-md hover:scale-105 transition">
-        <i class="bi bi-plus-lg text-lg"></i>
-        Nouveau produit
-      </button>
-    </div>
-
-    <!-- TABLE -->
-    <div class="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
-
-      <div class="overflow-x-auto">
-
-        <table class="min-w-full text-sm">
-
-          <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b text-slate-600 text-xs uppercase tracking-wide">
-            <tr>
-              <th class="px-5 py-4">#</th>
-              <th class="px-5 py-4">Produit</th>
-              <th class="px-5 py-4">Catégorie</th>
-              <th class="px-5 py-4">Qté</th>
-              <th class="px-5 py-4">Stock min</th>
-              <th class="px-5 py-4">Prix</th>
-              <th class="px-5 py-4">Opérateur</th>
-              <th class="px-5 py-4">Créé le</th>
-              <th class="px-5 py-4">Statut</th>
-              <th class="px-5 py-4 text-end">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody id="inventoryTable" class="divide-y divide-slate-100 bg-white"></tbody>
-
-        </table>
-
-      </div>
-    </div>
-
-  </main>
-</div>
-
-<!-- MODAL -->
-<div class="modal fade" id="productModal" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content rounded-2xl shadow-xl border-0">
-
-      <div class="modal-header border-b bg-slate-50 rounded-t-2xl">
-        <h5 class="modal-title fw-semibold">
-          <i class="bi bi-box-seam me-2 text-primary"></i>
-          Produit
-        </h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
-      <div class="modal-body p-4">
-        <form id="productForm" class="row g-4">
-
-          <div class="col-md-6">
-            <label class="form-label text-sm fw-semibold">Nom</label>
-            <input id="pName" class="form-control rounded-lg" required>
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label text-sm fw-semibold">Catégorie</label>
-            <input id="pCategory" class="form-control rounded-lg" required>
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label text-sm fw-semibold">Quantité</label>
-            <input id="pQty" type="number" min="0" class="form-control rounded-lg" required>
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label text-sm fw-semibold">Stock minimum</label>
-            <input id="pMinQty" type="number" min="0" value="0" class="form-control rounded-lg">
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label text-sm fw-semibold">Devise</label>
-            <select id="pCurrency" class="form-select rounded-lg">
-              <option value="USD">USD</option>
-              <option value="CDF">CDF</option>
-              <option value="BOTH">USD & CDF</option>
-            </select>
-          </div>
-
-          <div class="col-md-6" id="usdBlock">
-            <label class="form-label text-sm fw-semibold">Prix USD</label>
-            <input id="pUsd" type="number" min="0" class="form-control rounded-lg">
-          </div>
-
-          <div class="col-md-6 d-none" id="cdfBlock">
-            <label class="form-label text-sm fw-semibold">Prix CDF</label>
-            <input id="pCdf" type="number" min="0" class="form-control rounded-lg">
-          </div>
-
-        </form>
-      </div>
-
-      <div class="modal-footer bg-slate-50 rounded-b-2xl">
-        <button class="btn btn-outline-secondary rounded-lg px-4" data-bs-dismiss="modal">
-          Annuler
-        </button>
-        <button class="btn btn-success rounded-lg px-4" id="saveProductBtn">
-          Enregistrer
-        </button>
-      </div>
-
+    <div>
+      <h1 class="text-xl font-bold">Inventaire</h1>
+      <p class="text-sm text-muted">Gestion intelligente des stocks</p>
     </div>
   </div>
+
+  <div class="flex items-center gap-6">
+    <div class="text-right">
+      <div id="userName" class="font-semibold"></div>
+      <div id="userRole" class="text-sm text-muted"></div>
+    </div>
+
+    <button id="logoutBtn"
+      class="px-4 py-2 rounded-lg border border-red-200 text-danger hover:bg-red-50 transition">
+      <i class="bi bi-box-arrow-right text-lg"></i>
+    </button>
+  </div>
+</div>
+
+<!-- KPI BAR -->
+<div class="grid md:grid-cols-4 gap-6">
+
+  <div class="bg-gradient-to-br from-primary to-primaryDark text-white rounded-2xl p-6 shadow-lg">
+    <p class="text-sm opacity-80">Produits</p>
+    <h2 id="totalProducts" class="text-3xl font-bold mt-2">0</h2>
+  </div>
+
+  <div class="bg-gradient-to-br from-red-500 to-red-600 text-white rounded-2xl p-6 shadow-lg">
+    <p class="text-sm opacity-80">Stock critique</p>
+    <h2 id="criticalCount" class="text-3xl font-bold mt-2">0</h2>
+  </div>
+
+  <div class="bg-gradient-to-br from-amber-400 to-amber-600 text-white rounded-2xl p-6 shadow-lg">
+    <p class="text-sm opacity-90">En attente</p>
+    <h2 id="pendingCount" class="text-3xl font-bold mt-2">0</h2>
+  </div>
+
+  <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 text-white rounded-2xl p-6 shadow-lg">
+    <p class="text-sm opacity-90">Validés</p>
+    <h2 id="validatedCount" class="text-3xl font-bold mt-2">0</h2>
+  </div>
+
+</div>
+
+<!-- HEADER ACTIONS -->
+<div class="flex items-center justify-between">
+
+  <div>
+    <h2 class="text-lg font-semibold">Liste des produits</h2>
+    <p class="text-xs text-muted">Visualisation en temps réel</p>
+  </div>
+
+  <div class="flex items-center gap-4">
+    <input id="searchInput"
+      placeholder="Rechercher produit..."
+      class="px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary focus:outline-none text-sm">
+
+    <button id="addProductBtn"
+      class="d-none flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-success to-emerald-600 text-white shadow-md hover:scale-105 transition">
+      <i class="bi bi-plus-lg text-lg"></i>
+      Nouveau produit
+    </button>
+  </div>
+</div>
+
+<!-- TABLE -->
+<div class="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
+
+<div class="overflow-x-auto">
+
+<table class="min-w-full text-sm">
+
+<thead class="bg-slate-50 border-b text-xs uppercase tracking-wide text-slate-500">
+<tr>
+<th class="px-5 py-4">#</th>
+<th class="px-5 py-4">Produit</th>
+<th class="px-5 py-4">Catégorie</th>
+<th class="px-5 py-4">Qté</th>
+<th class="px-5 py-4">Min</th>
+<th class="px-5 py-4">Prix</th>
+<th class="px-5 py-4">Statut</th>
+<th class="px-5 py-4 text-end">Actions</th>
+</tr>
+</thead>
+
+<tbody id="inventoryTable" class="divide-y divide-slate-100"></tbody>
+
+</table>
+</div>
+</div>
+
+</main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
