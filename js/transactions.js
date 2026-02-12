@@ -13,7 +13,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ==========================================================
-   VARIABLES DOM
+   DOM
 ========================================================== */
 const table = document.getElementById("txTable");
 const modal = new bootstrap.Modal(document.getElementById("txModal"));
@@ -31,21 +31,18 @@ const unitPrice = document.getElementById("unitPrice");
 const totalPrice = document.getElementById("totalPrice");
 
 /* ==========================================================
-   VARIABLES LOGIQUE
+   VARIABLES
 ========================================================== */
 let productsCache = [];
 let clientsCache = [];
 let selectedProduct = null;
 let editingId = null;
-let currentUser = null;
 
 /* ==========================================================
    AUTH
 ========================================================== */
 onAuthStateChanged(auth, async (user) => {
   if (!user) return location.replace("../login.html");
-
-  currentUser = user;
   newTxBtn.classList.remove("d-none");
 
   await preloadData();
@@ -53,18 +50,16 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 /* ==========================================================
-   PRELOAD PRODUITS + CLIENTS
+   PRELOAD DATA
 ========================================================== */
 async function preloadData() {
 
-  // Produits
   const pSnap = await getDocs(collection(db, "inventory"));
   productsCache = [];
   pSnap.forEach(d => {
     productsCache.push({ id: d.id, ...d.data() });
   });
 
-  // Clients actifs
   const cSnap = await getDocs(collection(db, "clients"));
   clientsCache = [];
   cSnap.forEach(d => {
@@ -72,6 +67,34 @@ async function preloadData() {
       clientsCache.push({ id: d.id, ...d.data() });
     }
   });
+}
+
+/* ==========================================================
+   FACTURE FORMAT COURT
+   FKM-IN-260212001
+========================================================== */
+async function generateInvoiceNumber() {
+
+  const today = new Date();
+
+  const yy = String(today.getFullYear()).slice(2);
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+
+  const base = `${yy}${mm}${dd}`;
+
+  const snap = await getDocs(collection(db, "transactions"));
+
+  let countToday = 0;
+
+  snap.forEach(d => {
+    const inv = d.data().invoiceNumber;
+    if (inv && inv.includes(base)) countToday++;
+  });
+
+  const sequence = String(countToday + 1).padStart(3, "0");
+
+  return `FKM-IN-${base}${sequence}`;
 }
 
 /* ==========================================================
@@ -97,7 +120,9 @@ productSearch.oninput = () => {
         productResults.innerHTML = "";
 
         const price = p.pricing?.usd || p.pricing?.cdf || 0;
-        unitPrice.value = price;
+        const currency = p.pricing?.usd ? "USD" : "CDF";
+
+        unitPrice.value = `${price} ${currency}`;
 
         updateTotal();
       };
@@ -107,37 +132,17 @@ productSearch.oninput = () => {
 };
 
 /* ==========================================================
-   RECHERCHE CLIENT
-========================================================== */
-partnerSearch.oninput = () => {
-
-  const term = partnerSearch.value.toLowerCase();
-  partnerResults.innerHTML = "";
-
-  clientsCache
-    .filter(c => c.name.toLowerCase().includes(term))
-    .forEach(c => {
-
-      const btn = document.createElement("button");
-      btn.className = "list-group-item list-group-item-action";
-      btn.textContent = c.name;
-
-      btn.onclick = () => {
-        partnerSearch.value = c.name;
-        partnerResults.innerHTML = "";
-      };
-
-      partnerResults.appendChild(btn);
-    });
-};
-
-/* ==========================================================
-   CALCUL TOTAL AUTOMATIQUE
+   CALCUL TOTAL
 ========================================================== */
 function updateTotal() {
+
   const qty = Number(txQty.value) || 0;
-  const price = Number(unitPrice.value) || 0;
-  totalPrice.value = qty * price;
+  const priceRaw = unitPrice.value.split(" ")[0];
+  const currency = unitPrice.value.split(" ")[1] || "";
+
+  const total = qty * Number(priceRaw);
+
+  totalPrice.value = `${total} ${currency}`;
 }
 
 txQty.oninput = updateTotal;
@@ -150,14 +155,17 @@ saveBtn.onclick = async () => {
   if (!selectedProduct) return;
 
   const quantity = Number(txQty.value);
-  const total = quantity * Number(unitPrice.value);
+  const price = selectedProduct.pricing?.usd || selectedProduct.pricing?.cdf || 0;
+  const currency = selectedProduct.pricing?.usd ? "USD" : "CDF";
+  const total = quantity * price;
 
   const data = {
     productId: selectedProduct.id,
     productName: selectedProduct.name,
     quantity,
-    unitPrice: Number(unitPrice.value),
+    unitPrice: price,
     total,
+    currency,
     partnerName: partnerSearch.value,
     updatedAt: serverTimestamp()
   };
@@ -169,13 +177,11 @@ saveBtn.onclick = async () => {
 
   } else {
 
-    const year = new Date().getFullYear();
-    const unique = Date.now();
+    const invoiceNumber = await generateInvoiceNumber();
 
     await addDoc(collection(db, "transactions"), {
       ...data,
-      txNumber: `TX-${year}-${unique}`,
-      invoiceNumber: `INV-${year}-${unique}`,
+      invoiceNumber,
       status: "pending",
       createdAt: serverTimestamp()
     });
@@ -197,19 +203,17 @@ async function loadTransactions() {
   const snap = await getDocs(collection(db, "transactions"));
 
   snap.forEach(d => {
+
     const t = d.data();
 
     table.innerHTML += `
       <tr>
-        <td class="px-4 py-3">${t.txNumber}</td>
-        <td class="px-4 py-3">${t.invoiceNumber}</td>
-        <td class="px-4 py-3">
-          ${t.createdAt?.toDate().toLocaleDateString() || "-"}
-        </td>
+        <td class="px-4 py-3 fw-bold">${t.invoiceNumber}</td>
+        <td class="px-4 py-3">${t.createdAt?.toDate().toLocaleDateString() || "-"}</td>
         <td class="px-4 py-3">${t.partnerName}</td>
         <td class="px-4 py-3">${t.productName}</td>
         <td class="px-4 py-3">${t.quantity}</td>
-        <td class="px-4 py-3">${t.total}</td>
+        <td class="px-4 py-3">${t.total} ${t.currency}</td>
         <td class="px-4 py-3">
           <span class="badge bg-${
             t.status === "approved" ? "success" :
@@ -230,28 +234,28 @@ async function loadTransactions() {
               <li>
                 <a class="dropdown-item"
                    onclick="validateTx('${d.id}')">
-                  Approuver
+                   Approuver
                 </a>
               </li>
 
               <li>
                 <a class="dropdown-item"
                    onclick="rejectTx('${d.id}')">
-                  Rejeter
+                   Rejeter
                 </a>
               </li>
 
               <li>
                 <a class="dropdown-item"
-                   onclick="editTx('${d.id}')">
-                  Modifier
+                   onclick="printInvoice('${d.id}')">
+                   Imprimer
                 </a>
               </li>
 
               <li>
-                <a class="dropdown-item"
+                <a class="dropdown-item text-danger"
                    onclick="deleteTx('${d.id}')">
-                  Supprimer
+                   Supprimer
                 </a>
               </li>
 
@@ -265,21 +269,27 @@ async function loadTransactions() {
 }
 
 /* ==========================================================
-   EDIT
+   IMPRESSION
 ========================================================== */
-window.editTx = async (id) => {
+window.printInvoice = async (id) => {
 
   const snap = await getDoc(doc(db, "transactions", id));
   const t = snap.data();
 
-  editingId = id;
-  productSearch.value = t.productName;
-  partnerSearch.value = t.partnerName;
-  txQty.value = t.quantity;
-  unitPrice.value = t.unitPrice;
-  totalPrice.value = t.total;
+  const win = window.open("", "_blank");
 
-  modal.show();
+  win.document.write(`
+    <h3>FKM ENERGY</h3>
+    <hr>
+    <p><strong>Facture :</strong> ${t.invoiceNumber}</p>
+    <p><strong>Date :</strong> ${new Date().toLocaleDateString()}</p>
+    <p><strong>Client :</strong> ${t.partnerName}</p>
+    <p><strong>Produit :</strong> ${t.productName}</p>
+    <p><strong>Quantité :</strong> ${t.quantity}</p>
+    <p><strong>Total :</strong> ${t.total} ${t.currency}</p>
+  `);
+
+  win.print();
 };
 
 /* ==========================================================
