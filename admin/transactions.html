@@ -13,23 +13,6 @@
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: "#0B5C6B",
-            primaryDark: "#083F4A",
-            success: "#2E7D32",
-            warning: "#D4A017",
-            danger: "#DC2626",
-            bg: "#F5F7FA",
-            muted: "#6B7280"
-          }
-        }
-      }
-    }
-  </script>
 
   <link rel="icon" href="data:,">
 </head>
@@ -42,56 +25,58 @@
   <div id="sidebar-container"></div>
 
   <!-- MAIN -->
-  <main id="mainContent" class="flex-1 px-6 py-6 space-y-6 overflow-x-hidden">
+  <main class="flex-1 px-6 py-6 space-y-6 overflow-x-hidden">
 
     <!-- TOPBAR -->
-    <!-- TOPBAR -->
-<div class="bg-white rounded-xl shadow-sm px-6 py-4 flex items-center justify-between">
-  
-  <div class="flex items-center gap-3">
-    <button id="toggleSidebar"
-            class="p-2 rounded-lg border border-slate-200 hover:bg-slate-100 transition">
-      <i class="bi bi-list"></i>
-    </button>
+    <div class="bg-white rounded-xl shadow-sm px-6 py-4 flex items-center justify-between">
 
-    <div>
-      <h1 class="text-lg font-semibold leading-tight">Transactions</h1>
-      <p class="text-xs text-muted">Ventes & gestion commerciale</p>
+      <div class="flex items-center gap-3">
+        <button id="toggleSidebar"
+                class="p-2 rounded-lg border border-slate-200 hover:bg-slate-100">
+          <i class="bi bi-list"></i>
+        </button>
+
+        <div>
+          <h1 class="text-lg font-semibold leading-tight">Transactions</h1>
+          <p class="text-xs text-muted">Ventes & gestion commerciale</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-6">
+        <div class="text-right">
+          <div id="userName" class="font-semibold leading-tight">—</div>
+          <div id="userFunction" class="text-sm text-muted">—</div>
+        </div>
+
+        <button id="newTxBtn"
+                class="d-none px-4 py-2 rounded-lg bg-success text-white hover:bg-green-700">
+          <i class="bi bi-plus-lg me-1"></i>
+          Nouvelle transaction
+        </button>
+
+        <button id="logoutBtn"
+                class="px-4 py-2 rounded-lg border border-red-200 text-danger hover:bg-red-50">
+          <i class="bi bi-box-arrow-right"></i>
+        </button>
+      </div>
     </div>
-  </div>
-
-  <!-- UTILISATEUR -->
-  <div class="flex items-center gap-6">
-    <div class="text-right">
-      <div id="userName" class="font-semibold leading-tight">—</div>
-      <div id="userRole" class="text-sm text-muted">—</div>
-    </div>
-
-    <button id="logoutBtn"
-            class="px-4 py-2 rounded-lg border border-red-200 text-danger hover:bg-red-50 transition">
-      <i class="bi bi-box-arrow-right"></i>
-    </button>
-  </div>
-
-</div>
-
 
     <!-- TABLE -->
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
       <div class="overflow-x-auto">
         <table class="min-w-full text-sm">
-        <thead class="bg-slate-50 border-b">
-          <tr class="text-left text-slate-600">
-            <th class="px-4 py-3">Facture</th>
-            <th class="px-4 py-3">Date</th>
-            <th class="px-4 py-3">Client</th>
-            <th class="px-4 py-3">Produit</th>
-            <th class="px-4 py-3">Qté</th>
-            <th class="px-4 py-3">Total</th>
-            <th class="px-4 py-3">Statut</th>
-            <th class="px-4 py-3 text-end">Actions</th>
-          </tr>
-        </thead>
+          <thead class="bg-slate-50 border-b">
+            <tr class="text-left text-slate-600">
+              <th class="px-4 py-3">Facture</th>
+              <th class="px-4 py-3">Date</th>
+              <th class="px-4 py-3">Client</th>
+              <th class="px-4 py-3">Produit</th>
+              <th class="px-4 py-3">Qté</th>
+              <th class="px-4 py-3">Total</th>
+              <th class="px-4 py-3">Statut</th>
+              <th class="px-4 py-3 text-end">Actions</th>
+            </tr>
+          </thead>
           <tbody id="txTable" class="divide-y"></tbody>
         </table>
       </div>
@@ -100,7 +85,7 @@
   </main>
 </div>
 
-<!-- ================= MODAL PROFESSIONNEL ================= -->
+<!-- MODAL -->
 <div class="modal fade" id="txModal" tabindex="-1">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content rounded-xl">
@@ -116,11 +101,9 @@
       <div class="modal-body">
         <form id="txForm" class="row g-3">
 
-          <!-- PRODUIT -->
           <div class="col-md-6">
             <label class="form-label">Produit</label>
-            <input type="text"
-                   id="productSearch"
+            <input type="text" id="productSearch"
                    class="form-control"
                    placeholder="Rechercher un produit...">
             <div id="productResults"
@@ -128,36 +111,24 @@
                  style="max-height:200px;overflow-y:auto"></div>
           </div>
 
-          <!-- CLIENT -->
           <div class="col-md-6">
             <label class="form-label">Client</label>
-            <input type="text"
-                   id="partnerSearch"
+            <input type="text" id="partnerSearch"
                    class="form-control"
                    placeholder="Rechercher ou saisir le nom">
-            <div id="partnerResults"
-                 class="list-group mt-1"
-                 style="max-height:200px;overflow-y:auto"></div>
           </div>
 
-          <!-- QUANTITE -->
           <div class="col-md-4">
             <label class="form-label">Quantité</label>
-            <input id="txQty"
-                   type="number"
-                   min="1"
+            <input id="txQty" type="number" min="1"
                    class="form-control">
           </div>
 
-          <!-- PRIX -->
           <div class="col-md-4">
             <label class="form-label">Prix unitaire</label>
-            <input id="unitPrice"
-                   class="form-control"
-                   readonly>
+            <input id="unitPrice" class="form-control" readonly>
           </div>
 
-          <!-- TOTAL -->
           <div class="col-md-4">
             <label class="form-label">Total</label>
             <input id="totalPrice"
