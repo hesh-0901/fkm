@@ -41,8 +41,8 @@ tailwind.config = {
 <!-- MAIN -->
 <main id="mainContent" class="flex-1 px-8 py-8 space-y-8 overflow-x-hidden">
 
-<!-- ================= TOPBAR ================= -->
-<div class="bg-white rounded-2xl shadow-md px-8 py-5 flex items-center justify-between border border-slate-100">
+<!-- ================= TOPBAR (IDENTIQUE AUX AUTRES PAGES) ================= -->
+<div class="bg-white rounded-2xl shadow-sm px-8 py-5 flex items-center justify-between border border-slate-100">
 
   <div class="flex items-center gap-4">
     <button id="toggleSidebar"
@@ -59,22 +59,18 @@ tailwind.config = {
   <div class="flex items-center gap-6">
     <div class="text-right">
       <div id="userName" class="font-semibold">Jean Mukendi</div>
-      <div id="userRole" class="text-sm text-muted">Directeur Financier</div>
+      <div id="userRole" class="text-sm text-muted">Directeur</div>
     </div>
-
-    <button class="px-5 py-2 rounded-xl bg-primary text-white shadow-lg hover:bg-primaryDark transition flex items-center gap-2">
-      <i class="bi bi-briefcase-fill text-lg"></i>
-      Portefeuille Clients
-    </button>
   </div>
+
 </div>
 
 <!-- ================= FILTRES ================= -->
 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-wrap items-center gap-6">
 
   <div class="flex items-center gap-3 text-primary">
-    <i class="bi bi-calendar-range text-xl"></i>
-    <span class="font-semibold text-sm">Filtre période :</span>
+    <i class="bi bi-calendar-range text-lg"></i>
+    <span class="font-semibold text-sm">Période :</span>
   </div>
 
   <select class="px-4 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-primary">
@@ -88,94 +84,115 @@ tailwind.config = {
 
 </div>
 
-<!-- ================= KPI PREMIUM ================= -->
+<!-- ================= KPI SECTION ================= -->
 <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
 
-<div class="relative bg-gradient-to-br from-primary to-primaryDark text-white rounded-2xl shadow-xl p-6 transform hover:-translate-y-1 transition">
-  <i class="bi bi-currency-dollar absolute -right-6 -top-6 text-white/10 text-8xl"></i>
+<!-- CA USD -->
+<div class="relative bg-gradient-to-br from-primary to-primaryDark text-white rounded-2xl shadow-lg p-6 overflow-hidden">
+
+  <div class="absolute right-6 top-6 text-white/20 text-5xl">
+    <i class="bi bi-currency-dollar"></i>
+  </div>
+
   <p class="text-sm opacity-80">Chiffre d'Affaires USD</p>
-  <h2 class="text-3xl font-bold mt-2">$ 125,400</h2>
-  <p class="text-xs mt-1 opacity-70">+12% vs période précédente</p>
+  <h2 class="text-3xl font-bold mt-3">$ 125,400</h2>
+  <p class="text-xs opacity-70 mt-1">+12% vs période précédente</p>
+
 </div>
 
-<div class="relative bg-gradient-to-br from-emerald-500 to-emerald-700 text-white rounded-2xl shadow-xl p-6 transform hover:-translate-y-1 transition">
-  <i class="bi bi-cash-stack absolute -right-6 -top-6 text-white/10 text-8xl"></i>
+<!-- CA CDF -->
+<div class="relative bg-gradient-to-br from-emerald-500 to-emerald-700 text-white rounded-2xl shadow-lg p-6 overflow-hidden">
+
+  <div class="absolute right-6 top-6 text-white/20 text-5xl">
+    <i class="bi bi-cash-stack"></i>
+  </div>
+
   <p class="text-sm opacity-80">Chiffre d'Affaires CDF</p>
-  <h2 class="text-3xl font-bold mt-2">325M CDF</h2>
+  <h2 class="text-3xl font-bold mt-3">325M CDF</h2>
+
 </div>
 
-<div class="relative bg-white rounded-2xl shadow-md border border-slate-100 p-6 hover:shadow-xl transition">
-  <i class="bi bi-box-seam absolute -right-6 -top-6 text-primary/10 text-8xl"></i>
+<!-- STOCK USD -->
+<div class="relative bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+
+  <div class="absolute right-6 top-6 text-primary/20 text-5xl">
+    <i class="bi bi-box-seam"></i>
+  </div>
+
   <p class="text-sm text-muted">Valeur Stock USD</p>
-  <h2 class="text-2xl font-bold mt-2">$ 82,300</h2>
+  <h2 class="text-2xl font-bold mt-3">$ 82,300</h2>
+
 </div>
 
-<div class="relative bg-white rounded-2xl shadow-md border border-slate-100 p-6 hover:shadow-xl transition">
-  <i class="bi bi-box absolute -right-6 -top-6 text-primary/10 text-8xl"></i>
+<!-- STOCK CDF -->
+<div class="relative bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+
+  <div class="absolute right-6 top-6 text-primary/20 text-5xl">
+    <i class="bi bi-box"></i>
+  </div>
+
   <p class="text-sm text-muted">Valeur Stock CDF</p>
-  <h2 class="text-2xl font-bold mt-2">190M CDF</h2>
-</div>
+  <h2 class="text-2xl font-bold mt-3">190M CDF</h2>
 
 </div>
 
-<!-- ================= ANALYSE ================= -->
+</div>
+
+<!-- ================= ANALYTICS ================= -->
 <div class="grid lg:grid-cols-2 gap-6">
 
-<div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
-  <div class="flex items-center justify-between mb-4">
+<!-- COURBE -->
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+  <div class="flex items-center justify-between mb-6">
     <h3 class="font-semibold">Évolution des ventes</h3>
-    <i class="bi bi-graph-up-arrow text-primary text-3xl"></i>
+    <i class="bi bi-graph-up-arrow text-primary text-2xl"></i>
   </div>
   <div id="salesChart"></div>
 </div>
 
-<div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
-  <div class="flex items-center justify-between mb-4">
-    <h3 class="font-semibold">Top Produits</h3>
-    <i class="bi bi-bar-chart-line-fill text-primary text-3xl"></i>
+<!-- PRODUITS -->
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h3 class="font-semibold">Produits les plus vendus</h3>
+    <i class="bi bi-bar-chart-line-fill text-primary text-2xl"></i>
   </div>
   <div id="productsChart"></div>
 </div>
 
 </div>
 
-<!-- ================= TOP VENDEUR ================= -->
-<div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
-  <div class="flex items-center justify-between mb-4">
-    <h3 class="font-semibold">Meilleur vendeur</h3>
-    <i class="bi bi-person-badge-fill text-primary text-3xl"></i>
-  </div>
-  <div class="flex justify-between text-sm">
-    <span>Jean Mukendi</span>
-    <span class="font-semibold text-primary">$ 68,000</span>
-  </div>
-</div>
+<!-- ================= EXPORT CENTER ================= -->
+<div class="bg-gradient-to-r from-primary to-primaryDark text-white rounded-2xl shadow-xl p-8">
 
-<!-- ================= EXPORT PREMIUM ================= -->
-<div class="bg-gradient-to-r from-primary to-primaryDark text-white rounded-2xl shadow-2xl p-8">
-
-  <div class="flex items-center justify-between flex-wrap gap-6">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
 
     <div>
       <h3 class="text-lg font-semibold flex items-center gap-3">
-        <i class="bi bi-cloud-arrow-down-fill text-3xl"></i>
+        <i class="bi bi-cloud-arrow-down-fill text-2xl"></i>
         Centre de Téléchargement
       </h3>
       <p class="text-sm opacity-80 mt-2">
-        Exportation officielle des rapports financiers
+        Générer et exporter les rapports financiers officiels.
       </p>
     </div>
 
-    <div class="flex gap-4">
-      <button class="bg-white text-primary px-6 py-3 rounded-xl shadow-lg hover:scale-105 transition flex items-center gap-2">
-        <i class="bi bi-file-earmark-pdf-fill text-lg"></i>
+    <div class="flex gap-4 flex-wrap">
+
+      <button class="bg-white text-primary px-6 py-3 rounded-xl shadow-md hover:scale-105 transition flex items-center gap-2">
+        <i class="bi bi-file-earmark-pdf-fill"></i>
         Export PDF
       </button>
 
-      <button class="bg-white text-primary px-6 py-3 rounded-xl shadow-lg hover:scale-105 transition flex items-center gap-2">
-        <i class="bi bi-file-earmark-excel-fill text-lg"></i>
+      <button class="bg-white text-primary px-6 py-3 rounded-xl shadow-md hover:scale-105 transition flex items-center gap-2">
+        <i class="bi bi-file-earmark-excel-fill"></i>
         Export Excel
       </button>
+
+      <button class="bg-white text-primary px-6 py-3 rounded-xl shadow-md hover:scale-105 transition flex items-center gap-2">
+        <i class="bi bi-briefcase-fill"></i>
+        Portefeuille Clients
+      </button>
+
     </div>
 
   </div>
@@ -188,26 +205,29 @@ tailwind.config = {
 <script src="../js/sidebar.js"></script>
 
 <script>
-/* SIMULATION GRAPHIQUE */
 new ApexCharts(document.querySelector("#salesChart"), {
   series: [{
-    name: 'Ventes',
+    name: "Ventes",
     data: [12000, 15000, 18000, 16000, 22000, 25000]
   }],
-  chart: { type: 'line', height: 300 },
-  colors: ['#0B5C6B'],
-  stroke: { curve: 'smooth' },
-  xaxis: { categories: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'] }
+  chart: { type: "area", height: 320, toolbar: { show: false } },
+  colors: ["#0B5C6B"],
+  fill: { type: "gradient", gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05 } },
+  stroke: { curve: "smooth", width: 3 },
+  xaxis: { categories: ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun"] },
+  grid: { strokeDashArray: 4 }
 }).render();
 
 new ApexCharts(document.querySelector("#productsChart"), {
   series: [{
-    name: 'Ventes',
+    name: "Ventes",
     data: [45000, 32000, 21000]
   }],
-  chart: { type: 'bar', height: 300 },
-  colors: ['#0B5C6B'],
-  xaxis: { categories: ['Groupe 20KVA', 'Panneau X200', 'Batterie Pro'] }
+  chart: { type: "bar", height: 320, toolbar: { show: false } },
+  colors: ["#0B5C6B"],
+  plotOptions: { bar: { borderRadius: 8 } },
+  xaxis: { categories: ["Groupe 20KVA", "Panneau X200", "Batterie Pro"] },
+  grid: { strokeDashArray: 4 }
 }).render();
 </script>
 
