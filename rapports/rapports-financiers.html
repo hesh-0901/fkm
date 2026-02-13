@@ -224,5 +224,43 @@ new ApexCharts(document.querySelector("#sellersChart"), {
 }).render();
 </script>
 
+  <script type="module">
+  import { auth } from "../js/firebase.config.js";
+  import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+  /* ================================
+     SIDEBAR TOGGLE
+  ================================= */
+
+  const toggleBtn = document.getElementById("toggleSidebar");
+  const sidebar = document.getElementById("sidebar-container");
+  const mainContent = document.getElementById("mainContent");
+
+  toggleBtn.addEventListener("click", () => {
+
+    sidebar.classList.toggle("collapsed");
+
+    /* Ajustement marge si sidebar gère largeur fixe */
+    if (sidebar.classList.contains("collapsed")) {
+      mainContent.classList.remove("ml-64");
+    } else {
+      mainContent.classList.add("ml-64");
+    }
+  });
+
+  /* ================================
+     LOGOUT
+  ================================= */
+
+  const logoutBtn = document.querySelector(".bi-box-arrow-right").closest("button");
+
+  logoutBtn.addEventListener("click", async () => {
+    await signOut(auth);
+    window.location.href = "../login.html";
+  });
+
+</script>
+
+
 </body>
 </html>
