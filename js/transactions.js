@@ -48,16 +48,11 @@ const quickDateFilter = document.getElementById("quickDateFilter");
 const startDate = document.getElementById("startDate");
 const endDate = document.getElementById("endDate");
 const resetFilters = document.getElementById("resetFilters");
-
 /* ============================================================
    STATE VARIABLES
 ============================================================ */
-
-let productsCache = [];
-let transactionsCache = [];
-let selectedProduct = null;
-let editingId = null;
-let currentUserData = null;
+let cartItems = [];
+let selectedMarketer = null;
 
 /* ============================================================
    AUTHENTICATION HANDLING
@@ -98,54 +93,6 @@ async function preloadProducts() {
 }
 
 /* ============================================================
-   PRODUCT SEARCH AUTOCOMPLETE
-============================================================ */
-
-productSearch.oninput = () => {
-
-  const term = productSearch.value.toLowerCase();
-  productResults.innerHTML = "";
-
-  if (!term) return;
-
-  productsCache
-    .filter(p => p.name.toLowerCase().includes(term))
-    .forEach(p => {
-
-      const btn = document.createElement("button");
-      btn.className = "list-group-item list-group-item-action text-sm";
-      btn.textContent = p.name;
-
-      btn.onclick = () => {
-
-        selectedProduct = p;
-        productSearch.value = p.name;
-        productResults.innerHTML = "";
-
-        const price = p.pricing?.usd || p.pricing?.cdf || 0;
-        const currency = p.pricing?.usd ? "USD" : "CDF";
-
-        unitPrice.value = `${price} ${currency}`;
-        updateTotal();
-      };
-
-      productResults.appendChild(btn);
-    });
-};
-
-/* ============================================================
-   TOTAL CALCULATION
-============================================================ */
-
-function updateTotal() {
-  const qty = Number(txQty.value) || 0;
-  const [price, currency] = unitPrice.value.split(" ");
-  totalPrice.value = `${qty * Number(price || 0)} ${currency || ""}`;
-}
-
-txQty.oninput = updateTotal;
-
-/* ============================================================
    GENERATE UNIQUE INVOICE NUMBER
 ============================================================ */
 
@@ -177,86 +124,6 @@ async function generateInvoiceNumber() {
 
   return `IN-FKM-${day}${month}${sequence}`;
 }
-
-
-/* ============================================================
-   SAVE / UPDATE TRANSACTION
-============================================================ */
-saveBtn.onclick = async () => {
-
-  if (!selectedProduct || !txQty.value || !partnerSearch.value) {
-    alert("Veuillez remplir tous les champs.");
-    return;
-  }
-
-  // 🔒 Sécurisation stock
-  if (selectedProduct.quantity === 0) {
-    alert("Stock épuisé.");
-    return;
-  }
-
-  const quantity = Number(txQty.value);
-
-  if (quantity > selectedProduct.quantity) {
-    alert("Stock insuffisant.");
-    return;
-  }
-
-  let unitPriceUSD = 0;
-
-  // 💵 Si prix déjà en USD
-  if (selectedProduct.pricing?.usd) {
-    unitPriceUSD = selectedProduct.pricing.usd;
-  }
-
-  // 💱 Si prix en CDF → conversion USD
-  else if (selectedProduct.pricing?.cdf) {
-
-    const rateSnap = await getDoc(doc(db, "exchange_rates", "current"));
-    const rate = rateSnap.data()?.USD_CDF;
-
-    if (!rate) {
-      alert("Taux USD_CDF introuvable.");
-      return;
-    }
-
-    unitPriceUSD = selectedProduct.pricing.cdf / rate;
-  }
-
-  const grandTotalUSD = quantity * unitPriceUSD;
-
-  const data = {
-    productId: selectedProduct.id,
-    productName: selectedProduct.name,
-    quantity,
-    unitPrice: unitPriceUSD,
-    total: grandTotalUSD,
-    currency: "USD",
-    partnerName: partnerSearch.value,
-    updatedAt: serverTimestamp()
-  };
-
-  if (editingId) {
-
-    await updateDoc(doc(db, "transactions", editingId), data);
-    editingId = null;
-
-  } else {
-
-    await addDoc(collection(db, "transactions"), {
-      ...data,
-      invoiceNumber: await generateInvoiceNumber(),
-      status: "pending",
-      createdAt: serverTimestamp()
-    });
-  }
-
-  modal.hide();
-  document.getElementById("txForm").reset();
-  selectedProduct = null;
-
-  await loadTransactions();
-};
 
 /* ============================================================
    LOAD TRANSACTIONS (CACHED)
@@ -520,32 +387,6 @@ window.rejectTx = async (id) => {
       fonction: currentUserData.fonction
     },
     after: { status: "rejected" },
-    createdAt: serverTimestamp()
-  });
-
-  await loadTransactions();
-};
-
-window.deleteTx = async (id) => {
-
-  if (!confirm("Supprimer cette transaction ?")) return;
-
-  const snap = await getDoc(doc(db, "transactions", id));
-  const beforeData = snap.data();
-
-  await deleteDoc(doc(db, "transactions", id));
-
-  await addDoc(collection(db, "audit_logs"), {
-    action: "DELETE_TRANSACTION",
-    collection: "transactions",
-    documentId: id,
-    performedBy: {
-      uid: auth.currentUser.uid,
-      name: currentUserData.name,
-      role: currentUserData.role,
-      fonction: currentUserData.fonction
-    },
-    before: beforeData,
     createdAt: serverTimestamp()
   });
 
