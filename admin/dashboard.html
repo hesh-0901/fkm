@@ -84,91 +84,84 @@
     <!-- ================= KPI CARDS ================= -->
     <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
 
-      <!-- Produits -->
-      <div class="bg-gradient-to-br from-primary to-primaryDark text-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
-        <i class="bi bi-box-seam absolute -right-6 -top-6 text-white/10 text-8xl"></i>
-        <p class="text-sm opacity-80">Produits</p>
-        <h2 id="totalProducts" class="text-4xl font-bold mt-2">0</h2>
-      </div>
+     <!-- ================= KPI ================= -->
+<div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
 
-      <!-- Stock critique -->
-      <div class="bg-gradient-to-br from-red-500 to-red-700 text-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
-        <i class="bi bi-exclamation-triangle absolute -right-6 -top-6 text-white/10 text-8xl"></i>
-        <p class="text-sm opacity-90">Stock critique</p>
-        <h2 id="lowStock" class="text-4xl font-bold mt-2">0</h2>
-      </div>
+  <!-- Produits -->
+  <div class="bg-gradient-to-br from-primary to-primaryDark text-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
+    <i class="bi bi-box-seam absolute -right-6 -top-6 text-white/10 text-8xl"></i>
+    <p class="text-sm opacity-80">Produits</p>
+    <h2 id="totalProducts" class="text-4xl font-bold mt-2">0</h2>
+  </div>
 
-      <!-- Transactions pending -->
-      <div class="bg-gradient-to-br from-amber-400 to-amber-600 text-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
-        <i class="bi bi-hourglass-split absolute -right-6 -top-6 text-white/10 text-8xl"></i>
-        <p class="text-sm opacity-90">Transactions en attente</p>
-        <h2 id="pendingTx" class="text-4xl font-bold mt-2">0</h2>
-      </div>
+  <!-- Stock critique -->
+  <div class="bg-gradient-to-br from-red-500 to-red-700 text-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
+    <i class="bi bi-exclamation-triangle absolute -right-6 -top-6 text-white/10 text-8xl"></i>
+    <p class="text-sm opacity-90">Stock critique</p>
+    <h2 id="lowStock" class="text-4xl font-bold mt-2">0</h2>
+  </div>
 
-      <!-- Transactions approuvées -->
-      <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 text-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
-        <i class="bi bi-check-circle absolute -right-6 -top-6 text-white/10 text-8xl"></i>
-        <p class="text-sm opacity-90">Transactions approuvées</p>
-        <h2 id="approvedTx" class="text-4xl font-bold mt-2">0</h2>
-      </div>
+  <!-- Transactions pending -->
+  <div class="bg-gradient-to-br from-amber-400 to-amber-600 text-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
+    <i class="bi bi-hourglass-split absolute -right-6 -top-6 text-white/10 text-8xl"></i>
+    <p class="text-sm opacity-90">Transactions en attente</p>
+    <h2 id="pendingTx" class="text-4xl font-bold mt-2">0</h2>
+  </div>
 
+  <!-- Transactions approuvées -->
+  <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 text-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
+    <i class="bi bi-check-circle absolute -right-6 -top-6 text-white/10 text-8xl"></i>
+    <p class="text-sm opacity-90">Transactions approuvées</p>
+    <h2 id="approvedTx" class="text-4xl font-bold mt-2">0</h2>
+  </div>
+
+</div>
+
+<!-- ================= SECTION GRID ================= -->
+<div class="grid xl:grid-cols-3 gap-6">
+
+  <!-- STOCK PREMIUM -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="font-semibold text-base">Top Produits en Stock</h3>
+      <i class="bi bi-bar-chart-fill text-primary text-2xl"></i>
     </div>
+    <div id="stockPremiumList" class="space-y-5"></div>
+  </div>
 
-    <!-- ================= SECTION GRID ================= -->
-    <div class="grid xl:grid-cols-3 gap-6">
-
-      <!-- STOCK PREMIUM -->
-      <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="font-semibold text-base">Top Produits en Stock</h3>
-          <i class="bi bi-bar-chart-fill text-primary text-2xl"></i>
-        </div>
-        <div id="stockPremiumList" class="space-y-5"></div>
-      </div>
-
-      <!-- PERFORMANCE MARKETEUR -->
-      <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="font-semibold text-base">Performance Marketeurs</h3>
-          <i class="bi bi-graph-up-arrow text-success text-2xl"></i>
-        </div>
-        <div id="marketerPerformanceList" class="space-y-6"></div>
-      </div>
-
-      <!-- AUDIT SUMMARY -->
-      <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="font-semibold text-base">Résumé Audit</h3>
-          <i class="bi bi-shield-check text-primary text-2xl"></i>
-        </div>
-        <div id="auditSummaryList" class="grid grid-cols-1 gap-4"></div>
-      </div>
-
+  <!-- ACTIVITÉS (REMPLACE PERFORMANCE) -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="font-semibold text-base">Activités Récentes</h3>
+      <i class="bi bi-activity text-primary text-2xl"></i>
     </div>
+    <div id="recentActivities" class="space-y-4 max-h-96 overflow-y-auto pr-2"></div>
+  </div>
 
-    <!-- ================= ACTIVITÉS + ALERTES ================= -->
-    <div class="grid lg:grid-cols-2 gap-6">
-
-      <!-- ACTIVITÉS -->
-      <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="font-semibold text-base">Activités Récentes</h3>
-          <i class="bi bi-activity text-primary text-2xl"></i>
-        </div>
-        <div id="recentActivities" class="space-y-4 max-h-96 overflow-y-auto pr-2"></div>
-      </div>
-
-      <!-- ALERTES -->
-      <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="font-semibold text-base">Alertes Système</h3>
-          <i class="bi bi-bell-fill text-warning text-2xl"></i>
-        </div>
-        <div id="alertsList" class="space-y-4 text-sm"></div>
-      </div>
-
+  <!-- AUDIT SUMMARY -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="font-semibold text-base">Résumé Audit</h3>
+      <i class="bi bi-shield-check text-primary text-2xl"></i>
     </div>
+    <div id="auditSummaryList" class="grid grid-cols-1 gap-4"></div>
+  </div>
 
+</div>
+
+<!-- ================= ALERTES ================= -->
+<div class="grid lg:grid-cols-1 gap-6">
+
+  <!-- ALERTES -->
+  <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="font-semibold text-base">Alertes Système</h3>
+      <i class="bi bi-bell-fill text-warning text-2xl"></i>
+    </div>
+    <div id="alertsList" class="space-y-4 text-sm"></div>
+  </div>
+
+</div>
   </main>
 </div>
 
