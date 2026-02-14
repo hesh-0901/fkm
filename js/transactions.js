@@ -51,8 +51,15 @@ const resetFilters = document.getElementById("resetFilters");
 /* ============================================================
    STATE VARIABLES
 ============================================================ */
+let productsCache = [];
+let transactionsCache = [];
+let selectedProduct = null;
+let editingId = null;
+let currentUserData = null;
+
 let cartItems = [];
 let selectedMarketer = null;
+
 
 /* ============================================================
    AUTHENTICATION HANDLING
