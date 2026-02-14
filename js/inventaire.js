@@ -156,7 +156,7 @@ function renderTable(data) {
   if (data.length === 0) {
     table.innerHTML = `
       <tr>
-        <td colspan="8" class="text-center py-6 text-muted">
+        <td colspan="10" class="text-center py-6 text-muted">
           Aucun produit trouvé
         </td>
       </tr>`;
@@ -166,27 +166,56 @@ function renderTable(data) {
   let index = 1;
 
   data.forEach(p => {
+
     const low = p.quantity <= p.minQuantity;
+
+    const operatorName =
+      p.createdBy?.name || "-";
+
+    const lastUpdate =
+      p.updatedAt?.toDate
+        ? p.updatedAt.toDate().toLocaleString()
+        : p.createdAt?.toDate
+          ? p.createdAt.toDate().toLocaleString()
+          : "-";
 
     table.innerHTML += `
       <tr class="hover:bg-slate-50 transition">
+
         <td class="px-6 py-4 font-semibold">${index++}</td>
-        <td class="px-6 py-4 font-medium">${p.name}</td>
+
+        <td class="px-6 py-4 font-medium">
+          ${p.name}
+        </td>
+
         <td class="px-6 py-4">${p.category}</td>
+
         <td class="px-6 py-4 text-center">${p.quantity}</td>
+
         <td class="px-6 py-4 text-center">${p.minQuantity}</td>
+
         <td class="px-6 py-4">
           ${p.pricing?.usd ? p.pricing.usd + " USD" : ""}
           ${p.pricing?.cdf ? " / " + p.pricing.cdf + " CDF" : ""}
         </td>
+
         <td class="px-6 py-4">
           <span class="badge bg-${low ? "danger" : "success"}">
             ${low ? "Stock faible" : "OK"}
           </span>
         </td>
+
+        <td class="px-6 py-4 text-sm">
+          ${operatorName}
+        </td>
+
+        <td class="px-6 py-4 text-xs text-muted">
+          ${lastUpdate}
+        </td>
+
         <td class="px-6 py-4 text-end">
           ${
-            currentUser.role === ROLES.DIRECTEUR
+            [ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)
               ? `
               <div class="dropdown">
                 <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
@@ -200,22 +229,29 @@ function renderTable(data) {
                        Modifier
                     </a>
                   </li>
+                  ${
+                    currentUser.role === ROLES.DIRECTEUR
+                      ? `
                   <li>
                     <a class="dropdown-item text-danger"
                        onclick="removeItem('${p.id}')">
                        <i class="bi bi-trash me-2"></i>
                        Supprimer
                     </a>
-                  </li>
+                  </li>`
+                      : ""
+                  }
                 </ul>
               </div>`
               : "-"
           }
         </td>
+
       </tr>
     `;
   });
 }
+
 
 /* =========================
    EVENTS FILTRE
@@ -309,5 +345,24 @@ pCurrency.onchange = () => {
   usdBlock.classList.toggle("d-none", pCurrency.value === "CDF");
   cdfBlock.classList.toggle("d-none", pCurrency.value === "USD");
 };
+
+const data = {
+  name: pName.value.trim(),
+  category: pCategory.value.trim(),
+  quantity: Number(pQty.value),
+  minQuantity: Number(pMinQty.value),
+  pricing: {
+    mode: pCurrency.value,
+    usd: Number(pUsd.value || 0),
+    cdf: Number(pCdf.value || 0)
+  },
+  updatedAt: serverTimestamp(),
+  updatedBy: {
+    uid: currentUser.uid,
+    name: currentUser.name,
+    role: currentUser.role
+  }
+};
+
 
 addBtn.onclick = () => modal.show();
