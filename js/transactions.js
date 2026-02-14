@@ -365,7 +365,6 @@ function renderActions(id, t) {
 /* ============================================================
    VALIDATE / REJECT / EDIT / DELETE
 ============================================================ */
-
 window.validateTx = async (id) => {
 
   if (!["admin","directeur"].includes(currentUserData.role)) return;
@@ -373,11 +372,23 @@ window.validateTx = async (id) => {
   const snap = await getDoc(doc(db, "transactions", id));
   const t = snap.data();
 
-  if (t.status !== "pending") return;
+  if (!t || t.status !== "pending") return;
 
-  await updateDoc(doc(db, "inventory", t.productId), {
-    quantity: increment(-t.quantity)
-  });
+  // 🔥 Mise à jour stock pour chaque article
+  if (t.items && t.items.length) {
+
+    for (const item of t.items) {
+      await updateDoc(doc(db, "inventory", item.productId), {
+        quantity: increment(-item.quantity)
+      });
+    }
+
+  } else {
+    // fallback ancien système (sécurité)
+    await updateDoc(doc(db, "inventory", t.productId), {
+      quantity: increment(-t.quantity)
+    });
+  }
 
   await updateDoc(doc(db, "transactions", id), {
     status: "approved",
@@ -400,6 +411,7 @@ window.validateTx = async (id) => {
 
   await loadTransactions();
 };
+
 
 window.rejectTx = async (id) => {
 
