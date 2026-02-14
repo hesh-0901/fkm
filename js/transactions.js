@@ -476,7 +476,6 @@ window.validateTx = async (id) => {
 
   if (t.status !== "pending") return;
 
-  // Décrément stock
   await updateDoc(doc(db, "inventory", t.productId), {
     quantity: increment(-t.quantity)
   });
@@ -486,28 +485,6 @@ window.validateTx = async (id) => {
     updatedAt: serverTimestamp()
   });
 
-  // AUDIT
- window.validateTx = async (id) => {
-
-  if (!["admin","directeur"].includes(currentUserData.role)) return;
-
-  const snap = await getDoc(doc(db, "transactions", id));
-  const t = snap.data();
-
-  if (t.status !== "pending") return;
-
-  // 🔽 Décrément stock
-  await updateDoc(doc(db, "inventory", t.productId), {
-    quantity: increment(-t.quantity)
-  });
-
-  // 🔽 Mise à jour statut
-  await updateDoc(doc(db, "transactions", id), {
-    status: "approved",
-    updatedAt: serverTimestamp()
-  });
-
-  // 🔽 AUDIT LOG
   await addDoc(collection(db, "audit_logs"), {
     action: "APPROVE_TRANSACTION",
     collection: "transactions",
@@ -518,9 +495,7 @@ window.validateTx = async (id) => {
       role: currentUserData.role,
       fonction: currentUserData.fonction
     },
-    after: {
-      status: "approved"
-    },
+    after: { status: "approved" },
     createdAt: serverTimestamp()
   });
 
@@ -547,6 +522,32 @@ window.rejectTx = async (id) => {
       fonction: currentUserData.fonction
     },
     after: { status: "rejected" },
+    createdAt: serverTimestamp()
+  });
+
+  await loadTransactions();
+};
+
+window.deleteTx = async (id) => {
+
+  if (!confirm("Supprimer cette transaction ?")) return;
+
+  const snap = await getDoc(doc(db, "transactions", id));
+  const beforeData = snap.data();
+
+  await deleteDoc(doc(db, "transactions", id));
+
+  await addDoc(collection(db, "audit_logs"), {
+    action: "DELETE_TRANSACTION",
+    collection: "transactions",
+    documentId: id,
+    performedBy: {
+      uid: auth.currentUser.uid,
+      name: currentUserData.name,
+      role: currentUserData.role,
+      fonction: currentUserData.fonction
+    },
+    before: beforeData,
     createdAt: serverTimestamp()
   });
 
