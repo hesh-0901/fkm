@@ -26,8 +26,15 @@ const userRoleEl = document.getElementById("userRole");
 const logoutBtn = document.getElementById("logoutBtn");
 const periodFilter = document.getElementById("periodFilter");
 
-let activities = [];
+/* ==========================================================
+   STATE
+========================================================== */
 let selectedPeriod = "ALL";
+let activities = [];
+
+let inventoryData = [];
+let transactionsData = [];
+let auditData = [];
 
 /* ==========================================================
    AUTH
@@ -54,95 +61,128 @@ logoutBtn.onclick = async () => {
 periodFilter.addEventListener("change", () => {
   selectedPeriod = periodFilter.value;
   activities = [];
+  renderTransactions();
+  renderAudit();
 });
 
-
 /* ==========================================================
-   REALTIME DASHBOARD
+   INIT SNAPSHOTS (1 seule fois)
 ========================================================== */
 function initRealtimeDashboard() {
 
   /* INVENTORY */
   onSnapshot(collection(db, "inventory"), (snap) => {
-
-    let totalProducts = 0;
-    let lowStock = 0;
-    let stockData = [];
-
+    inventoryData = [];
     snap.forEach(doc => {
-      const p = doc.data();
-      totalProducts++;
-
-      if (p.quantity <= p.minQuantity) lowStock++;
-
-      stockData.push({
-        name: p.name,
-        quantity: p.quantity
-      });
-
-      pushActivity("Produit", p.name, p.updatedAt || p.createdAt);
+      inventoryData.push({ id: doc.id, ...doc.data() });
     });
-
-    totalProductsEl.textContent = totalProducts;
-    lowStockEl.textContent = lowStock;
-
-    renderStockList(
-      stockData.sort((a,b)=>b.quantity-a.quantity).slice(0,5)
-    );
+    renderInventory();
   });
 
   /* TRANSACTIONS */
   onSnapshot(collection(db, "transactions"), (snap) => {
-
-    let pending = 0;
-    let approved = 0;
-    let rejected = 0;
-    let marketerStats = {};
-
+    transactionsData = [];
     snap.forEach(doc => {
-      const t = doc.data();
-
-      if (!filterByPeriod(t.createdAt)) return;
-
-      if (t.status === "pending") pending++;
-      if (t.status === "approved") approved++;
-      if (t.status === "rejected") rejected++;
-
-      if (t.marketer?.name && t.status === "approved") {
-        if (!marketerStats[t.marketer.name]) {
-          marketerStats[t.marketer.name] = 0;
-        }
-        marketerStats[t.marketer.name] += 1; // nombre ventes seulement
-      }
-
-      pushActivity("Transaction", t.invoiceNumber, t.updatedAt || t.createdAt);
+      transactionsData.push({ id: doc.id, ...doc.data() });
     });
-
-    pendingTxEl.textContent = pending;
-    approvedTxEl.textContent = approved;
-
-    renderMarketerPerformance(marketerStats);
-    renderAlerts(Number(lowStockEl.textContent), pending, rejected);
+    renderTransactions();
   });
 
   /* AUDIT */
   onSnapshot(collection(db, "audit_logs"), (snap) => {
-
-    let approveCount = 0;
-    let rejectCount = 0;
-    let deleteCount = 0;
-
+    auditData = [];
     snap.forEach(doc => {
-      const log = doc.data();
-      if (!filterByPeriod(log.createdAt)) return;
+      auditData.push({ id: doc.id, ...doc.data() });
+    });
+    renderAudit();
+  });
+}
 
-      if (log.action === "APPROVE_TRANSACTION") approveCount++;
-      if (log.action === "REJECT_TRANSACTION") rejectCount++;
-      if (log.action === "DELETE_TRANSACTION") deleteCount++;
+/* ==========================================================
+   INVENTORY RENDER
+========================================================== */
+function renderInventory() {
+
+  let totalProducts = 0;
+  let lowStock = 0;
+  let stockData = [];
+
+  inventoryData.forEach(p => {
+
+    totalProducts++;
+
+    if (p.quantity <= p.minQuantity) lowStock++;
+
+    stockData.push({
+      name: p.name,
+      quantity: p.quantity
     });
 
-    renderAuditSummary(approveCount, rejectCount, deleteCount);
+    pushActivity("Produit", p.name, p.updatedAt || p.createdAt);
   });
+
+  totalProductsEl.textContent = totalProducts;
+  lowStockEl.textContent = lowStock;
+
+  renderStockList(
+    stockData.sort((a,b)=>b.quantity-a.quantity).slice(0,5)
+  );
+}
+
+/* ==========================================================
+   TRANSACTIONS RENDER (filtré)
+========================================================== */
+function renderTransactions() {
+
+  let pending = 0;
+  let approved = 0;
+  let rejected = 0;
+  let marketerStats = {};
+
+  transactionsData.forEach(t => {
+
+    if (!filterByPeriod(t.createdAt)) return;
+
+    if (t.status === "pending") pending++;
+    if (t.status === "approved") approved++;
+    if (t.status === "rejected") rejected++;
+
+    if (t.marketer?.name && t.status === "approved") {
+      if (!marketerStats[t.marketer.name]) {
+        marketerStats[t.marketer.name] = 0;
+      }
+      marketerStats[t.marketer.name] += 1;
+    }
+
+    pushActivity("Transaction", t.invoiceNumber, t.updatedAt || t.createdAt);
+  });
+
+  pendingTxEl.textContent = pending;
+  approvedTxEl.textContent = approved;
+
+  renderMarketerPerformance(marketerStats);
+  renderAlerts(Number(lowStockEl.textContent), pending, rejected);
+}
+
+/* ==========================================================
+   AUDIT RENDER
+========================================================== */
+function renderAudit() {
+
+  let approveCount = 0;
+  let rejectCount = 0;
+  let deleteCount = 0;
+
+  auditData.forEach(log => {
+
+    if (!filterByPeriod(log.createdAt)) return;
+
+    if (log.action === "APPROVE_TRANSACTION") approveCount++;
+    if (log.action === "REJECT_TRANSACTION") rejectCount++;
+    if (log.action === "DELETE_TRANSACTION") deleteCount++;
+  });
+
+  renderAuditSummary(approveCount, rejectCount, deleteCount);
 }
 
 /* ==========================================================
@@ -159,22 +199,20 @@ function filterByPeriod(timestamp) {
   const diffMs = now - date;
   const diffDays = diffMs / (1000 * 60 * 60 * 24);
 
-  if (selectedPeriod === "TODAY") {
+  if (selectedPeriod === "TODAY")
     return date.toDateString() === now.toDateString();
-  }
 
-  if (selectedPeriod === "7DAYS") {
+  if (selectedPeriod === "7DAYS")
     return diffDays <= 7;
-  }
 
-  if (selectedPeriod === "30DAYS") {
+  if (selectedPeriod === "30DAYS")
     return diffDays <= 30;
-  }
 
   return true;
 }
+
 /* ==========================================================
-   STOCK AVEC BARRES PREMIUM
+   STOCK PREMIUM
 ========================================================== */
 function renderStockList(products) {
 
@@ -191,26 +229,22 @@ function renderStockList(products) {
 
     return `
       <div class="space-y-2">
-
         <div class="flex justify-between text-sm font-medium">
           <span>${p.name}</span>
           <span>${p.quantity}</span>
         </div>
-
         <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-          <div class="h-3 rounded-full bg-gradient-to-r from-primary to-primaryDark
-                      transition-all duration-700"
+          <div class="h-3 rounded-full bg-gradient-to-r from-primary to-primaryDark"
                style="width:${percent}%">
           </div>
         </div>
-
       </div>
     `;
   }).join("");
 }
 
 /* ==========================================================
-   PERFORMANCE MARKETEUR (BARRES %)
+   MARKETEUR %
 ========================================================== */
 function renderMarketerPerformance(stats) {
 
@@ -230,28 +264,24 @@ function renderMarketerPerformance(stats) {
 
     return `
       <div class="space-y-2">
-
         <div class="flex justify-between text-sm font-semibold">
           <span>${name}</span>
           <span>${percent}%</span>
         </div>
-
         <div class="w-full bg-slate-100 rounded-full h-4 overflow-hidden">
-          <div class="h-4 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-700
-                      transition-all duration-700"
+          <div class="h-4 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-700"
                style="width:${percent}%">
           </div>
         </div>
-
       </div>
     `;
   }).join("");
 }
 
 /* ==========================================================
-   AUDIT PREMIUM
+   AUDIT SUMMARY
 ========================================================== */
-function renderAuditSummary(approve, reject, deleteCount) {
+function renderAuditSummary(approve, reject, del) {
 
   auditSummaryList.innerHTML = `
     <div class="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl text-center">
@@ -269,23 +299,22 @@ function renderAuditSummary(approve, reject, deleteCount) {
     <div class="bg-red-50 border border-red-200 p-6 rounded-2xl text-center">
       <i class="bi bi-trash-fill text-red-600 text-3xl"></i>
       <p class="mt-2 text-sm font-medium">Suppressions</p>
-      <p class="text-2xl font-bold">${deleteCount}</p>
+      <p class="text-2xl font-bold">${del}</p>
     </div>
   `;
 }
 
 /* ==========================================================
-   ACTIVITÉS PREMIUM
+   ACTIVITÉS
 ========================================================== */
 function pushActivity(type, label, timestamp) {
 
   if (!timestamp) return;
 
   const date = timestamp.toDate ? timestamp.toDate() : new Date();
-
   activities.push({ type, label, date });
-  activities.sort((a,b)=>b.date - a.date);
 
+  activities.sort((a,b)=>b.date - a.date);
   renderActivities();
 }
 
@@ -293,20 +322,15 @@ function renderActivities() {
 
   activitiesContainer.innerHTML = activities.slice(0,15).map(a => `
     <div class="relative pl-10">
-
       <span class="absolute left-0 top-2 w-6 h-6 rounded-full bg-primary
                    flex items-center justify-center text-white text-xs shadow">
         <i class="bi bi-activity"></i>
       </span>
-
       <div class="bg-slate-50 rounded-lg p-3 border border-slate-100">
         <p class="text-sm font-medium">${a.type}</p>
         <p class="text-xs text-muted">${a.label}</p>
-        <p class="text-[11px] text-slate-400">
-          ${formatTimeAgo(a.date)}
-        </p>
+        <p class="text-[11px] text-slate-400">${formatTimeAgo(a.date)}</p>
       </div>
-
     </div>
   `).join("");
 }
@@ -318,33 +342,25 @@ function renderAlerts(lowStock, pending, rejected) {
 
   alertsList.innerHTML = "";
 
-  if (lowStock > 0) {
-    alertsList.innerHTML += `
-      <div class="bg-red-50 border border-red-200 p-3 rounded-lg text-sm">
-        ${lowStock} produit(s) en stock critique.
-      </div>`;
-  }
+  if (lowStock > 0)
+    alertsList.innerHTML += `<div class="bg-red-50 border border-red-200 p-3 rounded-lg text-sm">
+      ${lowStock} produit(s) en stock critique.
+    </div>`;
 
-  if (pending > 0) {
-    alertsList.innerHTML += `
-      <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg text-sm">
-        ${pending} transaction(s) en attente.
-      </div>`;
-  }
+  if (pending > 0)
+    alertsList.innerHTML += `<div class="bg-amber-50 border border-amber-200 p-3 rounded-lg text-sm">
+      ${pending} transaction(s) en attente.
+    </div>`;
 
-  if (rejected > 0) {
-    alertsList.innerHTML += `
-      <div class="bg-red-50 border border-red-200 p-3 rounded-lg text-sm">
-        ${rejected} transaction(s) rejetées.
-      </div>`;
-  }
+  if (rejected > 0)
+    alertsList.innerHTML += `<div class="bg-red-50 border border-red-200 p-3 rounded-lg text-sm">
+      ${rejected} transaction(s) rejetées.
+    </div>`;
 
-  if (lowStock == 0 && pending == 0 && rejected == 0) {
-    alertsList.innerHTML = `
-      <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-lg text-sm">
-        Système stable. Aucune alerte.
-      </div>`;
-  }
+  if (lowStock == 0 && pending == 0 && rejected == 0)
+    alertsList.innerHTML = `<div class="bg-emerald-50 border border-emerald-200 p-3 rounded-lg text-sm">
+      Système stable. Aucune alerte.
+    </div>`;
 }
 
 /* ==========================================================
@@ -362,9 +378,8 @@ function formatTimeAgo(date) {
 
   for (const i of intervals) {
     const count = Math.floor(seconds / i.seconds);
-    if (count >= 1) {
+    if (count >= 1)
       return `Il y a ${count} ${i.label}${count > 1 ? "s" : ""}`;
-    }
   }
 
   return "À l'instant";
