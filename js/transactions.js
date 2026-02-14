@@ -512,106 +512,104 @@ window.printInvoice = async (id) => {
 
   const snap = await getDoc(doc(db, "transactions", id));
   const t = snap.data();
-  if (!t) return;
+  if (!t) return alert("Transaction introuvable.");
 
   const invoiceWindow = window.open("../partials/facture.html", "_blank");
 
-  const interval = setInterval(() => {
+  invoiceWindow.onload = () => {
 
-    if (invoiceWindow.document.readyState === "complete") {
+    const docInv = invoiceWindow.document;
 
-      clearInterval(interval);
+    // ==============================
+    // INFOS GÉNÉRALES
+    // ==============================
 
-      // ==============================
-      // INFOS GÉNÉRALES
-      // ==============================
+    docInv.getElementById("invoiceNumber").textContent =
+      t.invoiceNumber || "-";
 
-      invoiceWindow.document.getElementById("invoiceNumber").textContent = t.invoiceNumber;
-      invoiceWindow.document.getElementById("invoiceDate").textContent =
-        t.createdAt?.toDate().toLocaleDateString() || "-";
+    docInv.getElementById("invoiceDate").textContent =
+      t.createdAt?.toDate().toLocaleDateString() || "-";
 
-      invoiceWindow.document.getElementById("clientName").textContent = t.partnerName;
+    docInv.getElementById("clientName").textContent =
+      t.partnerName || "-";
 
-      // ==============================
-      // PRODUITS MULTIPLES
-      // ==============================
-// ==============================
-// PRODUITS MULTIPLES
-// ==============================
+    // ==============================
+    // PRODUITS MULTIPLES
+    // ==============================
 
-const itemsBody = invoiceWindow.document.getElementById("itemsBody");
-itemsBody.innerHTML = "";
+    const itemsBody = docInv.getElementById("itemsBody");
+    itemsBody.innerHTML = "";
 
-if (t.items && Array.isArray(t.items) && t.items.length > 0) {
+    if (t.items && Array.isArray(t.items) && t.items.length > 0) {
 
-  t.items.forEach((item, index) => {
+      t.items.forEach((item, index) => {
 
-    const unit = Number(item.unitPriceUSD || 0);
-    const total = Number(item.totalUSD || 0);
+        const unit = Number(item.unitPriceUSD || 0);
+        const total = Number(item.totalUSD || 0);
 
-    itemsBody.innerHTML += `
-      <tr>
-        <td>${index + 1}</td>
-        <td>${item.productName || "-"}</td>
-        <td>${item.quantity || 0}</td>
-        <td>${unit.toFixed(2)} USD</td>
-        <td>${total.toFixed(2)} USD</td>
-      </tr>
-    `;
-  });
+        itemsBody.innerHTML += `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${item.productName || "-"}</td>
+            <td>${item.quantity || 0}</td>
+            <td>${unit.toFixed(2)} USD</td>
+            <td>${total.toFixed(2)} USD</td>
+          </tr>
+        `;
+      });
 
-} else {
+    } else {
 
-  // Ancien format (fallback)
-  const unit = Number(t.unitPrice || 0);
-  const total = Number(t.total || 0);
+      // Ancien format (fallback)
+      const unit = Number(t.unitPrice || 0);
+      const total = Number(t.total || 0);
 
-  itemsBody.innerHTML = `
-    <tr>
-      <td>1</td>
-      <td>${t.productName || "-"}</td>
-      <td>${t.quantity || 0}</td>
-      <td>${unit.toFixed(2)} USD</td>
-      <td>${total.toFixed(2)} USD</td>
-    </tr>
-  `;
-}
-   // ==============================
-      // CALCULS
-      // ==============================
-
-      const subtotal = t.subtotalUSD || 0;
-      const discountPercent = t.discountPercent || 0;
-      const discountAmount = t.discountAmountUSD || 0;
-
-      const afterDiscount = subtotal - discountAmount;
-
-      const TVA_RATE = 0.16;
-      const tvaAmount = afterDiscount * TVA_RATE;
-
-      const grandTotal = afterDiscount + tvaAmount;
-
-      // ==============================
-      // INJECTION TOTALS
-      // ==============================
-
-      invoiceWindow.document.getElementById("subtotalAmount").textContent =
-        subtotal.toFixed(2) + " USD";
-
-      invoiceWindow.document.getElementById("discountPercentDisplay").textContent =
-        discountPercent;
-
-      invoiceWindow.document.getElementById("discountAmount").textContent =
-        discountAmount.toFixed(2) + " USD";
-
-      invoiceWindow.document.getElementById("tvaAmount").textContent =
-        tvaAmount.toFixed(2) + " USD";
-
-      invoiceWindow.document.getElementById("grandTotal").textContent =
-        grandTotal.toFixed(2) + " USD";
+      itemsBody.innerHTML = `
+        <tr>
+          <td>1</td>
+          <td>${t.productName || "-"}</td>
+          <td>${t.quantity || 0}</td>
+          <td>${unit.toFixed(2)} USD</td>
+          <td>${total.toFixed(2)} USD</td>
+        </tr>
+      `;
     }
 
-  }, 50);
+    // ==============================
+    // CALCULS
+    // ==============================
+
+    const subtotal = Number(t.subtotalUSD || t.total || 0);
+    const discountPercent = Number(t.discountPercent || 0);
+    const discountAmount = Number(t.discountAmountUSD || 0);
+
+    const afterDiscount = subtotal - discountAmount;
+
+    const TVA_RATE = 0.16;
+    const tvaAmount = afterDiscount * TVA_RATE;
+
+    const grandTotal =
+      Number(t.grandTotalUSD) || (afterDiscount + tvaAmount);
+
+    // ==============================
+    // INJECTION TOTALS
+    // ==============================
+
+    docInv.getElementById("subtotalAmount").textContent =
+      subtotal.toFixed(2) + " USD";
+
+    docInv.getElementById("discountPercentDisplay").textContent =
+      discountPercent;
+
+    docInv.getElementById("discountAmount").textContent =
+      discountAmount.toFixed(2) + " USD";
+
+    docInv.getElementById("tvaAmount").textContent =
+      tvaAmount.toFixed(2) + " USD";
+
+    docInv.getElementById("grandTotal").textContent =
+      grandTotal.toFixed(2) + " USD";
+  };
 };
 
 /*ajout*/
