@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Facture FKM ENERGY</title>
-
 <style>
 
 /* ============================= */
@@ -15,28 +14,23 @@
   margin: 15mm;
 }
 
-
 body {
   font-family: Arial, sans-serif;
-  font-size: 12px;
+  font-size: 13px;
   margin: 0;
-  background: #fff;
+  background: #f5f5f5;
 }
 
-/* Conteneur principal */
+/* ============================= */
+/* CONTENEUR */
+/* ============================= */
+
 .invoice-wrapper {
-width: 148mm;
-min-height: 210mm;
-padding: 15mm;
-  
-table {
   width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-table th, table td {
-  word-wrap: break-word;
+  max-width: 100%;
+  background: #fff;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 /* ============================= */
@@ -46,27 +40,29 @@ table th, table td {
 .header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 15px;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
 .logo img {
-  width: 110px;
+  width: 120px;
 }
 
 .company-info {
   text-align: right;
-  font-size: 11px;
-  line-height: 1.4;
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 .invoice-title {
   text-align: center;
-  font-size: 18px;
+  font-size: 22px;
   font-weight: bold;
-  border-top: 2px solid #000;
-  border-bottom: 2px solid #000;
-  padding: 6px 0;
-  margin: 15px 0;
+  margin: 20px 0;
+  padding: 8px 0;
+  border-top: 3px solid #000;
+  border-bottom: 3px solid #000;
+  letter-spacing: 2px;
 }
 
 /* ============================= */
@@ -76,8 +72,11 @@ table th, table td {
 .meta {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 15px;
-  font-size: 12px;
+  margin-bottom: 20px;
+}
+
+.meta strong {
+  font-size: 13px;
 }
 
 /* ============================= */
@@ -87,24 +86,25 @@ table th, table td {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 15px;
-  page-break-inside: auto;
+  margin-bottom: 20px;
+  table-layout: fixed;
 }
 
 table th, table td {
   border: 1px solid #000;
-  padding: 6px;
+  padding: 8px;
   text-align: center;
+  word-wrap: break-word;
 }
 
 table th {
   background: #f0f0f0;
   font-weight: bold;
+  font-size: 13px;
 }
 
-tr {
-  page-break-inside: avoid;
-  page-break-after: auto;
+tbody tr:nth-child(even) {
+  background: #fafafa;
 }
 
 /* ============================= */
@@ -112,18 +112,19 @@ tr {
 /* ============================= */
 
 .total-section {
-  width: 50%;
+  width: 45%;
   margin-left: auto;
 }
 
 .total-section td {
-  padding: 6px;
+  padding: 8px;
   border: 1px solid #000;
 }
 
 .total-section tr:last-child td {
   font-weight: bold;
-  background: #f3f3f3;
+  font-size: 14px;
+  background: #eaeaea;
 }
 
 /* ============================= */
@@ -131,11 +132,12 @@ tr {
 /* ============================= */
 
 .footer {
-  margin-top: 25px;
-  font-size: 11px;
+  margin-top: 40px;
+  font-size: 12px;
   text-align: center;
   border-top: 1px solid #ccc;
-  padding-top: 10px;
+  padding-top: 15px;
+  line-height: 1.6;
 }
 
 /* ============================= */
@@ -144,25 +146,41 @@ tr {
 
 .print-btn {
   text-align: center;
-  margin: 15px;
+  margin: 20px 0;
 }
 
 .print-btn button {
-  padding: 8px 16px;
+  padding: 10px 20px;
   border: none;
   background: #0B5C6B;
   color: #fff;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 6px;
+  font-size: 14px;
 }
 
+/* ============================= */
+/* MODE IMPRESSION */
+/* ============================= */
+
 @media print {
-  .print-btn {
-    display: none;
+
+  body {
+    background: #fff;
   }
+
+  .print-btn {
+    display: none !important;
+  }
+
+  .invoice-wrapper {
+    padding: 0;
+  }
+
 }
 
 </style>
+
 </head>
 
 <body>
