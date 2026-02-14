@@ -1,157 +1,204 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Audit & Sécurité | FKM ENERGY</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8" />
+<title>Audit & Sécurité | FKM ENERGY</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Bootstrap Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <!-- Bootstrap -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: "#0B5C6B",
-            danger: "#DC2626",
-            success: "#16A34A",
-            warning: "#F59E0B",
-            bg: "#F4F7FA"
-          }
-        }
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: "#0B5C6B",
+        primaryDark: "#083F4A",
+        success: "#16A34A",
+        warning: "#F59E0B",
+        danger: "#DC2626",
+        bg: "#F3F6FB",
+        muted: "#6B7280"
       }
     }
-  </script>
+  }
+}
+</script>
 
-  <link rel="icon" href="data:,">
+<link rel="icon" href="data:,">
 </head>
 
 <body class="bg-bg text-slate-800">
 
 <div class="flex min-h-screen">
 
-  <!-- SIDEBAR -->
-  <div id="sidebar-container"></div>
+<!-- SIDEBAR -->
+<div id="sidebar-container"></div>
 
-  <!-- MAIN -->
-  <main class="flex-1 px-8 py-8 space-y-8">
+<!-- MAIN -->
+<main id="mainContent" class="flex-1 px-8 py-8 space-y-8 overflow-x-hidden">
 
-    <!-- 🔐 PIN LOCK SCREEN -->
-    <div id="pinScreen"
-         class="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8 text-center">
+<!-- ================= HEADER ================= -->
+<div class="bg-white rounded-2xl shadow-md px-8 py-5 flex items-center justify-between border border-slate-100">
 
-      <div class="text-5xl text-primary mb-4">
-        <i class="bi bi-shield-lock-fill"></i>
-      </div>
+  <div class="flex items-center gap-4">
+    <button id="toggleSidebar"
+      class="p-2 rounded-lg border border-slate-200 hover:bg-slate-100 transition">
+      <i class="bi bi-list text-lg"></i>
+    </button>
 
-      <h2 class="text-xl font-semibold mb-2">
-        Accès sécurisé
-      </h2>
-
-      <p class="text-sm text-slate-500 mb-6">
-        Veuillez entrer le code PIN directeur
+    <div>
+      <h1 class="text-xl font-bold flex items-center gap-2">
+        <i class="bi bi-shield-lock-fill text-primary"></i>
+        Audit & Sécurité
+      </h1>
+      <p class="text-sm text-muted">
+        Journal officiel des actions système
       </p>
+    </div>
+  </div>
 
-      <input id="pinInput"
-        type="password"
-        maxlength="4"
-        class="w-full text-center text-2xl tracking-widest
-               border border-slate-300 rounded-xl py-3
-               focus:ring-2 focus:ring-primary focus:outline-none"
-        placeholder="••••">
-
-      <button id="validatePin"
-        class="mt-6 w-full bg-primary text-white py-3 rounded-xl
-               hover:opacity-90 transition">
-        Déverrouiller
-      </button>
-
-      <p id="pinError"
-         class="text-sm text-danger mt-4 hidden">
-      </p>
-
+  <div class="flex items-center gap-6">
+    <div class="text-right">
+      <div id="userName" class="font-semibold"></div>
+      <div id="userRole" class="text-sm text-muted"></div>
     </div>
 
-    <!-- 🔎 AUDIT CONTENT -->
-    <div id="auditContent" class="hidden space-y-8">
-
-      <!-- HEADER -->
-      <div class="flex justify-between items-center">
-        <div>
-          <h1 class="text-xl font-semibold">Audit & Sécurité</h1>
-          <p class="text-sm text-slate-500">
-            Journal complet des actions système
-          </p>
-        </div>
-      </div>
-
-      <!-- SUMMARY CARDS -->
-      <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
-
-        <div class="bg-white rounded-2xl shadow p-6 text-center">
-          <i class="bi bi-list-check text-primary text-3xl"></i>
-          <p class="text-sm mt-2">Total Logs</p>
-          <h3 id="totalLogs" class="text-2xl font-bold mt-1">0</h3>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow p-6 text-center">
-          <i class="bi bi-check-circle-fill text-success text-3xl"></i>
-          <p class="text-sm mt-2">Approbations</p>
-          <h3 id="approveCount" class="text-2xl font-bold mt-1">0</h3>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow p-6 text-center">
-          <i class="bi bi-x-circle-fill text-warning text-3xl"></i>
-          <p class="text-sm mt-2">Rejets</p>
-          <h3 id="rejectCount" class="text-2xl font-bold mt-1">0</h3>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow p-6 text-center">
-          <i class="bi bi-trash-fill text-danger text-3xl"></i>
-          <p class="text-sm mt-2">Suppressions</p>
-          <h3 id="deleteCount" class="text-2xl font-bold mt-1">0</h3>
-        </div>
-
-      </div>
-
-      <!-- TABLE -->
-      <div class="bg-white rounded-2xl shadow overflow-hidden">
-
-        <div class="overflow-x-auto">
-
-          <table class="min-w-full text-sm">
-
-            <thead class="bg-slate-50 text-xs uppercase text-slate-500">
-              <tr>
-                <th class="px-6 py-4">Date</th>
-                <th class="px-6 py-4">Action</th>
-                <th class="px-6 py-4">Collection</th>
-                <th class="px-6 py-4">Utilisateur</th>
-                <th class="px-6 py-4">Rôle</th>
-              </tr>
-            </thead>
-
-            <tbody id="auditTable" class="divide-y divide-slate-100">
-            </tbody>
-
-          </table>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </main>
+    <button id="logoutBtn"
+      class="px-4 py-2 rounded-lg border border-red-200 text-danger hover:bg-red-50 transition">
+      <i class="bi bi-box-arrow-right text-lg"></i>
+    </button>
+  </div>
 </div>
 
+<!-- ================= PIN LOCK ================= -->
+<div id="pinScreen"
+     class="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8 text-center border border-slate-100">
+
+  <div class="text-5xl text-primary mb-4">
+    <i class="bi bi-shield-lock-fill"></i>
+  </div>
+
+  <h2 class="text-lg font-semibold mb-2">
+    Accès sécurisé Directeur
+  </h2>
+
+  <p class="text-sm text-muted mb-6">
+    Entrez le code PIN confidentiel
+  </p>
+
+  <input id="pinInput"
+    type="password"
+    maxlength="4"
+    class="w-full text-center text-2xl tracking-widest
+           border border-slate-300 rounded-xl py-3
+           focus:ring-2 focus:ring-primary focus:outline-none"
+    placeholder="••••">
+
+  <button id="validatePin"
+    class="mt-6 w-full bg-gradient-to-r from-primary to-primaryDark
+           text-white py-3 rounded-xl hover:opacity-90 transition">
+    Déverrouiller
+  </button>
+
+  <p id="pinError"
+     class="text-sm text-danger mt-4 hidden">
+  </p>
+
+</div>
+
+<!-- ================= AUDIT CONTENT ================= -->
+<div id="auditContent" class="hidden space-y-8">
+
+<!-- ================= FILTRES ================= -->
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex flex-wrap items-center gap-6">
+
+  <div class="flex items-center gap-2">
+    <i class="bi bi-funnel text-primary text-lg"></i>
+    <span class="text-sm font-semibold">Filtres :</span>
+  </div>
+
+  <input type="date" id="startDate"
+    class="px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-primary">
+
+  <input type="date" id="endDate"
+    class="px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-primary">
+
+  <input type="text" id="searchAudit"
+    placeholder="Rechercher utilisateur / action..."
+    class="px-4 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-primary">
+
+  <button id="resetFilters"
+    class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-sm transition">
+    Réinitialiser
+  </button>
+
+</div>
+
+<!-- ================= STATS ================= -->
+<div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
+
+  <div class="bg-white rounded-2xl shadow-lg p-6 text-center border border-slate-100">
+    <i class="bi bi-list-check text-primary text-3xl"></i>
+    <p class="text-xs text-muted mt-2">Total Logs</p>
+    <h3 id="totalLogs" class="text-2xl font-bold mt-1">0</h3>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-lg p-6 text-center border border-slate-100">
+    <i class="bi bi-check-circle-fill text-success text-3xl"></i>
+    <p class="text-xs text-muted mt-2">Approbations</p>
+    <h3 id="approveCount" class="text-2xl font-bold mt-1">0</h3>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-lg p-6 text-center border border-slate-100">
+    <i class="bi bi-x-circle-fill text-warning text-3xl"></i>
+    <p class="text-xs text-muted mt-2">Rejets</p>
+    <h3 id="rejectCount" class="text-2xl font-bold mt-1">0</h3>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-lg p-6 text-center border border-slate-100">
+    <i class="bi bi-trash-fill text-danger text-3xl"></i>
+    <p class="text-xs text-muted mt-2">Suppressions</p>
+    <h3 id="deleteCount" class="text-2xl font-bold mt-1">0</h3>
+  </div>
+
+</div>
+
+<!-- ================= TABLE ================= -->
+<div class="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
+
+<div class="overflow-x-auto">
+
+<table class="min-w-full text-xs">
+
+<thead class="bg-slate-50 border-b uppercase tracking-wide text-slate-500">
+<tr>
+<th class="px-4 py-3 text-left">Date</th>
+<th class="px-4 py-3 text-left">Action</th>
+<th class="px-4 py-3 text-left">Collection</th>
+<th class="px-4 py-3 text-left">Utilisateur</th>
+<th class="px-4 py-3 text-left">Rôle</th>
+<th class="px-4 py-3 text-left">Document ID</th>
+</tr>
+</thead>
+
+<tbody id="auditTable"
+       class="divide-y divide-slate-100">
+</tbody>
+
+</table>
+
+</div>
+</div>
+
+</div> <!-- END AUDIT CONTENT -->
+
+</main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../js/sidebar.js"></script>
 <script type="module" src="../js/audit-securite.js"></script>
 
