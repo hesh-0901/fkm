@@ -151,17 +151,39 @@ txQty.oninput = updateTotal;
    GENERATE UNIQUE INVOICE NUMBER
 ============================================================ */
 
-function generateInvoiceNumber() {
+async function generateInvoiceNumber() {
+
   const now = new Date();
-  return `FKM-IN-${now.getFullYear()}${(now.getMonth()+1)
-    .toString().padStart(2,"0")}${now.getDate()
-    .toString().padStart(2,"0")}${Date.now().toString().slice(-3)}`;
+  const day = String(now.getDate()).padStart(2, "0");
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const year = now.getFullYear();
+
+  const startOfMonth = new Date(year, now.getMonth(), 1);
+  const endOfMonth = new Date(year, now.getMonth() + 1, 1);
+
+  const q = query(
+    collection(db, "transactions"),
+    orderBy("createdAt", "asc")
+  );
+
+  const snap = await getDocs(q);
+
+  const monthlyInvoices = snap.docs.filter(d => {
+    const data = d.data();
+    if (!data.createdAt) return false;
+    const date = data.createdAt.toDate();
+    return date >= startOfMonth && date < endOfMonth;
+  });
+
+  const sequence = String(monthlyInvoices.length + 1).padStart(2, "0");
+
+  return `IN-FKM-${day}${month}${sequence}`;
 }
+
 
 /* ============================================================
    SAVE / UPDATE TRANSACTION
 ============================================================ */
-
 saveBtn.onclick = async () => {
 
   if (!selectedProduct || !txQty.value || !partnerSearch.value) {
@@ -169,29 +191,63 @@ saveBtn.onclick = async () => {
     return;
   }
 
+  // 🔒 Sécurisation stock
+  if (selectedProduct.quantity === 0) {
+    alert("Stock épuisé.");
+    return;
+  }
+
   const quantity = Number(txQty.value);
-  const price = selectedProduct.pricing?.usd || selectedProduct.pricing?.cdf || 0;
-  const currency = selectedProduct.pricing?.usd ? "USD" : "CDF";
-  const total = quantity * price;
+
+  if (quantity > selectedProduct.quantity) {
+    alert("Stock insuffisant.");
+    return;
+  }
+
+  let unitPriceUSD = 0;
+
+  // 💵 Si prix déjà en USD
+  if (selectedProduct.pricing?.usd) {
+    unitPriceUSD = selectedProduct.pricing.usd;
+  }
+
+  // 💱 Si prix en CDF → conversion USD
+  else if (selectedProduct.pricing?.cdf) {
+
+    const rateSnap = await getDoc(doc(db, "exchange_rates", "current"));
+    const rate = rateSnap.data()?.USD_CDF;
+
+    if (!rate) {
+      alert("Taux USD_CDF introuvable.");
+      return;
+    }
+
+    unitPriceUSD = selectedProduct.pricing.cdf / rate;
+  }
+
+  const grandTotalUSD = quantity * unitPriceUSD;
 
   const data = {
     productId: selectedProduct.id,
     productName: selectedProduct.name,
     quantity,
-    unitPrice: price,
-    total,
-    currency,
+    unitPrice: unitPriceUSD,
+    total: grandTotalUSD,
+    currency: "USD",
     partnerName: partnerSearch.value,
     updatedAt: serverTimestamp()
   };
 
   if (editingId) {
+
     await updateDoc(doc(db, "transactions", editingId), data);
     editingId = null;
+
   } else {
+
     await addDoc(collection(db, "transactions"), {
       ...data,
-      invoiceNumber: generateInvoiceNumber(),
+      invoiceNumber: await generateInvoiceNumber(),
       status: "pending",
       createdAt: serverTimestamp()
     });
