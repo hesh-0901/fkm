@@ -17,12 +17,17 @@ const approvedTxEl = document.getElementById("approvedTx");
 
 const alertsList = document.getElementById("alertsList");
 const activitiesContainer = document.getElementById("recentActivities");
+const stockList = document.getElementById("stockPremiumList");
+const marketerPerformanceList = document.getElementById("marketerPerformanceList");
+const auditSummaryList = document.getElementById("auditSummaryList");
 
 const userNameEl = document.getElementById("userName");
 const userRoleEl = document.getElementById("userRole");
 const logoutBtn = document.getElementById("logoutBtn");
+const periodFilter = document.getElementById("periodFilter");
 
 let activities = [];
+let selectedPeriod = "ALL";
 
 /* ==========================================================
    AUTH
@@ -47,6 +52,10 @@ logoutBtn.onclick = async () => {
   location.replace("../login.html");
 };
 
+periodFilter.addEventListener("change", () => {
+  selectedPeriod = periodFilter.value;
+});
+
 /* ==========================================================
    REALTIME DASHBOARD
 ========================================================== */
@@ -70,13 +79,13 @@ function initRealtimeDashboard() {
         quantity: p.quantity
       });
 
-      pushActivity("inventory", p.name, p.updatedAt || p.createdAt);
+      pushActivity("Produit", p.name, p.updatedAt || p.createdAt);
     });
 
     totalProductsEl.textContent = totalProducts;
     lowStockEl.textContent = lowStock;
 
-    renderStockChart(
+    renderStockList(
       stockData.sort((a,b)=>b.quantity-a.quantity).slice(0,5)
     );
   });
@@ -87,28 +96,123 @@ function initRealtimeDashboard() {
     let pending = 0;
     let approved = 0;
     let rejected = 0;
+    let marketerStats = {};
 
     snap.forEach(doc => {
       const t = doc.data();
+
+      if (!filterByPeriod(t.createdAt)) return;
 
       if (t.status === "pending") pending++;
       if (t.status === "approved") approved++;
       if (t.status === "rejected") rejected++;
 
-      pushActivity("transaction", t.invoiceNumber, t.updatedAt || t.createdAt, t.status);
+      if (t.marketer?.name && t.status === "approved") {
+        if (!marketerStats[t.marketer.name]) {
+          marketerStats[t.marketer.name] = 0;
+        }
+        marketerStats[t.marketer.name] += t.grandTotalUSD || 0;
+      }
+
+      pushActivity("Transaction", t.invoiceNumber, t.updatedAt || t.createdAt);
     });
 
     pendingTxEl.textContent = pending;
     approvedTxEl.textContent = approved;
 
+    renderMarketerPerformance(marketerStats);
     renderAlerts(lowStockEl.textContent, pending, rejected);
+  });
+
+  /* AUDIT */
+  onSnapshot(collection(db, "audit_logs"), (snap) => {
+
+    let approveCount = 0;
+    let rejectCount = 0;
+    let deleteCount = 0;
+
+    snap.forEach(doc => {
+      const log = doc.data();
+
+      if (!filterByPeriod(log.createdAt)) return;
+
+      if (log.action === "APPROVE_TRANSACTION") approveCount++;
+      if (log.action === "REJECT_TRANSACTION") rejectCount++;
+      if (log.action === "DELETE_TRANSACTION") deleteCount++;
+    });
+
+    auditSummaryList.innerHTML = `
+      <div class="text-sm space-y-2">
+        <p>✔️ Approbations : <strong>${approveCount}</strong></p>
+        <p>❌ Rejets : <strong>${rejectCount}</strong></p>
+        <p>🗑️ Suppressions : <strong>${deleteCount}</strong></p>
+      </div>
+    `;
   });
 }
 
 /* ==========================================================
-   ACTIVITY ENGINE
+   FILTRE PÉRIODE
 ========================================================== */
-function pushActivity(type, label, timestamp, status = null) {
+function filterByPeriod(timestamp) {
+
+  if (!timestamp || selectedPeriod === "ALL") return true;
+
+  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  const now = new Date();
+
+  if (selectedPeriod === "TODAY") {
+    return date.toDateString() === now.toDateString();
+  }
+
+  return true;
+}
+
+/* ==========================================================
+   STOCK LIST
+========================================================== */
+function renderStockList(products) {
+
+  if (!products.length) {
+    stockList.innerHTML = `<p class="text-sm text-muted">Aucune donnée.</p>`;
+    return;
+  }
+
+  stockList.innerHTML = products.map(p => `
+    <div class="flex justify-between items-center bg-slate-50 p-3 rounded-lg">
+      <span class="text-sm font-medium">${p.name}</span>
+      <span class="text-sm font-semibold text-primary">${p.quantity}</span>
+    </div>
+  `).join("");
+}
+
+/* ==========================================================
+   PERFORMANCE MARKETEUR
+========================================================== */
+function renderMarketerPerformance(stats) {
+
+  const entries = Object.entries(stats);
+
+  if (!entries.length) {
+    marketerPerformanceList.innerHTML =
+      `<p class="text-sm text-muted">Aucune vente enregistrée.</p>`;
+    return;
+  }
+
+  marketerPerformanceList.innerHTML = entries.map(([name, total]) => `
+    <div class="flex justify-between items-center bg-slate-50 p-3 rounded-lg">
+      <span class="text-sm font-medium">${name}</span>
+      <span class="text-sm font-semibold text-success">
+        ${total.toFixed(2)} USD
+      </span>
+    </div>
+  `).join("");
+}
+
+/* ==========================================================
+   ACTIVITÉS
+========================================================== */
+function pushActivity(type, label, timestamp) {
 
   if (!timestamp) return;
 
@@ -117,7 +221,6 @@ function pushActivity(type, label, timestamp, status = null) {
   activities.push({
     type,
     label,
-    status,
     date
   });
 
@@ -128,60 +231,59 @@ function pushActivity(type, label, timestamp, status = null) {
 
 function renderActivities() {
 
-  if (!activitiesContainer) return;
-
-  activitiesContainer.innerHTML = activities.slice(0,15).map(a => {
-
-    let icon = "bi-activity";
-    let color = "bg-primary";
-
-    if (a.type === "transaction") {
-      if (a.status === "approved") {
-        icon = "bi-check-circle";
-        color = "bg-success";
-      } else if (a.status === "pending") {
-        icon = "bi-hourglass-split";
-        color = "bg-warning";
-      } else if (a.status === "rejected") {
-        icon = "bi-x-circle";
-        color = "bg-danger";
-      }
-    }
-
-    return `
-      <div class="relative pl-10 group">
-
-        <span class="absolute left-0 top-1.5 w-6 h-6 rounded-full ${color}
-                     flex items-center justify-center text-white text-xs shadow">
-          <i class="bi ${icon}"></i>
-        </span>
-
-        <div class="bg-slate-50 rounded-lg p-3 border border-slate-100
-                    group-hover:shadow-md transition">
-          <p class="text-sm font-medium capitalize">
-            ${a.type === "transaction" ? "Transaction" : "Produit"}
-          </p>
-          <p class="text-xs text-muted">${a.label}</p>
-          <p class="text-[11px] text-slate-400">
-            ${formatTimeAgo(a.date)}
-          </p>
-        </div>
-
-      </div>
-    `;
-  }).join("");
+  activitiesContainer.innerHTML = activities.slice(0,15).map(a => `
+    <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+      <p class="text-sm font-medium">${a.type}</p>
+      <p class="text-xs text-muted">${a.label}</p>
+      <p class="text-[11px] text-slate-400">${formatTimeAgo(a.date)}</p>
+    </div>
+  `).join("");
 }
 
 /* ==========================================================
-   FORMAT TIME AGO
+   ALERTS
+========================================================== */
+function renderAlerts(lowStock, pending, rejected) {
+
+  alertsList.innerHTML = "";
+
+  if (lowStock > 0) {
+    alertsList.innerHTML += `
+      <div class="bg-red-50 border border-red-200 p-3 rounded-lg text-sm">
+        ${lowStock} produit(s) en stock critique.
+      </div>`;
+  }
+
+  if (pending > 0) {
+    alertsList.innerHTML += `
+      <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg text-sm">
+        ${pending} transaction(s) en attente.
+      </div>`;
+  }
+
+  if (rejected > 0) {
+    alertsList.innerHTML += `
+      <div class="bg-red-50 border border-red-200 p-3 rounded-lg text-sm">
+        ${rejected} transaction(s) rejetées.
+      </div>`;
+  }
+
+  if (lowStock == 0 && pending == 0 && rejected == 0) {
+    alertsList.innerHTML = `
+      <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-lg text-sm">
+        Système stable. Aucune alerte.
+      </div>`;
+  }
+}
+
+/* ==========================================================
+   TIME AGO
 ========================================================== */
 function formatTimeAgo(date) {
 
   const seconds = Math.floor((new Date() - date) / 1000);
 
   const intervals = [
-    { label: "an", seconds: 31536000 },
-    { label: "mois", seconds: 2592000 },
     { label: "jour", seconds: 86400 },
     { label: "heure", seconds: 3600 },
     { label: "minute", seconds: 60 }
@@ -195,105 +297,4 @@ function formatTimeAgo(date) {
   }
 
   return "À l'instant";
-}
-
-/* ==========================================================
-   STOCK CHART
-========================================================== */
-function renderStockChart(products) {
-
-  const container = document.getElementById("stockPremiumList");
-  if (!container) return;
-
-  if (!products.length) {
-    container.innerHTML = `
-      <p class="text-sm text-muted">Aucune donnée disponible.</p>
-    `;
-    return;
-  }
-
-  const maxStock = Math.max(...products.map(p => p.quantity));
-
-  container.innerHTML = products.map(p => {
-
-    const percentage = Math.round((p.quantity / maxStock) * 100);
-
-    return `
-      <div class="space-y-2 group">
-
-        <div class="flex justify-between items-center">
-          <p class="text-sm font-medium group-hover:text-primary transition">
-            ${p.name}
-          </p>
-          <span class="text-xs font-semibold text-slate-500">
-            ${p.quantity}
-          </span>
-        </div>
-
-        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-          <div class="h-2 rounded-full bg-gradient-to-r from-primary to-primaryDark
-                      transition-all duration-700 ease-out"
-               style="width:${percentage}%">
-          </div>
-        </div>
-
-      </div>
-    `;
-  }).join("");
-}
-
-/* ==========================================================
-   ALERTS
-========================================================== */
-function renderAlerts(lowStock, pending, rejected) {
-
-  alertsList.innerHTML = "";
-
-  if (lowStock > 0) {
-    alertsList.innerHTML += `
-      <div class="flex items-start gap-3 bg-red-50 border border-red-200 rounded-lg p-3">
-        <i class="bi bi-exclamation-triangle-fill text-red-600 text-xl"></i>
-        <div>
-          <p class="font-medium text-red-700">Stock critique détecté</p>
-          <p class="text-red-600 text-xs">${lowStock} produit(s) sous le seuil minimum.</p>
-        </div>
-      </div>
-    `;
-  }
-
-  if (pending > 0) {
-    alertsList.innerHTML += `
-      <div class="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-lg p-3">
-        <i class="bi bi-hourglass-split text-amber-600 text-xl"></i>
-        <div>
-          <p class="font-medium text-amber-700">Transactions en attente</p>
-          <p class="text-amber-600 text-xs">${pending} transaction(s) nécessitent validation.</p>
-        </div>
-      </div>
-    `;
-  }
-
-  if (rejected > 0) {
-    alertsList.innerHTML += `
-      <div class="flex items-start gap-3 bg-red-50 border border-red-200 rounded-lg p-3">
-        <i class="bi bi-x-circle-fill text-red-600 text-xl"></i>
-        <div>
-          <p class="font-medium text-red-700">Transactions rejetées</p>
-          <p class="text-red-600 text-xs">${rejected} transaction(s) rejetées récemment.</p>
-        </div>
-      </div>
-    `;
-  }
-
-  if (lowStock == 0 && pending == 0 && rejected == 0) {
-    alertsList.innerHTML = `
-      <div class="flex items-start gap-3 bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-        <i class="bi bi-check-circle-fill text-emerald-600 text-xl"></i>
-        <div>
-          <p class="font-medium text-emerald-700">Système stable</p>
-          <p class="text-emerald-600 text-xs">Aucune alerte pour le moment.</p>
-        </div>
-      </div>
-    `;
-  }
 }
