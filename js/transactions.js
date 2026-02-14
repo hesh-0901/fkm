@@ -487,7 +487,7 @@ window.validateTx = async (id) => {
   });
 
   // AUDIT
-  window.validateTx = async (id) => {
+ window.validateTx = async (id) => {
 
   if (!["admin","directeur"].includes(currentUserData.role)) return;
 
@@ -523,10 +523,6 @@ window.validateTx = async (id) => {
     },
     createdAt: serverTimestamp()
   });
-
-  await loadTransactions();
-};
-
 
   await loadTransactions();
 };
