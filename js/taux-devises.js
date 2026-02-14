@@ -1,4 +1,4 @@
-js/taux-devises.js
+/*js/taux-devises.js*/
 import { auth, db } from "./firebase.config.js";
 import {
   onAuthStateChanged,
