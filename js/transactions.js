@@ -37,8 +37,6 @@ const productResults = document.getElementById("productResults");
 const partnerSearch = document.getElementById("partnerSearch");
 
 const txQty = document.getElementById("txQty");
-const unitPrice = document.getElementById("unitPrice");
-const totalPrice = document.getElementById("totalPrice");
 
 const logoutBtn = document.getElementById("logoutBtn");
 const userNameEl = document.getElementById("userName");
@@ -657,3 +655,209 @@ window.printInvoice = async (id) => {
 
   }, 50);
 };
+/*ajout*/
+const marketerSearch = document.getElementById("marketerSearch");
+const marketerResults = document.getElementById("marketerResults");
+const discountPercent = document.getElementById("discountPercent");
+const stockInfo = document.getElementById("stockInfo");
+const addItemBtn = document.getElementById("addItemBtn");
+const itemsTable = document.getElementById("itemsTable");
+
+const subtotalUSD = document.getElementById("subtotalUSD");
+const discountAmountUSD = document.getElementById("discountAmountUSD");
+const grandTotalUSD = document.getElementById("grandTotalUSD");
+/*2*/
+productSearch.oninput = () => {
+
+  const term = productSearch.value.toLowerCase();
+  productResults.innerHTML = "";
+
+  if (!term) return;
+
+  productsCache
+    .filter(p => p.name.toLowerCase().includes(term))
+    .forEach(p => {
+
+      const btn = document.createElement("button");
+      btn.className = "list-group-item list-group-item-action";
+      btn.textContent = p.name;
+
+      btn.onclick = () => {
+
+        selectedProduct = p;
+        productSearch.value = p.name;
+        productResults.innerHTML = "";
+
+        stockInfo.value = p.quantity + " disponible";
+      };
+
+      productResults.appendChild(btn);
+    });
+};
+/*AJOUT PRODUIT AU PANIER*/
+addItemBtn.onclick = async () => {
+
+  if (!selectedProduct) return alert("Choisir un produit.");
+  if (!txQty.value) return alert("Entrer quantité.");
+
+  const quantity = Number(txQty.value);
+
+  if (quantity > selectedProduct.quantity)
+    return alert("Stock insuffisant.");
+
+  let unitPriceUSD = 0;
+
+  if (selectedProduct.pricing?.usd) {
+    unitPriceUSD = selectedProduct.pricing.usd;
+  } else if (selectedProduct.pricing?.cdf) {
+
+    const rateSnap = await getDoc(doc(db, "exchange_rates", "current"));
+    const rate = rateSnap.data()?.USD_CDF;
+
+    if (!rate) return alert("Taux USD introuvable.");
+
+    unitPriceUSD = selectedProduct.pricing.cdf / rate;
+  }
+
+  const totalUSD = quantity * unitPriceUSD;
+
+  cartItems.push({
+    productId: selectedProduct.id,
+    productName: selectedProduct.name,
+    quantity,
+    unitPriceUSD,
+    totalUSD
+  });
+
+  renderCart();
+  resetProductFields();
+};
+
+/*RENDER PANIER*/
+function renderCart() {
+
+  itemsTable.innerHTML = "";
+
+  cartItems.forEach((item, index) => {
+
+    itemsTable.innerHTML += `
+      <tr>
+        <td>${item.productName}</td>
+        <td>${item.quantity}</td>
+        <td>${item.unitPriceUSD.toFixed(2)}</td>
+        <td>${item.totalUSD.toFixed(2)}</td>
+        <td>
+          <button class="btn btn-sm btn-danger"
+                  onclick="removeItem(${index})">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  calculateTotals();
+}
+/*SUPPRIMER ITEM*/
+window.removeItem = (index) => {
+  cartItems.splice(index, 1);
+  renderCart();
+};
+/*CALCUL TOTALS */
+function calculateTotals() {
+
+  const subtotal = cartItems.reduce((sum, i) => sum + i.totalUSD, 0);
+  const discount = (subtotal * Number(discountPercent.value || 0)) / 100;
+  const grandTotal = subtotal - discount;
+
+  subtotalUSD.textContent = subtotal.toFixed(2) + " USD";
+  discountAmountUSD.textContent = discount.toFixed(2) + " USD";
+  grandTotalUSD.textContent = grandTotal.toFixed(2) + " USD";
+}
+
+discountPercent.oninput = calculateTotals;
+
+/* MARKETEURS AUTOCOMPLETE*/
+marketerSearch.oninput = async () => {
+
+  const term = marketerSearch.value.toLowerCase();
+  marketerResults.innerHTML = "";
+
+  if (!term) return;
+
+  const snap = await getDocs(collection(db, "users"));
+
+  snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .filter(u => u.role === "operateur"
+      && u.name.toLowerCase().includes(term))
+    .forEach(u => {
+
+      const btn = document.createElement("button");
+      btn.className = "list-group-item list-group-item-action";
+      btn.textContent = u.name;
+
+      btn.onclick = () => {
+        selectedMarketer = {
+          uid: u.id,
+          name: u.name
+        };
+        marketerSearch.value = u.name;
+        marketerResults.innerHTML = "";
+      };
+
+      marketerResults.appendChild(btn);
+    });
+};
+/*saveBtn ERP*/
+saveBtn.onclick = async () => {
+
+  if (!partnerSearch.value) return alert("Client requis.");
+  if (!cartItems.length) return alert("Ajouter au moins un produit.");
+
+  const subtotal = cartItems.reduce((sum, i) => sum + i.totalUSD, 0);
+  const discount = (subtotal * Number(discountPercent.value || 0)) / 100;
+  const grandTotal = subtotal - discount;
+
+  const txData = {
+    invoiceNumber: await generateInvoiceNumber(),
+    partnerName: partnerSearch.value,
+    marketer: selectedMarketer || null,
+    items: cartItems,
+    subtotalUSD: subtotal,
+    discountPercent: Number(discountPercent.value || 0),
+    discountAmountUSD: discount,
+    grandTotalUSD: grandTotal,
+    productName: cartItems[0].productName,
+    quantity: cartItems.reduce((s,i)=>s+i.quantity,0),
+    total: grandTotal,
+    currency: "USD",
+    status: "pending",
+    createdAt: serverTimestamp()
+  };
+
+  await addDoc(collection(db, "transactions"), txData);
+
+  modal.hide();
+  resetModal();
+  await loadTransactions();
+};
+
+/* RESET MODAL*/
+function resetProductFields() {
+  productSearch.value = "";
+  txQty.value = "";
+  stockInfo.value = "";
+  selectedProduct = null;
+}
+
+function resetModal() {
+  cartItems = [];
+  selectedMarketer = null;
+  partnerSearch.value = "";
+  marketerSearch.value = "";
+  discountPercent.value = 0;
+  itemsTable.innerHTML = "";
+  calculateTotals();
+}
+
