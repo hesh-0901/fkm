@@ -9,15 +9,17 @@ import {
   doc,
   getDoc,
   setDoc,
-  updateDoc,
   serverTimestamp,
   collection,
-  addDoc
+  addDoc,
+  getDocs,
+  query,
+  orderBy
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ============================================================
+/* =========================
    DOM
-============================================================ */
+========================= */
 
 const logoutBtn = document.getElementById("logoutBtn");
 const userNameEl = document.getElementById("userName");
@@ -25,17 +27,20 @@ const userRoleEl = document.getElementById("userRole");
 
 const usdCdfRate = document.getElementById("usdCdfRate");
 const saveRateBtn = document.getElementById("saveRateBtn");
-const lastUpdate = document.getElementById("lastUpdate");
+const openRateModalBtn = document.getElementById("openRateModalBtn");
+const ratesTable = document.getElementById("ratesTable");
 
-/* ============================================================
+const modal = new bootstrap.Modal(document.getElementById("rateModal"));
+
+/* =========================
    STATE
-============================================================ */
+========================= */
 
 let currentUser = null;
 
-/* ============================================================
+/* =========================
    AUTH
-============================================================ */
+========================= */
 
 onAuthStateChanged(auth, async (user) => {
 
@@ -54,47 +59,77 @@ onAuthStateChanged(auth, async (user) => {
   userNameEl.textContent = currentUser.name;
   userRoleEl.textContent = currentUser.fonction;
 
-  if (!["admin", "directeur"].includes(currentUser.role)) {
-    alert("Accès non autorisé.");
+  if (currentUser.role !== "directeur") {
+    alert("Accès réservé au directeur.");
     location.replace("../admin/dashboard.html");
     return;
   }
 
-  await loadRate();
+  await loadRatesHistory();
 });
 
-/* ============================================================
+/* =========================
    LOGOUT
-============================================================ */
+========================= */
 
 logoutBtn.onclick = async () => {
   await signOut(auth);
   location.replace("../login.html");
 };
 
-/* ============================================================
-   LOAD RATE
-============================================================ */
+/* =========================
+   LOAD HISTORY
+========================= */
 
-async function loadRate() {
+async function loadRatesHistory() {
 
-  const snap = await getDoc(doc(db, "exchange_rates", "current"));
+  const q = query(
+    collection(db, "audit_logs"),
+    orderBy("createdAt", "desc")
+  );
 
-  if (!snap.exists()) return;
+  const snap = await getDocs(q);
 
-  const data = snap.data();
+  const logs = snap.docs
+    .map(d => d.data())
+    .filter(l => l.action === "UPDATE_EXCHANGE_RATE");
 
-  usdCdfRate.value = data.USD_CDF || "";
-
-  if (data.updatedAt) {
-    lastUpdate.textContent =
-      data.updatedAt.toDate().toLocaleString();
-  }
+  renderTable(logs);
 }
 
-/* ============================================================
+/* =========================
+   RENDER TABLE
+========================= */
+
+function renderTable(data) {
+
+  if (!data.length) {
+    ratesTable.innerHTML = `
+      <tr>
+        <td colspan="5" class="text-center py-6 text-muted">
+          Aucun historique trouvé
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  ratesTable.innerHTML = data.map((l, index) => `
+      <tr class="text-sm">
+        <td class="px-6 py-4">${index + 1}</td>
+        <td class="px-6 py-4 font-semibold">${l.after?.USD_CDF}</td>
+        <td class="px-6 py-4">${l.performedBy?.name}</td>
+        <td class="px-6 py-4">${l.performedBy?.role}</td>
+        <td class="px-6 py-4">
+          ${l.createdAt?.toDate().toLocaleString() || "-"}
+        </td>
+      </tr>
+  `).join("");
+}
+
+/* =========================
    SAVE RATE + AUDIT
-============================================================ */
+========================= */
 
 saveRateBtn.onclick = async () => {
 
@@ -113,8 +148,6 @@ saveRateBtn.onclick = async () => {
     USD_CDF: value,
     updatedAt: serverTimestamp()
   });
-
-  /* ================= AUDIT ================= */
 
   await addDoc(collection(db, "audit_logs"), {
     action: "UPDATE_EXCHANGE_RATE",
@@ -136,7 +169,14 @@ saveRateBtn.onclick = async () => {
     createdAt: serverTimestamp()
   });
 
-  alert("Taux mis à jour avec succès.");
+  modal.hide();
+  usdCdfRate.value = "";
 
-  await loadRate();
+  await loadRatesHistory();
 };
+
+/* =========================
+   OPEN MODAL
+========================= */
+
+openRateModalBtn.onclick = () => modal.show();
