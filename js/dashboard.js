@@ -46,15 +46,16 @@ onAuthStateChanged(auth, async (user) => {
   initRealtimeDashboard();
 });
 
-/* LOGOUT */
 logoutBtn.onclick = async () => {
   await signOut(auth);
   location.replace("../login.html");
 };
 
-periodFilter.addEventListener("change", () => {
-  selectedPeriod = periodFilter.value;
-});
+if (periodFilter) {
+  periodFilter.addEventListener("change", () => {
+    selectedPeriod = periodFilter.value;
+  });
+}
 
 /* ==========================================================
    REALTIME DASHBOARD
@@ -111,7 +112,7 @@ function initRealtimeDashboard() {
         if (!marketerStats[t.marketer.name]) {
           marketerStats[t.marketer.name] = 0;
         }
-        marketerStats[t.marketer.name] += t.grandTotalUSD || 0;
+        marketerStats[t.marketer.name] += 1; // nombre ventes seulement
       }
 
       pushActivity("Transaction", t.invoiceNumber, t.updatedAt || t.createdAt);
@@ -121,7 +122,7 @@ function initRealtimeDashboard() {
     approvedTxEl.textContent = approved;
 
     renderMarketerPerformance(marketerStats);
-    renderAlerts(lowStockEl.textContent, pending, rejected);
+    renderAlerts(Number(lowStockEl.textContent), pending, rejected);
   });
 
   /* AUDIT */
@@ -133,7 +134,6 @@ function initRealtimeDashboard() {
 
     snap.forEach(doc => {
       const log = doc.data();
-
       if (!filterByPeriod(log.createdAt)) return;
 
       if (log.action === "APPROVE_TRANSACTION") approveCount++;
@@ -141,13 +141,7 @@ function initRealtimeDashboard() {
       if (log.action === "DELETE_TRANSACTION") deleteCount++;
     });
 
-    auditSummaryList.innerHTML = `
-      <div class="text-sm space-y-2">
-        <p>✔️ Approbations : <strong>${approveCount}</strong></p>
-        <p>❌ Rejets : <strong>${rejectCount}</strong></p>
-        <p>🗑️ Suppressions : <strong>${deleteCount}</strong></p>
-      </div>
-    `;
+    renderAuditSummary(approveCount, rejectCount, deleteCount);
   });
 }
 
@@ -169,7 +163,7 @@ function filterByPeriod(timestamp) {
 }
 
 /* ==========================================================
-   STOCK LIST
+   STOCK AVEC BARRES PREMIUM
 ========================================================== */
 function renderStockList(products) {
 
@@ -178,16 +172,34 @@ function renderStockList(products) {
     return;
   }
 
-  stockList.innerHTML = products.map(p => `
-    <div class="flex justify-between items-center bg-slate-50 p-3 rounded-lg">
-      <span class="text-sm font-medium">${p.name}</span>
-      <span class="text-sm font-semibold text-primary">${p.quantity}</span>
-    </div>
-  `).join("");
+  const maxStock = Math.max(...products.map(p => p.quantity));
+
+  stockList.innerHTML = products.map(p => {
+
+    const percent = Math.round((p.quantity / maxStock) * 100);
+
+    return `
+      <div class="space-y-2">
+
+        <div class="flex justify-between text-sm font-medium">
+          <span>${p.name}</span>
+          <span>${p.quantity}</span>
+        </div>
+
+        <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+          <div class="h-3 rounded-full bg-gradient-to-r from-primary to-primaryDark
+                      transition-all duration-700"
+               style="width:${percent}%">
+          </div>
+        </div>
+
+      </div>
+    `;
+  }).join("");
 }
 
 /* ==========================================================
-   PERFORMANCE MARKETEUR
+   PERFORMANCE MARKETEUR (BARRES %)
 ========================================================== */
 function renderMarketerPerformance(stats) {
 
@@ -199,18 +211,60 @@ function renderMarketerPerformance(stats) {
     return;
   }
 
-  marketerPerformanceList.innerHTML = entries.map(([name, total]) => `
-    <div class="flex justify-between items-center bg-slate-50 p-3 rounded-lg">
-      <span class="text-sm font-medium">${name}</span>
-      <span class="text-sm font-semibold text-success">
-        ${total.toFixed(2)} USD
-      </span>
-    </div>
-  `).join("");
+  const max = Math.max(...entries.map(e => e[1]));
+
+  marketerPerformanceList.innerHTML = entries.map(([name, total]) => {
+
+    const percent = Math.round((total / max) * 100);
+
+    return `
+      <div class="space-y-2">
+
+        <div class="flex justify-between text-sm font-semibold">
+          <span>${name}</span>
+          <span>${percent}%</span>
+        </div>
+
+        <div class="w-full bg-slate-100 rounded-full h-4 overflow-hidden">
+          <div class="h-4 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-700
+                      transition-all duration-700"
+               style="width:${percent}%">
+          </div>
+        </div>
+
+      </div>
+    `;
+  }).join("");
 }
 
 /* ==========================================================
-   ACTIVITÉS
+   AUDIT PREMIUM
+========================================================== */
+function renderAuditSummary(approve, reject, deleteCount) {
+
+  auditSummaryList.innerHTML = `
+    <div class="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl text-center">
+      <i class="bi bi-check-circle-fill text-emerald-600 text-3xl"></i>
+      <p class="mt-2 text-sm font-medium">Approbations</p>
+      <p class="text-2xl font-bold">${approve}</p>
+    </div>
+
+    <div class="bg-amber-50 border border-amber-200 p-6 rounded-2xl text-center">
+      <i class="bi bi-x-circle-fill text-amber-600 text-3xl"></i>
+      <p class="mt-2 text-sm font-medium">Rejets</p>
+      <p class="text-2xl font-bold">${reject}</p>
+    </div>
+
+    <div class="bg-red-50 border border-red-200 p-6 rounded-2xl text-center">
+      <i class="bi bi-trash-fill text-red-600 text-3xl"></i>
+      <p class="mt-2 text-sm font-medium">Suppressions</p>
+      <p class="text-2xl font-bold">${deleteCount}</p>
+    </div>
+  `;
+}
+
+/* ==========================================================
+   ACTIVITÉS PREMIUM
 ========================================================== */
 function pushActivity(type, label, timestamp) {
 
@@ -218,12 +272,7 @@ function pushActivity(type, label, timestamp) {
 
   const date = timestamp.toDate ? timestamp.toDate() : new Date();
 
-  activities.push({
-    type,
-    label,
-    date
-  });
-
+  activities.push({ type, label, date });
   activities.sort((a,b)=>b.date - a.date);
 
   renderActivities();
@@ -232,16 +281,27 @@ function pushActivity(type, label, timestamp) {
 function renderActivities() {
 
   activitiesContainer.innerHTML = activities.slice(0,15).map(a => `
-    <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
-      <p class="text-sm font-medium">${a.type}</p>
-      <p class="text-xs text-muted">${a.label}</p>
-      <p class="text-[11px] text-slate-400">${formatTimeAgo(a.date)}</p>
+    <div class="relative pl-10">
+
+      <span class="absolute left-0 top-2 w-6 h-6 rounded-full bg-primary
+                   flex items-center justify-center text-white text-xs shadow">
+        <i class="bi bi-activity"></i>
+      </span>
+
+      <div class="bg-slate-50 rounded-lg p-3 border border-slate-100">
+        <p class="text-sm font-medium">${a.type}</p>
+        <p class="text-xs text-muted">${a.label}</p>
+        <p class="text-[11px] text-slate-400">
+          ${formatTimeAgo(a.date)}
+        </p>
+      </div>
+
     </div>
   `).join("");
 }
 
 /* ==========================================================
-   ALERTS
+   ALERTES
 ========================================================== */
 function renderAlerts(lowStock, pending, rejected) {
 
