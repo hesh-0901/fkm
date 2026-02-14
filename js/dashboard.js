@@ -51,11 +51,11 @@ logoutBtn.onclick = async () => {
   location.replace("../login.html");
 };
 
-if (periodFilter) {
-  periodFilter.addEventListener("change", () => {
-    selectedPeriod = periodFilter.value;
-  });
-}
+periodFilter.addEventListener("change", () => {
+  selectedPeriod = periodFilter.value;
+  activities = [];
+});
+
 
 /* ==========================================================
    REALTIME DASHBOARD
@@ -150,18 +150,29 @@ function initRealtimeDashboard() {
 ========================================================== */
 function filterByPeriod(timestamp) {
 
-  if (!timestamp || selectedPeriod === "ALL") return true;
+  if (!timestamp) return false;
+  if (selectedPeriod === "ALL") return true;
 
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
   const now = new Date();
+
+  const diffMs = now - date;
+  const diffDays = diffMs / (1000 * 60 * 60 * 24);
 
   if (selectedPeriod === "TODAY") {
     return date.toDateString() === now.toDateString();
   }
 
+  if (selectedPeriod === "7DAYS") {
+    return diffDays <= 7;
+  }
+
+  if (selectedPeriod === "30DAYS") {
+    return diffDays <= 30;
+  }
+
   return true;
 }
-
 /* ==========================================================
    STOCK AVEC BARRES PREMIUM
 ========================================================== */
