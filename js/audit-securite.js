@@ -81,7 +81,7 @@ validatePinBtn.addEventListener("click", async () => {
   const enteredPin = pinInput.value.trim();
   if (!enteredPin) return;
 
-  const pinSnap = await getDoc(doc(db, "security", "director_pin"));
+const pinSnap = await getDoc(doc(db, "settings", "security"));
 
   if (!pinSnap.exists()) {
     pinError.textContent = "PIN non configuré.";
