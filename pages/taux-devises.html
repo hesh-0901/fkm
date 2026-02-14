@@ -74,39 +74,81 @@
       </div>
     </div>
 
-    <!-- CARD -->
-    <div class="bg-white rounded-2xl shadow-md border border-slate-100 p-6 max-w-xl">
+    <!-- ACTION BAR -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-lg font-semibold">Historique des taux</h2>
+        <p class="text-xs text-muted">Suivi complet des modifications</p>
+      </div>
 
-      <h2 class="text-lg font-semibold mb-4">Taux USD → CDF</h2>
+      <button id="openRateModalBtn"
+              class="flex items-center gap-2 px-5 py-2.5 rounded-xl
+                     bg-gradient-to-r from-primary to-primaryDark
+                     text-white shadow hover:scale-105 transition">
+        <i class="bi bi-plus-lg"></i>
+        Nouveau taux
+      </button>
+    </div>
 
-      <div class="space-y-4">
+    <!-- TABLE -->
+    <div class="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
 
-        <div>
-          <label class="text-sm text-muted">Taux actuel</label>
-          <input id="usdCdfRate"
-                 type="number"
-                 step="0.01"
-                 class="form-control mt-1">
-        </div>
+          <thead class="bg-slate-50 border-b text-xs uppercase tracking-wide text-slate-500">
+            <tr>
+              <th class="px-6 py-4">#</th>
+              <th class="px-6 py-4">Taux USD → CDF</th>
+              <th class="px-6 py-4">Modifié par</th>
+              <th class="px-6 py-4">Rôle</th>
+              <th class="px-6 py-4">Date</th>
+            </tr>
+          </thead>
 
-        <div class="flex items-center justify-between">
-          <div class="text-xs text-muted">
-            Dernière mise à jour :
-            <span id="lastUpdate">—</span>
-          </div>
+          <tbody id="ratesTable" class="divide-y divide-slate-100">
+          </tbody>
 
-          <button id="saveRateBtn"
-                  class="px-5 py-2 rounded-xl
-                         bg-gradient-to-r from-primary to-primaryDark
-                         text-white shadow hover:scale-105 transition">
-            Enregistrer
-          </button>
-        </div>
-
+        </table>
       </div>
     </div>
 
   </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal fade" id="rateModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-xl">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-currency-exchange me-2"></i>
+          Nouveau taux USD → CDF
+        </h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Taux</label>
+          <input id="usdCdfRate"
+                 type="number"
+                 step="0.01"
+                 class="form-control">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">
+          Annuler
+        </button>
+        <button class="btn btn-success" id="saveRateBtn">
+          Enregistrer
+        </button>
+      </div>
+
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
