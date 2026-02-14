@@ -412,7 +412,6 @@ window.validateTx = async (id) => {
   await loadTransactions();
 };
 
-
 window.rejectTx = async (id) => {
 
   if (!["admin","directeur"].includes(currentUserData.role)) return;
