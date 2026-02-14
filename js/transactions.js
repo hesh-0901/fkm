@@ -250,15 +250,40 @@ function renderTable(data) {
 
     const created = t.createdAt?.toDate().toLocaleDateString() || "-";
 
+    // 🔹 Gestion ERP multi-items
+    const productsHTML = t.items && t.items.length
+      ? t.items.map(item =>
+          `<div class="text-xs">${item.productName} (${item.quantity})</div>`
+        ).join("")
+      : t.productName;
+
+    const totalQuantity = t.items && t.items.length
+      ? t.items.reduce((sum, i) => sum + i.quantity, 0)
+      : t.quantity;
+
+    const totalAmount = t.grandTotalUSD
+      ? t.grandTotalUSD.toFixed(2)
+      : t.total;
+
     return `
       <tr class="text-sm">
         <td class="px-6 py-4">${index + 1}</td>
         <td class="px-6 py-4 font-semibold">${t.invoiceNumber}</td>
         <td class="px-6 py-4">${created}</td>
         <td class="px-6 py-4">${t.partnerName}</td>
-        <td class="px-6 py-4">${t.productName}</td>
-        <td class="px-6 py-4 text-center">${t.quantity}</td>
-        <td class="px-6 py-4 font-semibold">${t.total} ${t.currency}</td>
+
+        <td class="px-6 py-4">
+          ${productsHTML}
+        </td>
+
+        <td class="px-6 py-4 text-center">
+          ${totalQuantity}
+        </td>
+
+        <td class="px-6 py-4 font-semibold">
+          ${totalAmount} ${t.currency}
+        </td>
+
         <td class="px-6 py-4">
           <span class="badge bg-${
             t.status === "approved" ? "success" :
@@ -266,6 +291,7 @@ function renderTable(data) {
             "warning"
           }">${t.status}</span>
         </td>
+
         <td class="px-6 py-4 text-end">
           <div class="flex items-center justify-end gap-2">
 
@@ -292,6 +318,7 @@ function renderTable(data) {
     `;
   }).join("");
 }
+
 
 /* ============================================================
    ACTION DROPDOWN
