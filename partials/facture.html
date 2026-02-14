@@ -2,111 +2,156 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Facture</title>
+<title>Facture FKM ENERGY</title>
 
 <style>
+
+/* ============================= */
+/* FORMAT A5 */
+/* ============================= */
+
 @page {
-  size: A4;
-  margin: 15mm;
+  size: A5;
+  margin: 10mm;
 }
 
 body {
   font-family: Arial, sans-serif;
-  font-size: 14px;
-  color: #000;
+  font-size: 12px;
+  margin: 0;
+  background: #f5f5f5;
+  display: flex;
+  justify-content: center;
 }
 
-.invoice-container {
-  width: 100%;
+.invoice-wrapper {
+  width: 148mm;
+  min-height: 210mm;
+  background: #fff;
+  padding: 15mm;
+  box-sizing: border-box;
 }
+
+/* ============================= */
+/* HEADER */
+/* ============================= */
 
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .logo img {
-  width: 150px;
+  width: 100px;
 }
 
 .company-info {
   text-align: right;
-  font-size: 13px;
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 .invoice-title {
   text-align: center;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: bold;
-  margin-bottom: 20px;
   border-top: 2px solid #000;
   border-bottom: 2px solid #000;
-  padding: 8px 0;
+  padding: 6px 0;
+  margin: 15px 0;
 }
+
+/* ============================= */
+/* META INFO */
+/* ============================= */
 
 .meta {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
+  font-size: 12px;
 }
 
-.meta div {
-  font-size: 14px;
-}
+/* ============================= */
+/* TABLE PRODUITS */
+/* ============================= */
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 table th, table td {
   border: 1px solid #000;
-  padding: 8px;
+  padding: 6px;
   text-align: center;
 }
 
 table th {
-  background: #f3f3f3;
+  background: #f0f0f0;
+  font-weight: bold;
 }
 
+/* ============================= */
+/* TOTAL SECTION */
+/* ============================= */
+
 .total-section {
-  width: 40%;
+  width: 60%;
   margin-left: auto;
-  border: 1px solid #000;
 }
 
 .total-section td {
-  padding: 8px;
+  padding: 6px;
+  border: 1px solid #000;
 }
 
-.footer {
-  text-align: center;
-  font-size: 12px;
-  margin-top: 30px;
+.total-section tr:last-child td {
+  font-weight: bold;
+  background: #f3f3f3;
 }
+
+/* ============================= */
+/* FOOTER */
+/* ============================= */
+
+.footer {
+  margin-top: 25px;
+  font-size: 11px;
+  text-align: center;
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+}
+
+/* ============================= */
+/* PRINT BUTTON */
+/* ============================= */
 
 .print-btn {
   text-align: center;
-  margin-bottom: 20px;
+  margin: 15px;
 }
 
 .print-btn button {
-  padding: 10px 20px;
+  padding: 8px 16px;
   border: none;
   background: #0B5C6B;
   color: #fff;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 5px;
 }
 
 @media print {
+  body {
+    background: #fff;
+  }
   .print-btn {
     display: none;
   }
 }
+
 </style>
 </head>
 
@@ -116,11 +161,12 @@ table th {
   <button onclick="window.print()">Imprimer</button>
 </div>
 
-<div class="invoice-container">
+<div class="invoice-wrapper">
 
+  <!-- HEADER -->
   <div class="header">
     <div class="logo">
-      <img src="../assets/logofkm.png" alt="Logo">
+      <img src="../assets/logofkm.png" alt="FKM Logo">
     </div>
     <div class="company-info">
       <strong>FKM ENERGY</strong><br>
@@ -131,10 +177,12 @@ table th {
     </div>
   </div>
 
+  <!-- TITLE -->
   <div class="invoice-title">
     FACTURE
   </div>
 
+  <!-- META -->
   <div class="meta">
     <div>
       <strong>Facture N° :</strong> <span id="invoiceNumber"></span><br>
@@ -146,32 +194,42 @@ table th {
     </div>
   </div>
 
+  <!-- PRODUITS -->
   <table>
     <thead>
       <tr>
+        <th>#</th>
         <th>Produit</th>
-        <th>Quantité</th>
-        <th>Prix Unitaire</th>
-        <th>Total</th>
+        <th>Qté</th>
+        <th>PU (USD)</th>
+        <th>Total (USD)</th>
       </tr>
     </thead>
-    <tbody>
-      <tr>
-        <td id="productName"></td>
-        <td id="quantity"></td>
-        <td id="unitPrice"></td>
-        <td id="totalAmount"></td>
-      </tr>
+    <tbody id="itemsBody">
     </tbody>
   </table>
 
+  <!-- TOTALS -->
   <table class="total-section">
     <tr>
-      <td><strong>Total :</strong></td>
+      <td>Sous-total :</td>
+      <td id="subtotalAmount"></td>
+    </tr>
+    <tr>
+      <td>Remise (<span id="discountPercentDisplay"></span>%) :</td>
+      <td id="discountAmount"></td>
+    </tr>
+    <tr>
+      <td>TVA (16%) :</td>
+      <td id="tvaAmount"></td>
+    </tr>
+    <tr>
+      <td>Total Final :</td>
       <td id="grandTotal"></td>
     </tr>
   </table>
 
+  <!-- FOOTER -->
   <div class="footer">
     Merci pour votre confiance.<br>
     Les marchandises vendues ne sont ni reprises ni échangées.
