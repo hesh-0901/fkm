@@ -12,8 +12,9 @@
 
 @page {
   size: A4;
-  margin: 12mm;
+  margin: 15mm;
 }
+
 
 body {
   font-family: Arial, sans-serif;
@@ -24,8 +25,18 @@ body {
 
 /* Conteneur principal */
 .invoice-wrapper {
+width: 148mm;
+min-height: 210mm;
+padding: 15mm;
+  
+table {
   width: 100%;
-  box-sizing: border-box;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+table th, table td {
+  word-wrap: break-word;
 }
 
 /* ============================= */
