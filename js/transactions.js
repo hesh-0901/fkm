@@ -535,38 +535,48 @@ window.printInvoice = async (id) => {
       // ==============================
       // PRODUITS MULTIPLES
       // ==============================
+// ==============================
+// PRODUITS MULTIPLES
+// ==============================
 
 const itemsBody = invoiceWindow.document.getElementById("itemsBody");
 itemsBody.innerHTML = "";
 
-if (t.items && t.items.length) {
+if (t.items && Array.isArray(t.items) && t.items.length > 0) {
 
   t.items.forEach((item, index) => {
+
+    const unit = Number(item.unitPriceUSD || 0);
+    const total = Number(item.totalUSD || 0);
+
     itemsBody.innerHTML += `
       <tr>
         <td>${index + 1}</td>
-        <td>${item.productName}</td>
-        <td>${item.quantity}</td>
-        <td>${item.unitPriceUSD.toFixed(2)}</td>
-        <td>${item.totalUSD.toFixed(2)}</td>
+        <td>${item.productName || "-"}</td>
+        <td>${item.quantity || 0}</td>
+        <td>${unit.toFixed(2)} USD</td>
+        <td>${total.toFixed(2)} USD</td>
       </tr>
     `;
   });
 
 } else {
 
-  // Ancien format
+  // Ancien format (fallback)
+  const unit = Number(t.unitPrice || 0);
+  const total = Number(t.total || 0);
+
   itemsBody.innerHTML = `
     <tr>
       <td>1</td>
-      <td>${t.productName}</td>
-      <td>${t.quantity}</td>
-      <td>${t.unitPrice?.toFixed(2) || "0.00"}</td>
-      <td>${t.total?.toFixed(2) || "0.00"}</td>
+      <td>${t.productName || "-"}</td>
+      <td>${t.quantity || 0}</td>
+      <td>${unit.toFixed(2)} USD</td>
+      <td>${total.toFixed(2)} USD</td>
     </tr>
   `;
 }
-      // ==============================
+   // ==============================
       // CALCULS
       // ==============================
 
