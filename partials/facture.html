@@ -7,28 +7,24 @@
 <style>
 
 /* ============================= */
-/* FORMAT A5 */
+/* FORMAT A4 PROPRE */
 /* ============================= */
 
 @page {
-  size: A5;
-  margin: 10mm;
+  size: A4;
+  margin: 12mm;
 }
 
 body {
   font-family: Arial, sans-serif;
   font-size: 12px;
   margin: 0;
-  background: #f5f5f5;
-  display: flex;
-  justify-content: center;
+  background: #fff;
 }
 
+/* Conteneur principal */
 .invoice-wrapper {
-  width: 148mm;
-  min-height: 210mm;
-  background: #fff;
-  padding: 15mm;
+  width: 100%;
   box-sizing: border-box;
 }
 
@@ -43,7 +39,7 @@ body {
 }
 
 .logo img {
-  width: 100px;
+  width: 110px;
 }
 
 .company-info {
@@ -81,6 +77,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 15px;
+  page-break-inside: auto;
 }
 
 table th, table td {
@@ -94,12 +91,17 @@ table th {
   font-weight: bold;
 }
 
+tr {
+  page-break-inside: avoid;
+  page-break-after: auto;
+}
+
 /* ============================= */
 /* TOTAL SECTION */
 /* ============================= */
 
 .total-section {
-  width: 60%;
+  width: 50%;
   margin-left: auto;
 }
 
@@ -144,9 +146,6 @@ table th {
 }
 
 @media print {
-  body {
-    background: #fff;
-  }
   .print-btn {
     display: none;
   }
@@ -205,8 +204,7 @@ table th {
         <th>Total (USD)</th>
       </tr>
     </thead>
-    <tbody id="itemsBody">
-    </tbody>
+    <tbody id="itemsBody"></tbody>
   </table>
 
   <!-- TOTALS -->
