@@ -522,25 +522,74 @@ window.printInvoice = async (id) => {
 
       clearInterval(interval);
 
+      // ==============================
+      // INFOS GÉNÉRALES
+      // ==============================
+
       invoiceWindow.document.getElementById("invoiceNumber").textContent = t.invoiceNumber;
       invoiceWindow.document.getElementById("invoiceDate").textContent =
         t.createdAt?.toDate().toLocaleDateString() || "-";
 
       invoiceWindow.document.getElementById("clientName").textContent = t.partnerName;
-      invoiceWindow.document.getElementById("productName").textContent = t.productName;
-      invoiceWindow.document.getElementById("quantity").textContent = t.quantity;
-      invoiceWindow.document.getElementById("unitPrice").textContent =
-        t.unitPrice + " " + t.currency;
 
-      invoiceWindow.document.getElementById("totalAmount").textContent =
-        t.total + " " + t.currency;
+      // ==============================
+      // PRODUITS MULTIPLES
+      // ==============================
+
+      const itemsBody = invoiceWindow.document.getElementById("itemsBody");
+      itemsBody.innerHTML = "";
+
+      t.items.forEach((item, index) => {
+
+        itemsBody.innerHTML += `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${item.productName}</td>
+            <td>${item.quantity}</td>
+            <td>${item.unitPriceUSD.toFixed(2)}</td>
+            <td>${item.totalUSD.toFixed(2)}</td>
+          </tr>
+        `;
+      });
+
+      // ==============================
+      // CALCULS
+      // ==============================
+
+      const subtotal = t.subtotalUSD || 0;
+      const discountPercent = t.discountPercent || 0;
+      const discountAmount = t.discountAmountUSD || 0;
+
+      const afterDiscount = subtotal - discountAmount;
+
+      const TVA_RATE = 0.16;
+      const tvaAmount = afterDiscount * TVA_RATE;
+
+      const grandTotal = afterDiscount + tvaAmount;
+
+      // ==============================
+      // INJECTION TOTALS
+      // ==============================
+
+      invoiceWindow.document.getElementById("subtotalAmount").textContent =
+        subtotal.toFixed(2) + " USD";
+
+      invoiceWindow.document.getElementById("discountPercentDisplay").textContent =
+        discountPercent;
+
+      invoiceWindow.document.getElementById("discountAmount").textContent =
+        discountAmount.toFixed(2) + " USD";
+
+      invoiceWindow.document.getElementById("tvaAmount").textContent =
+        tvaAmount.toFixed(2) + " USD";
 
       invoiceWindow.document.getElementById("grandTotal").textContent =
-        t.total + " " + t.currency;
+        grandTotal.toFixed(2) + " USD";
     }
 
   }, 50);
 };
+
 /*ajout*/
 const marketerSearch = document.getElementById("marketerSearch");
 const marketerResults = document.getElementById("marketerResults");
