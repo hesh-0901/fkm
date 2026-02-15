@@ -182,15 +182,20 @@ function renderAuditTable(data) {
         <td colspan="6" class="text-center py-6 text-slate-400">
           Aucun log trouvé
         </td>
-      </tr>`;
+      </tr>
+    `;
     return;
   }
 
-  data.sort((a,b) => {
+  // 🔽 Tri décroissant par date
+  data.sort((a, b) => {
     const d1 = a.createdAt?.toDate ? a.createdAt.toDate() : 0;
     const d2 = b.createdAt?.toDate ? b.createdAt.toDate() : 0;
     return d2 - d1;
   });
+
+  // 🔽 Construction propre du HTML
+  let rows = "";
 
   data.forEach(log => {
 
@@ -198,41 +203,38 @@ function renderAuditTable(data) {
       ? log.createdAt.toDate().toLocaleString()
       : "-";
 
-    auditTable.innerHTML += `
+    rows += `
       <tr class="hover:bg-slate-50 transition text-xs">
 
-auditTable.innerHTML += `
-  <tr class="hover:bg-slate-50 transition text-xs">
+        <td class="px-4 py-2">
+          ${date}
+        </td>
 
-    <td class="px-4 py-2">
-      ${date}
-    </td>
+        <td class="px-4 py-2 font-semibold text-primary">
+          ${log.action || "-"}
+        </td>
 
-    <td class="px-4 py-2 font-semibold text-primary">
-      ${log.action || "-"}
-    </td>
+        <td class="px-4 py-2">
+          ${log.collection || "-"}
+        </td>
 
-    <td class="px-4 py-2">
-      ${log.collection || "-"}
-    </td>
+        <td class="px-4 py-2">
+          ${log.performedBy?.name || "-"}
+        </td>
 
-    <td class="px-4 py-2">
-      ${log.performedBy?.name || "-"}
-    </td>
+        <td class="px-4 py-2 text-slate-500">
+          ${log.performedBy?.role || "-"}
+        </td>
 
-    <td class="px-4 py-2 text-muted">
-      ${log.performedBy?.role || "-"}
-    </td>
+        <td class="px-4 py-2 text-slate-400">
+          ${log.documentId || "-"}
+        </td>
 
-    <td class="px-4 py-2 text-muted">
-      ${log.documentId || "-"}
-    </td>
-
-  </tr>
-`;
-
+      </tr>
     `;
   });
+
+  auditTable.innerHTML = rows;
 }
 
 /* ==========================================================
