@@ -74,35 +74,46 @@ logoutBtn.onclick = async () => {
 };
 
 /* ==========================================================
-   PIN VALIDATION
+   PIN VALIDATION (CORRIGÉ)
 ========================================================== */
 validatePinBtn.addEventListener("click", async () => {
 
   const enteredPin = pinInput.value.trim();
   if (!enteredPin) return;
 
-const pinSnap = await getDoc(doc(db, "settings", "security"));
+  try {
 
-  if (!pinSnap.exists()) {
-    pinError.textContent = "PIN non configuré.";
+    const pinSnap = await getDoc(doc(db, "settings", "security"));
+
+    if (!pinSnap.exists()) {
+      pinError.textContent = "PIN non configuré.";
+      pinError.classList.remove("hidden");
+      return;
+    }
+
+    // ✅ CORRECTION ICI
+    const correctPin = pinSnap.data().auditPin;
+
+    // ✅ Conversion en number des deux côtés
+    if (Number(enteredPin) === Number(correctPin)) {
+
+      unlocked = true;
+      pinScreen.classList.add("hidden");
+      auditContent.classList.remove("hidden");
+
+      await loadAuditLogs();
+
+    } else {
+      pinError.textContent = "Code PIN incorrect.";
+      pinError.classList.remove("hidden");
+    }
+
+  } catch (error) {
+    console.error(error);
+    pinError.textContent = "Erreur de sécurité.";
     pinError.classList.remove("hidden");
-    return;
   }
 
-  const correctPin = pinSnap.data().pin;
-
-  if (enteredPin === correctPin) {
-
-    unlocked = true;
-    pinScreen.classList.add("hidden");
-    auditContent.classList.remove("hidden");
-
-    await loadAuditLogs();
-
-  } else {
-    pinError.textContent = "Code PIN incorrect.";
-    pinError.classList.remove("hidden");
-  }
 });
 
 /* ==========================================================
@@ -175,7 +186,6 @@ function renderAuditTable(data) {
     return;
   }
 
-  // tri décroissant
   data.sort((a,b) => {
     const d1 = a.createdAt?.toDate ? a.createdAt.toDate() : 0;
     const d2 = b.createdAt?.toDate ? b.createdAt.toDate() : 0;
@@ -192,26 +202,13 @@ function renderAuditTable(data) {
       <tr class="hover:bg-slate-50 transition text-xs">
 
         <td class="px-4 py-2">${date}</td>
-
         <td class="px-4 py-2 font-semibold text-primary">
           ${log.action || "-"}
         </td>
-
-        <td class="px-4 py-2">
-          ${log.collection || "-"}
-        </td>
-
-        <td class="px-4 py-2">
-          ${log.user?.name || "-"}
-        </td>
-
-        <td class="px-4 py-2 text-muted">
-          ${log.user?.role || "-"}
-        </td>
-
-        <td class="px-4 py-2 text-muted">
-          ${log.documentId || "-"}
-        </td>
+        <td class="px-4 py-2">${log.collection || "-"}</td>
+        <td class="px-4 py-2">${log.user?.name || "-"}</td>
+        <td class="px-4 py-2 text-muted">${log.user?.role || "-"}</td>
+        <td class="px-4 py-2 text-muted">${log.documentId || "-"}</td>
 
       </tr>
     `;
@@ -219,7 +216,7 @@ function renderAuditTable(data) {
 }
 
 /* ==========================================================
-   RENDER STATS
+   STATS
 ========================================================== */
 function renderStats(data) {
 
@@ -253,3 +250,4 @@ resetFiltersBtn.addEventListener("click", () => {
   searchInput.value = "";
   applyFilters();
 });
+
