@@ -76,6 +76,7 @@ onAuthStateChanged(auth, async (user) => {
 
   if ([ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) {
     addBtn.classList.remove("d-none");
+addBtn.style.display = "flex";
   }
 
   await loadInventory();
@@ -345,24 +346,5 @@ pCurrency.onchange = () => {
   usdBlock.classList.toggle("d-none", pCurrency.value === "CDF");
   cdfBlock.classList.toggle("d-none", pCurrency.value === "USD");
 };
-
-const data = {
-  name: pName.value.trim(),
-  category: pCategory.value.trim(),
-  quantity: Number(pQty.value),
-  minQuantity: Number(pMinQty.value),
-  pricing: {
-    mode: pCurrency.value,
-    usd: Number(pUsd.value || 0),
-    cdf: Number(pCdf.value || 0)
-  },
-  updatedAt: serverTimestamp(),
-  updatedBy: {
-    uid: currentUser.uid,
-    name: currentUser.name,
-    role: currentUser.role
-  }
-};
-
 
 addBtn.onclick = () => modal.show();
