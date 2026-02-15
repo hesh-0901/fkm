@@ -56,6 +56,29 @@ let editingId = null;
 let inventoryCache = [];
 
 /* =========================
+   AUDIT LOGGER
+========================= */
+async function logAudit(action, documentId, extraData = {}) {
+  try {
+    await addDoc(collection(db, "audit_logs"), {
+      action,
+      collection: "inventory",
+      documentId,
+      performedBy: {
+        uid: currentUser.uid,
+        name: currentUser.name,
+        role: currentUser.role
+      },
+      ...extraData,
+      createdAt: serverTimestamp()
+    });
+  } catch (error) {
+    console.error("Erreur audit :", error);
+  }
+}
+
+
+/* =========================
    AUTH
 ========================= */
 onAuthStateChanged(auth, async (user) => {
@@ -295,10 +318,18 @@ saveBtn.onclick = async () => {
   };
 
   if (editingId) {
+
     await updateDoc(doc(db, "inventory", editingId), data);
+
+    await logAudit("UPDATE_PRODUCT", editingId, {
+      productName: data.name
+    });
+
     editingId = null;
+
   } else {
-    await addDoc(collection(db, "inventory"), {
+
+    const newDoc = await addDoc(collection(db, "inventory"), {
       ...data,
       createdBy: {
         uid: currentUser.uid,
@@ -307,12 +338,17 @@ saveBtn.onclick = async () => {
       },
       createdAt: serverTimestamp()
     });
+
+    await logAudit("CREATE_PRODUCT", newDoc.id, {
+      productName: data.name
+    });
   }
 
   modal.hide();
   productForm.reset();
   await loadInventory();
 };
+
 
 /* =========================
    EDIT
@@ -342,9 +378,18 @@ window.removeItem = async (id) => {
   if (currentUser.role !== ROLES.DIRECTEUR) return;
   if (!confirm("Supprimer ce produit ?")) return;
 
+  const snap = await getDoc(doc(db, "inventory", id));
+  const productName = snap.data()?.name || "";
+
   await deleteDoc(doc(db, "inventory", id));
+
+  await logAudit("DELETE_PRODUCT", id, {
+    productName
+  });
+
   await loadInventory();
 };
+
 
 /* =========================
    CURRENCY SWITCH
