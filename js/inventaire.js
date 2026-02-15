@@ -106,11 +106,10 @@ console.log("ROLE CONNECTÉ :", currentUser.role);
 
   userNameEl.textContent = currentUser.name;
   userRoleEl.textContent = currentUser.fonction;
+if ([ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) {
+  addBtn.classList.remove("d-none");
+}
 
-  if ([ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) {
-    addBtn.classList.remove("hidden");
-addBtn.style.display = "flex";
-  }
 
   await loadInventory();
 });
