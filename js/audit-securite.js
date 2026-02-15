@@ -157,10 +157,10 @@ function applyFilters() {
       if (logDate > endDay) return false;
     }
 
-    const matchSearch =
-      log.action?.toLowerCase().includes(searchTerm) ||
-      log.user?.name?.toLowerCase().includes(searchTerm) ||
-      log.collection?.toLowerCase().includes(searchTerm);
+const matchSearch =
+  log.action?.toLowerCase().includes(searchTerm) ||
+  log.performedBy?.name?.toLowerCase().includes(searchTerm) ||
+  log.collection?.toLowerCase().includes(searchTerm);
 
     return matchSearch;
   });
@@ -201,16 +201,36 @@ function renderAuditTable(data) {
     auditTable.innerHTML += `
       <tr class="hover:bg-slate-50 transition text-xs">
 
-        <td class="px-4 py-2">${date}</td>
-        <td class="px-4 py-2 font-semibold text-primary">
-          ${log.action || "-"}
-        </td>
-        <td class="px-4 py-2">${log.collection || "-"}</td>
-        <td class="px-4 py-2">${log.user?.name || "-"}</td>
-        <td class="px-4 py-2 text-muted">${log.user?.role || "-"}</td>
-        <td class="px-4 py-2 text-muted">${log.documentId || "-"}</td>
+auditTable.innerHTML += `
+  <tr class="hover:bg-slate-50 transition text-xs">
 
-      </tr>
+    <td class="px-4 py-2">
+      ${date}
+    </td>
+
+    <td class="px-4 py-2 font-semibold text-primary">
+      ${log.action || "-"}
+    </td>
+
+    <td class="px-4 py-2">
+      ${log.collection || "-"}
+    </td>
+
+    <td class="px-4 py-2">
+      ${log.performedBy?.name || "-"}
+    </td>
+
+    <td class="px-4 py-2 text-muted">
+      ${log.performedBy?.role || "-"}
+    </td>
+
+    <td class="px-4 py-2 text-muted">
+      ${log.documentId || "-"}
+    </td>
+
+  </tr>
+`;
+
     `;
   });
 }
