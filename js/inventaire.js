@@ -54,7 +54,6 @@ const productForm = document.getElementById("productForm");
 let currentUser = null;
 let editingId = null;
 let inventoryCache = [];
-console.log("ROLE CONNECTÉ :", currentUser.role);
 
 /* =========================
    AUDIT LOGGER
@@ -95,12 +94,15 @@ if (!snap.exists()) {
 const data = snap.data();
 
 
-  currentUser = {
-    uid: user.uid,
-    name: data.name,
-    fonction: data.fonction,
-    role: data.role
-  };
+currentUser = {
+  uid: user.uid,
+  name: data.name,
+  fonction: data.fonction,
+  role: data.role
+};
+
+console.log("ROLE CONNECTÉ :", currentUser.role);
+  
 
   userNameEl.textContent = currentUser.name;
   userRoleEl.textContent = currentUser.fonction;
