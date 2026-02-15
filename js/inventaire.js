@@ -54,6 +54,7 @@ const productForm = document.getElementById("productForm");
 let currentUser = null;
 let editingId = null;
 let inventoryCache = [];
+console.log("ROLE CONNECTÉ :", currentUser.role);
 
 /* =========================
    AUDIT LOGGER
