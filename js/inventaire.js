@@ -61,8 +61,15 @@ let inventoryCache = [];
 onAuthStateChanged(auth, async (user) => {
   if (!user) return location.replace("../login.html");
 
-  const snap = await getDoc(doc(db, "users", user.uid));
-  const data = snap.data();
+const snap = await getDoc(doc(db, "users", user.uid));
+
+if (!snap.exists()) {
+  alert("Utilisateur non trouvé.");
+  return location.replace("../login.html");
+}
+
+const data = snap.data();
+
 
   currentUser = {
     uid: user.uid,
@@ -75,7 +82,7 @@ onAuthStateChanged(auth, async (user) => {
   userRoleEl.textContent = currentUser.fonction;
 
   if ([ROLES.OPERATEUR, ROLES.ADMIN, ROLES.DIRECTEUR].includes(currentUser.role)) {
-    addBtn.classList.remove("d-none");
+    addBtn.classList.remove("hidden");
 addBtn.style.display = "flex";
   }
 
