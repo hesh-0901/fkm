@@ -298,9 +298,9 @@ function renderTable(data) {
           ${totalQuantity}
         </td>
 
-        <td class="px-6 py-4 font-semibold">
-          ${totalAmount} ${t.currency}
-        </td>
+         <td class="px-6 py-4 font-semibold">
+           ${totalAmount} ${t.invoiceCurrency || "USD"}
+         </td>
 
         <td class="px-6 py-4">
           <span class="badge bg-${
@@ -637,16 +637,7 @@ window.printInvoice = async (id) => {
 };
 
 /*ajout*/
-const marketerSearch = document.getElementById("marketerSearch");
-const marketerResults = document.getElementById("marketerResults");
-const discountPercent = document.getElementById("discountPercent");
-const stockInfo = document.getElementById("stockInfo");
-const addItemBtn = document.getElementById("addItemBtn");
-const itemsTable = document.getElementById("itemsTable");
 
-const subtotalUSD = document.getElementById("subtotalUSD");
-const discountAmountUSD = document.getElementById("discountAmountUSD");
-const grandTotalUSD = document.getElementById("grandTotalUSD");
 /*2*/
 productSearch.oninput = () => {
 
