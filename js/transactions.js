@@ -773,18 +773,6 @@ window.removeItem = (index) => {
   renderCart();
 };
 /*CALCUL TOTALS */
-function calculateTotals() {
-
-  const subtotal = cartItems.reduce((sum, i) => sum + i.totalUSD, 0);
-  const discount = (subtotal * Number(discountPercent.value || 0)) / 100;
-  const grandTotal = subtotal - discount;
-
-  subtotalUSD.textContent = subtotal.toFixed(2) + " USD";
-  discountAmountUSD.textContent = discount.toFixed(2) + " USD";
-  grandTotalUSD.textContent = grandTotal.toFixed(2) + " USD";
-}
-
-discountPercent.oninput = calculateTotals;
 
 /* MARKETEURS AUTOCOMPLETE*/
 marketerSearch.oninput = async () => {
