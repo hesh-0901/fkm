@@ -36,6 +36,7 @@ const newTxBtn = document.getElementById("newTxBtn");
 const productSearch = document.getElementById("productSearch");
 const productResults = document.getElementById("productResults");
 const partnerSearch = document.getElementById("partnerSearch");
+const partnerPhone = document.getElementById("partnerPhone");
 const txQty = document.getElementById("txQty");
 
 const marketerSearch = document.getElementById("marketerSearch");
@@ -805,11 +806,12 @@ saveBtn.onclick = async () => {
   const discount = (subtotal * Number(discountPercent.value || 0)) / 100;
   const grandTotal = subtotal - discount;
 
-  const txData = {
-    invoiceNumber: await generateInvoiceNumber(),
-    partnerName: partnerSearch.value,
-    marketer: selectedMarketer || null,
-    invoiceCurrency: invoiceCurrency.value,
+   const txData = {
+  invoiceNumber: await generateInvoiceNumber(),
+  partnerName: partnerSearch.value,
+  partnerPhone: partnerPhone.value || "",
+  marketer: selectedMarketer || null,
+  invoiceCurrency: invoiceCurrency.value,
     items: cartItems,
     subtotalUSD: subtotal,
     discountPercent: Number(discountPercent.value || 0),
@@ -842,8 +844,9 @@ function resetProductFields() {
 function resetModal() {
   cartItems = [];
   selectedMarketer = null;
-  partnerSearch.value = "";
-  marketerSearch.value = "";
+   partnerSearch.value = "";
+   partnerPhone.value = "";
+   marketerSearch.value = "";
   discountPercent.value = 0;
   itemsTable.innerHTML = "";
   calculateTotals();
