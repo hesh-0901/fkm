@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <title>Connexion | FKM ENERGY</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- 🔥 NO ZOOM MOBILE -->
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+
+  <!-- iOS fix -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -22,24 +28,21 @@
   </script>
 </head>
 
-<body class="min-h-screen bg-[#0b1220] overflow-hidden relative">
+<body class="min-h-screen bg-[#0b1220] relative overflow-x-hidden">
 
   <!-- ================= BACKGROUND ================= -->
-  <div class="absolute inset-0 overflow-hidden">
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
 
-    <!-- Solar Glow -->
     <div class="absolute top-[-250px] left-[-250px] w-[600px] h-[600px]
                 bg-gradient-to-br from-yellow-400/20 via-primary/20 to-secondary/20
                 rounded-full blur-[160px] animate-pulse">
     </div>
 
-    <!-- Energy Wave -->
     <div class="absolute bottom-[-250px] right-[-250px] w-[600px] h-[600px]
                 bg-gradient-to-tr from-secondary/30 via-primary/20 to-cyan-400/20
                 rounded-full blur-[160px]">
     </div>
 
-    <!-- Subtle Grid -->
     <div class="absolute inset-0 opacity-[0.03]"
          style="background-image: linear-gradient(to right, white 1px, transparent 1px),
                                 linear-gradient(to bottom, white 1px, transparent 1px);
@@ -69,7 +72,6 @@
         </p>
 
         <div class="mt-16 grid grid-cols-3 gap-10 text-center">
-
           <div>
             <div class="text-3xl font-bold">24/7</div>
             <div class="text-sm uppercase tracking-wide text-white/60">
@@ -90,33 +92,32 @@
               Intégré
             </div>
           </div>
-
         </div>
 
       </div>
     </div>
 
     <!-- ================= LOGIN PANEL ================= -->
-    <div class="flex items-center justify-center px-6">
+    <div class="flex items-center justify-center px-4 sm:px-6 py-10">
 
       <div class="w-full max-w-md relative
                   bg-white/10 backdrop-blur-3xl
                   border border-white/20
                   rounded-3xl
                   shadow-[0_30px_80px_rgba(0,0,0,0.6)]
-                  p-10
+                  p-6 sm:p-10
                   text-white">
 
         <!-- BRAND -->
-        <div class="text-center mb-10">
+        <div class="text-center mb-8 sm:mb-10">
 
-          <div class="text-2xl font-extrabold tracking-[0.2em]
+          <div class="text-xl sm:text-2xl font-extrabold tracking-[0.2em]
                       bg-gradient-to-r from-yellow-300 via-primary to-secondary
                       bg-clip-text text-transparent">
             FKM ENERGY
           </div>
 
-          <h2 class="mt-4 text-3xl font-semibold text-white">
+          <h2 class="mt-4 text-2xl sm:text-3xl font-semibold text-white">
             Connexion sécurisée
           </h2>
 
@@ -143,10 +144,11 @@
                 required
                 placeholder="nom.prenom"
                 class="flex-1 px-4 py-3 rounded-l-xl outline-none text-sm
-                       bg-transparent text-white placeholder-white/40"
+                       bg-transparent text-white placeholder-white/40
+                       text-base"
               />
 
-              <span class="px-4 flex items-center text-sm text-white/60 bg-white/5 rounded-r-xl">
+              <span class="px-3 sm:px-4 flex items-center text-xs sm:text-sm text-white/60 bg-white/5 rounded-r-xl">
                 @fkmenergy.com
               </span>
 
@@ -170,7 +172,7 @@
                        border border-white/20
                        rounded-xl outline-none
                        focus:bg-white/20 focus:ring-2 focus:ring-primary
-                       transition text-sm"
+                       transition text-base"
               />
 
               <button
@@ -219,7 +221,7 @@
         </form>
 
         <!-- FOOTER -->
-        <div class="mt-10 text-center text-xs text-white/40">
+        <div class="mt-8 text-center text-xs text-white/40">
           © 2026 FKM ENERGY · Secure Access · Solar Intelligence Platform
         </div>
 
