@@ -36,16 +36,17 @@
 
 <body class="bg-bg text-slate-800">
 
-<div class="flex min-h-screen">
+<div class="flex flex-col lg:flex-row min-h-screen">
+
 
   <!-- SIDEBAR -->
   <div id="sidebar-container"></div>
 
   <!-- MAIN -->
-  <main id="mainContent" class="flex-1 px-6 py-6 space-y-8 overflow-x-hidden">
+  <<main id="mainContent" class="flex-1 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6 sm:space-y-8 overflow-x-hidden">
 
     <!-- ================= TOPBAR ================= -->
-    <div class="bg-white rounded-2xl shadow-sm px-6 py-4 flex items-center justify-between border border-slate-100">
+    <div class="bg-white rounded-2xl shadow-sm px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-slate-100">
 
       <div class="flex items-center gap-3">
         <button id="toggleSidebar"
@@ -84,7 +85,7 @@
     </div>
 
     <!-- ================= KPI ================= -->
-    <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
 
       <div class="bg-gradient-to-br from-primary to-primaryDark text-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
         <i class="bi bi-box-seam absolute -right-6 -top-6 text-white/10 text-8xl"></i>
@@ -113,7 +114,7 @@
     </div>
 
     <!-- ================= GRID PRINCIPAL ================= -->
-    <div class="grid xl:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
 
       <!-- TOP PRODUITS -->
       <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
@@ -145,7 +146,8 @@
     </div>
 
     <!-- ================= ACTIVITÉS + ALERTES ================= -->
-    <div class="grid lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+
 
       <!-- ACTIVITÉS -->
       <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
