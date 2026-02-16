@@ -1,11 +1,9 @@
-// js/sidebar.js
 const SIDEBAR_STATE_KEY = "fkm_sidebar_collapsed";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const sidebarContainer = document.getElementById("sidebar-container");
   if (!sidebarContainer) return;
 
-  /* Load sidebar */
   const res = await fetch("../partials/sidebar.html");
   sidebarContainer.innerHTML = await res.text();
 
@@ -18,7 +16,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const isDesktop = () => window.innerWidth >= 1024;
 
-  /* INIT DESKTOP STATE */
+  /* INIT DESKTOP */
   if (isDesktop()) {
     const collapsed =
       localStorage.getItem(SIDEBAR_STATE_KEY) === "true";
@@ -49,7 +47,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  /* DESKTOP */
+  /* ================= DESKTOP ================= */
+
   function toggleDesktop() {
     const collapsed = sidebar.classList.contains("w-20");
     applyDesktopState(!collapsed);
@@ -58,6 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function applyDesktopState(collapsed) {
     sidebar.classList.remove("-translate-x-full");
+    overlay?.classList.add("hidden");
 
     if (collapsed) {
       sidebar.classList.remove("w-72");
@@ -86,15 +86,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  /* MOBILE */
+  /* ================= MOBILE ================= */
+
   function openMobile() {
     sidebar.classList.remove("-translate-x-full");
     overlay?.classList.remove("hidden");
+
+    document.body.classList.add("overflow-hidden");
   }
 
   function closeMobile() {
     sidebar.classList.add("-translate-x-full");
     overlay?.classList.add("hidden");
+
+    document.body.classList.remove("overflow-hidden");
   }
 });
-
