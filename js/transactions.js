@@ -540,13 +540,24 @@ window.printInvoice = async (id) => {
 
   const invoiceWindow = window.open("../partials/facture.html", "_blank");
 
-  invoiceWindow.onload = () => {
+  invoiceWindow.onload = async () => {
 
     const docInv = invoiceWindow.document;
 
-    // ==============================
-    // INFOS GÉNÉRALES
-    // ==============================
+    // 🔥 Récupération taux
+    const rateSnap = await getDoc(doc(db, "exchange_rates", "current"));
+    const rate = rateSnap.data()?.USD_CDF || 1;
+
+    const currency = t.invoiceCurrency || "USD";
+
+    const convert = (amount) => {
+      if (currency === "CDF") return (amount * rate).toFixed(2);
+      return amount.toFixed(2);
+    };
+
+    /* ==============================
+       INFOS GÉNÉRALES
+    ============================== */
 
     docInv.getElementById("invoiceNumber").textContent =
       t.invoiceNumber || "-";
@@ -557,9 +568,15 @@ window.printInvoice = async (id) => {
     docInv.getElementById("clientName").textContent =
       t.partnerName || "-";
 
-    // ==============================
-    // PRODUITS MULTIPLES
-    // ==============================
+    // 🔥 Assistant de vente
+    const assistantEl = docInv.getElementById("assistantName");
+    if (assistantEl) {
+      assistantEl.textContent = t.marketer?.name || "-";
+    }
+
+    /* ==============================
+       PRODUITS
+    ============================== */
 
     const itemsBody = docInv.getElementById("itemsBody");
     itemsBody.innerHTML = "";
@@ -568,23 +585,19 @@ window.printInvoice = async (id) => {
 
       t.items.forEach((item, index) => {
 
-        const unit = Number(item.unitPriceUSD || 0);
-        const total = Number(item.totalUSD || 0);
-
         itemsBody.innerHTML += `
           <tr>
             <td>${index + 1}</td>
             <td>${item.productName || "-"}</td>
             <td>${item.quantity || 0}</td>
-            <td>${unit.toFixed(2)} USD</td>
-            <td>${total.toFixed(2)} USD</td>
+            <td>${convert(item.unitPriceUSD)} ${currency}</td>
+            <td>${convert(item.totalUSD)} ${currency}</td>
           </tr>
         `;
       });
 
     } else {
 
-      // Ancien format (fallback)
       const unit = Number(t.unitPrice || 0);
       const total = Number(t.total || 0);
 
@@ -593,46 +606,44 @@ window.printInvoice = async (id) => {
           <td>1</td>
           <td>${t.productName || "-"}</td>
           <td>${t.quantity || 0}</td>
-          <td>${unit.toFixed(2)} USD</td>
-          <td>${total.toFixed(2)} USD</td>
+          <td>${convert(unit)} ${currency}</td>
+          <td>${convert(total)} ${currency}</td>
         </tr>
       `;
     }
 
-    // ==============================
-    // CALCULS
-    // ==============================
+    /* ==============================
+       CALCULS
+    ============================== */
 
     const subtotal = Number(t.subtotalUSD || t.total || 0);
-    const discountPercent = Number(t.discountPercent || 0);
+    const discountPercentValue = Number(t.discountPercent || 0);
     const discountAmount = Number(t.discountAmountUSD || 0);
 
     const afterDiscount = subtotal - discountAmount;
-
     const TVA_RATE = 0.16;
     const tvaAmount = afterDiscount * TVA_RATE;
-
     const grandTotal =
       Number(t.grandTotalUSD) || (afterDiscount + tvaAmount);
 
-    // ==============================
-    // INJECTION TOTALS
-    // ==============================
+    /* ==============================
+       INJECTION TOTALS
+    ============================== */
 
     docInv.getElementById("subtotalAmount").textContent =
-      subtotal.toFixed(2) + " USD";
+      convert(subtotal) + " " + currency;
 
     docInv.getElementById("discountPercentDisplay").textContent =
-      discountPercent;
+      discountPercentValue;
 
     docInv.getElementById("discountAmount").textContent =
-      discountAmount.toFixed(2) + " USD";
+      convert(discountAmount) + " " + currency;
 
     docInv.getElementById("tvaAmount").textContent =
-      tvaAmount.toFixed(2) + " USD";
+      convert(tvaAmount) + " " + currency;
 
     docInv.getElementById("grandTotal").textContent =
-      grandTotal.toFixed(2) + " USD";
+      convert(grandTotal) + " " + currency;
   };
 };
 
