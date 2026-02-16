@@ -98,8 +98,12 @@ onAuthStateChanged(auth, async (user) => {
 
   newTxBtn.classList.remove("d-none");
 
-  await preloadProducts();
-  await loadTransactions();
+await preloadProducts();
+
+const rateSnap = await getDoc(doc(db, "exchange_rates", "current"));
+exchangeRate = rateSnap.data()?.USD_CDF || 1;
+
+await loadTransactions();
 });
 
 /* ============================================================
@@ -344,11 +348,11 @@ function renderTable(data) {
 /* ============================================================
    CALCUL
 ============================================================ */
-async function calculateTotals() {
+function calculateTotals() {
 
-  const subtotal = cartItems.reduce((sum, i) => sum + i.totalUSD, 0);
-  const discount = (subtotal * Number(discountPercent.value || 0)) / 100;
-  const grandTotal = subtotal - discount;
+  const subtotalUSDValue = cartItems.reduce((sum, i) => sum + i.totalUSD, 0);
+  const discountUSDValue = (subtotalUSDValue * Number(discountPercent.value || 0)) / 100;
+  const grandTotalUSDValue = subtotalUSDValue - discountUSDValue;
 
   const currency = invoiceCurrency.value;
 
@@ -357,9 +361,9 @@ async function calculateTotals() {
     return amount.toFixed(2);
   };
 
-  subtotalUSD.textContent = convert(subtotal) + " " + currency;
-  discountAmountUSD.textContent = convert(discount) + " " + currency;
-  grandTotalUSD.textContent = convert(grandTotal) + " " + currency;
+  subtotalUSD.textContent = convert(subtotalUSDValue) + " " + currency;
+  discountAmountUSD.textContent = convert(discountUSDValue) + " " + currency;
+  grandTotalUSD.textContent = convert(grandTotalUSDValue) + " " + currency;
 }
 
 /* ============================================================
@@ -645,10 +649,7 @@ window.printInvoice = async (id) => {
     const discountAmount = Number(t.discountAmountUSD || 0);
 
     const afterDiscount = subtotal - discountAmount;
-    const TVA_RATE = 0.16;
-    const tvaAmount = afterDiscount * TVA_RATE;
-    const grandTotal =
-      Number(t.grandTotalUSD) || (afterDiscount + tvaAmount);
+    const grandTotal =const grandTotal = Number(t.grandTotalUSD || 0);
 
     /* ==============================
        INJECTION TOTALS
@@ -662,9 +663,6 @@ window.printInvoice = async (id) => {
 
     docInv.getElementById("discountAmount").textContent =
       convert(discountAmount) + " " + currency;
-
-    docInv.getElementById("tvaAmount").textContent =
-      convert(tvaAmount) + " " + currency;
 
     docInv.getElementById("grandTotal").textContent =
       convert(grandTotal) + " " + currency;
