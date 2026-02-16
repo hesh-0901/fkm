@@ -49,7 +49,7 @@ const itemsTable = document.getElementById("itemsTable");
 
 const subtotalUSD = document.getElementById("subtotalUSD");
 const discountAmountUSD = document.getElementById("discountAmountUSD");
-const grandTotal = Number(t.grandTotalUSD || 0);
+const grandTotalUSD = document.getElementById("grandTotalUSD");
 
 /* 🔥 Devise facture */
 const invoiceCurrency = document.getElementById("invoiceCurrency");
@@ -661,8 +661,8 @@ window.printInvoice = async (id) => {
     const discountPercentValue = Number(t.discountPercent || 0);
     const discountAmount = Number(t.discountAmountUSD || 0);
 
-    const afterDiscount = subtotal - discountAmount;
-    const grandTotal =const grandTotal = Number(t.grandTotalUSD || 0);
+   const grandTotal = Number(t.grandTotalUSD || 0);
+
 
     /* ==============================
        INJECTION TOTALS
