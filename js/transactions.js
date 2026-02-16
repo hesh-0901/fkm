@@ -32,22 +32,40 @@ const modal = new bootstrap.Modal(document.getElementById("txModal"));
 const saveBtn = document.getElementById("saveTxBtn");
 const newTxBtn = document.getElementById("newTxBtn");
 
+/* ---------- ERP FORM ---------- */
 const productSearch = document.getElementById("productSearch");
 const productResults = document.getElementById("productResults");
 const partnerSearch = document.getElementById("partnerSearch");
-
 const txQty = document.getElementById("txQty");
 
+const marketerSearch = document.getElementById("marketerSearch");
+const marketerResults = document.getElementById("marketerResults");
+
+const discountPercent = document.getElementById("discountPercent");
+const stockInfo = document.getElementById("stockInfo");
+const addItemBtn = document.getElementById("addItemBtn");
+const itemsTable = document.getElementById("itemsTable");
+
+const subtotalUSD = document.getElementById("subtotalUSD");
+const discountAmountUSD = document.getElementById("discountAmountUSD");
+const grandTotalUSD = document.getElementById("grandTotalUSD");
+
+/* 🔥 NOUVEAU : Devise facture */
+const invoiceCurrency = document.getElementById("invoiceCurrency");
+
+/* ---------- AUTH / USER ---------- */
 const logoutBtn = document.getElementById("logoutBtn");
 const userNameEl = document.getElementById("userName");
 const userFunctionEl = document.getElementById("userFunction");
 
+/* ---------- FILTERS ---------- */
 const txSearch = document.getElementById("txSearch");
 const statusFilter = document.getElementById("statusFilter");
 const quickDateFilter = document.getElementById("quickDateFilter");
 const startDate = document.getElementById("startDate");
 const endDate = document.getElementById("endDate");
 const resetFilters = document.getElementById("resetFilters");
+
 /* ============================================================
    STATE VARIABLES
 ============================================================ */
