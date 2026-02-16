@@ -356,6 +356,12 @@ function renderActions(id, t) {
 
       <ul class="dropdown-menu dropdown-menu-end">
 
+        <li>
+          <a class="dropdown-item" onclick="previewInvoice('${id}')">
+            Prévisualiser
+          </a>
+        </li>
+
         ${canValidate && t.status === "pending" ? `
         <li><a class="dropdown-item" onclick="validateTx('${id}')">
           Approuver
