@@ -32,11 +32,11 @@ tailwind.config = {
 
 <body class="bg-bg text-slate-800">
 
-<div class="flex min-h-screen">
+<div class="flex flex-col lg:flex-row min-h-screen">
 
 <div id="sidebar-container"></div>
 
-<main id="mainContent" class="flex-1 px-8 py-8 space-y-8 overflow-x-hidden">
+<main id="mainContent" class="flex-1 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6 sm:space-y-8 overflow-x-hidden">
 
 <div class="bg-white rounded-2xl shadow-md px-8 py-5 flex items-center justify-between border border-slate-100">
 
@@ -66,14 +66,14 @@ tailwind.config = {
 </div>
 
 <!-- HEADER ACTIONS -->
-<div class="flex items-center justify-between">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 
   <div>
     <h2 class="text-lg font-semibold">Liste des produits</h2>
     <p class="text-xs text-muted">Visualisation & contrôle du stock</p>
   </div>
 
-  <div class="flex items-center gap-4">
+  <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
 
     <input id="inventorySearch"
       placeholder="Rechercher un produit..."
@@ -89,7 +89,7 @@ tailwind.config = {
 </div>
 
 <!-- ✅ FILTRE AVANCÉ AJOUTÉ -->
-<div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex flex-wrap items-center gap-4">
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 sm:gap-4">
 
   <div class="flex items-center gap-2">
     <i class="bi bi-funnel text-primary text-lg"></i>
