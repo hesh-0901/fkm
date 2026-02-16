@@ -5,7 +5,8 @@
          text-slate-200 flex flex-col 
          border-r border-slate-800 
          shadow-2xl
-         transition-all duration-300"
+         transition-all duration-300
+         transform -translate-x-full lg:translate-x-0"
 >
 
   <!-- HEADER -->
@@ -40,10 +41,8 @@
       <a href="../admin/dashboard.html"
          class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
                 rounded-xl hover:bg-slate-800/60 transition">
-
         <i class="bi bi-grid text-lg text-slate-400 
                   group-hover:text-primary transition"></i>
-
         <span class="label text-sm font-medium">
           Dashboard
         </span>
@@ -60,10 +59,8 @@
       <a href="../admin/inventaire.html"
          class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
                 rounded-xl hover:bg-slate-800/60 transition">
-
         <i class="bi bi-box-seam text-lg text-slate-400 
                   group-hover:text-emerald-400 transition"></i>
-
         <span class="label text-sm font-medium">
           Inventaire
         </span>
@@ -72,10 +69,8 @@
       <a href="../admin/transactions.html"
          class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
                 rounded-xl hover:bg-slate-800/60 transition">
-
         <i class="bi bi-arrow-left-right text-lg text-slate-400 
                   group-hover:text-amber-400 transition"></i>
-
         <span class="label text-sm font-medium">
           Transactions
         </span>
@@ -92,10 +87,8 @@
       <a href="../pages/clients.html"
          class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
                 rounded-xl hover:bg-slate-800/60 transition">
-
         <i class="bi bi-people text-lg text-slate-400 
                   group-hover:text-primary transition"></i>
-
         <span class="label text-sm font-medium">
           Clients
         </span>
@@ -104,10 +97,8 @@
       <a href="../pages/fournisseurs.html"
          class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
                 rounded-xl hover:bg-slate-800/60 transition">
-
         <i class="bi bi-building text-lg text-slate-400 
                   group-hover:text-indigo-400 transition"></i>
-
         <span class="label text-sm font-medium">
           Fournisseurs
         </span>
@@ -124,10 +115,8 @@
       <a href="../pages/taux-devises.html"
          class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
                 rounded-xl hover:bg-slate-800/60 transition">
-
         <i class="bi bi-currency-exchange text-lg text-slate-400 
                   group-hover:text-green-400 transition"></i>
-
         <span class="label text-sm font-medium">
           Taux & Devises
         </span>
@@ -136,10 +125,8 @@
       <a href="../rapports/rapports-financiers.html"
          class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
                 rounded-xl hover:bg-slate-800/60 transition">
-
         <i class="bi bi-bar-chart-line text-lg text-slate-400 
                   group-hover:text-primary transition"></i>
-
         <span class="label text-sm font-medium">
           Rapports financiers
         </span>
@@ -156,10 +143,8 @@
       <a href="../pages/utilisateurs.html"
          class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
                 rounded-xl hover:bg-slate-800/60 transition">
-
         <i class="bi bi-person-gear text-lg text-slate-400 
                   group-hover:text-emerald-400 transition"></i>
-
         <span class="label text-sm font-medium">
           Utilisateurs
         </span>
@@ -168,10 +153,8 @@
       <a href="../pages/audit-securite.html"
          class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
                 rounded-xl hover:bg-slate-800/60 transition">
-
         <i class="bi bi-shield-lock text-lg text-slate-400 
                   group-hover:text-red-400 transition"></i>
-
         <span class="label text-sm font-medium">
           Audit & Sécurité
         </span>
@@ -180,3 +163,8 @@
 
   </nav>
 </aside>
+
+<!-- OVERLAY MOBILE -->
+<div id="sidebarOverlay"
+     class="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 hidden lg:hidden">
+</div>
