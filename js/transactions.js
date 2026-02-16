@@ -340,7 +340,29 @@ function renderTable(data) {
     `;
   }).join("");
 }
+/* ============================================================
+   CALCUL
+============================================================ */
+async function calculateTotals() {
 
+  const subtotal = cartItems.reduce((sum, i) => sum + i.totalUSD, 0);
+  const discount = (subtotal * Number(discountPercent.value || 0)) / 100;
+  const grandTotal = subtotal - discount;
+
+  const rateSnap = await getDoc(doc(db, "exchange_rates", "current"));
+  const rate = rateSnap.data()?.USD_CDF || 1;
+
+  const currency = invoiceCurrency.value;
+
+  const convert = (amount) => {
+    if (currency === "CDF") return (amount * rate).toFixed(2);
+    return amount.toFixed(2);
+  };
+
+  subtotalUSD.textContent = convert(subtotal) + " " + currency;
+  discountAmountUSD.textContent = convert(discount) + " " + currency;
+  grandTotalUSD.textContent = convert(grandTotal) + " " + currency;
+}
 
 /* ============================================================
    ACTION DROPDOWN
