@@ -6,7 +6,8 @@
          border-r border-slate-800 
          shadow-2xl
          transition-all duration-300
-         transform -translate-x-full lg:translate-x-0"
+         transform -translate-x-full lg:translate-x-0
+         z-50"
 >
 
   <!-- HEADER -->
@@ -27,7 +28,6 @@
       ❮
     </button>
   </div>
-
   <!-- NAV -->
   <nav class="flex-1 overflow-y-auto px-3 py-6 space-y-8">
 
@@ -166,5 +166,5 @@
 
 <!-- OVERLAY MOBILE -->
 <div id="sidebarOverlay"
-     class="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 hidden lg:hidden">
+     class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden lg:hidden z-40 transition-opacity duration-300">
 </div>
