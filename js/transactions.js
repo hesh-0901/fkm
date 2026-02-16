@@ -52,7 +52,9 @@ const discountAmountUSD = document.getElementById("discountAmountUSD");
 const grandTotalUSD = document.getElementById("grandTotalUSD");
 
 /* 🔥 NOUVEAU : Devise facture */
-const invoiceCurrency = document.getElementById("invoiceCurrency");
+discountPercent.oninput = calculateTotals;
+invoiceCurrency.addEventListener("change", calculateTotals);
+
 
 /* ---------- AUTH / USER ---------- */
 const logoutBtn = document.getElementById("logoutBtn");
