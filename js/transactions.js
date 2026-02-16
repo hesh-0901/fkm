@@ -288,10 +288,13 @@ function renderTable(data) {
         <td class="px-6 py-4">${index + 1}</td>
         <td class="px-6 py-4 font-semibold">${t.invoiceNumber}</td>
         <td class="px-6 py-4">${created}</td>
-        <td class="px-6 py-4">${t.partnerName}</td>
-
-        <td class="px-6 py-4">
-          ${productsHTML}
+         <td class="px-6 py-4">${t.partnerName}</td>
+         <td class="px-6 py-4">
+           ${t.partnerPhone || "-"}
+         </td>
+         <td class="px-6 py-4">
+           ${productsHTML}
+         </td>
         </td>
 
         <td class="px-6 py-4 text-center">
