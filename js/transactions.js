@@ -49,12 +49,10 @@ const itemsTable = document.getElementById("itemsTable");
 
 const subtotalUSD = document.getElementById("subtotalUSD");
 const discountAmountUSD = document.getElementById("discountAmountUSD");
-const grandTotalUSD = document.getElementById("grandTotalUSD");
+const grandTotal = Number(t.grandTotalUSD || 0);
 
-/* 🔥 NOUVEAU : Devise facture */
-discountPercent.oninput = calculateTotals;
-invoiceCurrency.addEventListener("change", calculateTotals);
-
+/* 🔥 Devise facture */
+const invoiceCurrency = document.getElementById("invoiceCurrency");
 
 /* ---------- AUTH / USER ---------- */
 const logoutBtn = document.getElementById("logoutBtn");
@@ -80,6 +78,8 @@ let currentUserData = null;
 
 let cartItems = [];
 let selectedMarketer = null;
+let exchangeRate = 1;
+
 
 
 /* ============================================================
@@ -351,20 +351,33 @@ function renderTable(data) {
 function calculateTotals() {
 
   const subtotalUSDValue = cartItems.reduce((sum, i) => sum + i.totalUSD, 0);
-  const discountUSDValue = (subtotalUSDValue * Number(discountPercent.value || 0)) / 100;
+
+  const discountPercentValue = Number(discountPercent.value || 0);
+  const discountUSDValue = (subtotalUSDValue * discountPercentValue) / 100;
+
   const grandTotalUSDValue = subtotalUSDValue - discountUSDValue;
 
   const currency = invoiceCurrency.value;
 
   const convert = (amount) => {
-    if (currency === "CDF") return (amount * exchangeRate).toFixed(2);
-    return amount.toFixed(2);
+    if (currency === "CDF") {
+      return (amount * exchangeRate).toLocaleString("fr-FR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    return amount.toLocaleString("fr-FR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
   };
 
   subtotalUSD.textContent = convert(subtotalUSDValue) + " " + currency;
   discountAmountUSD.textContent = convert(discountUSDValue) + " " + currency;
   grandTotalUSD.textContent = convert(grandTotalUSDValue) + " " + currency;
 }
+
 
 /* ============================================================
    ACTION DROPDOWN
@@ -743,14 +756,21 @@ function renderCart() {
 
   itemsTable.innerHTML = "";
 
+  const currency = invoiceCurrency.value;
+
+  const convert = (amount) => {
+    if (currency === "CDF") return (amount * exchangeRate).toFixed(2);
+    return amount.toFixed(2);
+  };
+
   cartItems.forEach((item, index) => {
 
     itemsTable.innerHTML += `
       <tr>
         <td>${item.productName}</td>
         <td>${item.quantity}</td>
-        <td>${item.unitPriceUSD.toFixed(2)}</td>
-        <td>${item.totalUSD.toFixed(2)}</td>
+        <td>${convert(item.unitPriceUSD)} ${currency}</td>
+        <td>${convert(item.totalUSD)} ${currency}</td>
         <td>
           <button class="btn btn-sm btn-danger"
                   onclick="removeItem(${index})">
@@ -763,6 +783,7 @@ function renderCart() {
 
   calculateTotals();
 }
+
 /*SUPPRIMER ITEM*/
 window.removeItem = (index) => {
   cartItems.splice(index, 1);
