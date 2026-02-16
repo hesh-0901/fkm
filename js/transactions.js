@@ -780,6 +780,7 @@ saveBtn.onclick = async () => {
     invoiceNumber: await generateInvoiceNumber(),
     partnerName: partnerSearch.value,
     marketer: selectedMarketer || null,
+    invoiceCurrency: invoiceCurrency.value,
     items: cartItems,
     subtotalUSD: subtotal,
     discountPercent: Number(discountPercent.value || 0),
@@ -800,6 +801,7 @@ saveBtn.onclick = async () => {
   await loadTransactions();
 };
 
+
 /* RESET MODAL*/
 function resetProductFields() {
   productSearch.value = "";
@@ -817,4 +819,77 @@ function resetModal() {
   itemsTable.innerHTML = "";
   calculateTotals();
 }
+window.previewInvoice = async (id) => {
+
+  const snap = await getDoc(doc(db, "transactions", id));
+  const t = snap.data();
+  if (!t) return alert("Transaction introuvable.");
+
+  const previewWindow = window.open("", "_blank");
+
+  const rateSnap = await getDoc(doc(db, "exchange_rates", "current"));
+  const rate = rateSnap.data()?.USD_CDF || 1;
+
+  const currency = t.invoiceCurrency || "USD";
+
+  const convert = (amount) => {
+    if (currency === "CDF") return (amount * rate).toFixed(2);
+    return amount.toFixed(2);
+  };
+
+  previewWindow.document.write(`
+    <html>
+    <head>
+      <title>Prévisualisation Facture</title>
+      <style>
+        body{font-family:Arial;padding:30px}
+        table{width:100%;border-collapse:collapse;margin-top:20px}
+        th,td{border:1px solid #ddd;padding:8px;text-align:left}
+        th{background:#f4f4f4}
+      </style>
+    </head>
+    <body>
+
+      <h2>Facture ${t.invoiceNumber}</h2>
+      <p><strong>Date :</strong> ${t.createdAt?.toDate().toLocaleDateString()}</p>
+      <p><strong>Client :</strong> ${t.partnerName}</p>
+      <p><strong>Assistant de vente :</strong> ${t.marketer?.name || "-"}</p>
+      <p><strong>Devise :</strong> ${currency}</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Produit</th>
+            <th>Qté</th>
+            <th>PU</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${
+            t.items.map((item, index)=>`
+              <tr>
+                <td>${index+1}</td>
+                <td>${item.productName}</td>
+                <td>${item.quantity}</td>
+                <td>${convert(item.unitPriceUSD)} ${currency}</td>
+                <td>${convert(item.totalUSD)} ${currency}</td>
+              </tr>
+            `).join("")
+          }
+        </tbody>
+      </table>
+
+      <h3 style="margin-top:20px">
+        Total : ${convert(t.grandTotalUSD)} ${currency}
+      </h3>
+
+    </body>
+    </html>
+  `);
+
+  previewWindow.document.close();
+};
+
 
