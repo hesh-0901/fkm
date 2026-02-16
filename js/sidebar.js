@@ -1,172 +1,100 @@
 // js/sidebar.js
+const SIDEBAR_STATE_KEY = "fkm_sidebar_collapsed";
 
-<aside
-  id="sidebar"
-  class="fixed inset-y-0 left-0 w-72 
-         bg-gradient-to-b from-slate-900 via-slate-950 to-black 
-         text-slate-200 flex flex-col 
-         border-r border-slate-800 
-         shadow-2xl
-         transition-all duration-300
-         transform -translate-x-full lg:translate-x-0"
->
+document.addEventListener("DOMContentLoaded", async () => {
+  const sidebarContainer = document.getElementById("sidebar-container");
+  if (!sidebarContainer) return;
 
-  <!-- HEADER -->
-  <div class="flex items-center justify-between px-6 h-16 
-              border-b border-slate-800/60">
+  /* Load sidebar */
+  const res = await fetch("../partials/sidebar.html");
+  sidebarContainer.innerHTML = await res.text();
 
-    <span class="text-lg font-semibold tracking-wide 
-                 bg-gradient-to-r from-primary to-emerald-400 
-                 bg-clip-text text-transparent">
-      FKM ENERGY
-    </span>
+  const sidebar = document.getElementById("sidebar");
+  const main = document.getElementById("mainContent");
+  const overlay = document.getElementById("sidebarOverlay");
 
-    <button
-      id="sidebarToggleInternal"
-      title="Réduire"
-      class="text-slate-400 hover:text-white transition text-lg"
-    >
-      ❮
-    </button>
-  </div>
+  const toggleTop = document.getElementById("toggleSidebar");
+  const toggleInternal = document.getElementById("sidebarToggleInternal");
 
-  <!-- NAV -->
-  <nav class="flex-1 overflow-y-auto px-3 py-6 space-y-8">
+  const isDesktop = () => window.innerWidth >= 1024;
 
-    <!-- SECTION -->
-    <div>
-      <div class="px-3 text-[11px] font-semibold uppercase 
-                  tracking-widest text-slate-500 mb-3">
-        Pilotage
-      </div>
+  /* INIT DESKTOP STATE */
+  if (isDesktop()) {
+    const collapsed =
+      localStorage.getItem(SIDEBAR_STATE_KEY) === "true";
+    applyDesktopState(collapsed);
+  }
 
-      <a href="../admin/dashboard.html"
-         class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
-                rounded-xl hover:bg-slate-800/60 transition">
-        <i class="bi bi-grid text-lg text-slate-400 
-                  group-hover:text-primary transition"></i>
-        <span class="label text-sm font-medium">
-          Dashboard
-        </span>
-      </a>
-    </div>
+  /* EVENTS */
+  toggleTop?.addEventListener("click", () => {
+    if (isDesktop()) {
+      toggleDesktop();
+    } else {
+      openMobile();
+    }
+  });
 
-    <!-- STOCK -->
-    <div>
-      <div class="px-3 text-[11px] font-semibold uppercase 
-                  tracking-widest text-slate-500 mb-3">
-        Stock
-      </div>
+  toggleInternal?.addEventListener("click", () => {
+    if (isDesktop()) toggleDesktop();
+  });
 
-      <a href="../admin/inventaire.html"
-         class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
-                rounded-xl hover:bg-slate-800/60 transition">
-        <i class="bi bi-box-seam text-lg text-slate-400 
-                  group-hover:text-emerald-400 transition"></i>
-        <span class="label text-sm font-medium">
-          Inventaire
-        </span>
-      </a>
+  overlay?.addEventListener("click", closeMobile);
 
-      <a href="../admin/transactions.html"
-         class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
-                rounded-xl hover:bg-slate-800/60 transition">
-        <i class="bi bi-arrow-left-right text-lg text-slate-400 
-                  group-hover:text-amber-400 transition"></i>
-        <span class="label text-sm font-medium">
-          Transactions
-        </span>
-      </a>
-    </div>
+  window.addEventListener("resize", () => {
+    if (isDesktop()) {
+      closeMobile();
+      const collapsed =
+        localStorage.getItem(SIDEBAR_STATE_KEY) === "true";
+      applyDesktopState(collapsed);
+    }
+  });
 
-    <!-- PARTENAIRES -->
-    <div>
-      <div class="px-3 text-[11px] font-semibold uppercase 
-                  tracking-widest text-slate-500 mb-3">
-        Partenaires
-      </div>
+  /* DESKTOP */
+  function toggleDesktop() {
+    const collapsed = sidebar.classList.contains("w-20");
+    applyDesktopState(!collapsed);
+    localStorage.setItem(SIDEBAR_STATE_KEY, String(!collapsed));
+  }
 
-      <a href="../pages/clients.html"
-         class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
-                rounded-xl hover:bg-slate-800/60 transition">
-        <i class="bi bi-people text-lg text-slate-400 
-                  group-hover:text-primary transition"></i>
-        <span class="label text-sm font-medium">
-          Clients
-        </span>
-      </a>
+  function applyDesktopState(collapsed) {
+    sidebar.classList.remove("-translate-x-full");
 
-      <a href="../pages/fournisseurs.html"
-         class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
-                rounded-xl hover:bg-slate-800/60 transition">
-        <i class="bi bi-building text-lg text-slate-400 
-                  group-hover:text-indigo-400 transition"></i>
-        <span class="label text-sm font-medium">
-          Fournisseurs
-        </span>
-      </a>
-    </div>
+    if (collapsed) {
+      sidebar.classList.remove("w-72");
+      sidebar.classList.add("w-20");
 
-    <!-- FINANCE -->
-    <div>
-      <div class="px-3 text-[11px] font-semibold uppercase 
-                  tracking-widest text-slate-500 mb-3">
-        Finance
-      </div>
+      sidebar.querySelectorAll(".label").forEach(el =>
+        el.classList.add("hidden")
+      );
 
-      <a href="../pages/taux-devises.html"
-         class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
-                rounded-xl hover:bg-slate-800/60 transition">
-        <i class="bi bi-currency-exchange text-lg text-slate-400 
-                  group-hover:text-green-400 transition"></i>
-        <span class="label text-sm font-medium">
-          Taux & Devises
-        </span>
-      </a>
+      main?.classList.add("lg:ml-20");
+      main?.classList.remove("lg:ml-72");
 
-      <a href="../rapports/rapports-financiers.html"
-         class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
-                rounded-xl hover:bg-slate-800/60 transition">
-        <i class="bi bi-bar-chart-line text-lg text-slate-400 
-                  group-hover:text-primary transition"></i>
-        <span class="label text-sm font-medium">
-          Rapports financiers
-        </span>
-      </a>
-    </div>
+      if (toggleInternal) toggleInternal.textContent = "❯";
+    } else {
+      sidebar.classList.remove("w-20");
+      sidebar.classList.add("w-72");
 
-    <!-- ADMIN -->
-    <div>
-      <div class="px-3 text-[11px] font-semibold uppercase 
-                  tracking-widest text-slate-500 mb-3">
-        Administration
-      </div>
+      sidebar.querySelectorAll(".label").forEach(el =>
+        el.classList.remove("hidden")
+      );
 
-      <a href="../pages/utilisateurs.html"
-         class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
-                rounded-xl hover:bg-slate-800/60 transition">
-        <i class="bi bi-person-gear text-lg text-slate-400 
-                  group-hover:text-emerald-400 transition"></i>
-        <span class="label text-sm font-medium">
-          Utilisateurs
-        </span>
-      </a>
+      main?.classList.add("lg:ml-72");
+      main?.classList.remove("lg:ml-20");
 
-      <a href="../pages/audit-securite.html"
-         class="sidebar-link group flex items-center gap-3 px-3 py-2.5 
-                rounded-xl hover:bg-slate-800/60 transition">
-        <i class="bi bi-shield-lock text-lg text-slate-400 
-                  group-hover:text-red-400 transition"></i>
-        <span class="label text-sm font-medium">
-          Audit & Sécurité
-        </span>
-      </a>
-    </div>
+      if (toggleInternal) toggleInternal.textContent = "❮";
+    }
+  }
 
-  </nav>
-</aside>
+  /* MOBILE */
+  function openMobile() {
+    sidebar.classList.remove("-translate-x-full");
+    overlay?.classList.remove("hidden");
+  }
 
-<!-- OVERLAY MOBILE -->
-<div id="sidebarOverlay"
-     class="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 hidden lg:hidden">
-</div>
+  function closeMobile() {
+    sidebar.classList.add("-translate-x-full");
+    overlay?.classList.add("hidden");
+  }
+});
+
