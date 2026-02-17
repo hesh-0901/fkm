@@ -606,19 +606,28 @@ window.printInvoice = async (id) => {
 
     const docInv = invoiceWindow.document;
 
-    // 🔥 Récupération taux
     const rateSnap = await getDoc(doc(db, "exchange_rates", "current"));
     const rate = rateSnap.data()?.USD_CDF || 1;
 
     const currency = t.invoiceCurrency || "USD";
 
     const convert = (amount) => {
-      if (currency === "CDF") return (amount * rate).toFixed(2);
-      return amount.toFixed(2);
+      if (currency === "CDF") {
+        return (amount * rate).toLocaleString("fr-FR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+      }
+
+      return Number(amount).toLocaleString("fr-FR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
     };
 
-    /* ==============================
-       INFOS GÉNÉRALES
+
+       /* ==============================
+       INFOS GENERALES
     ============================== */
 
     docInv.getElementById("invoiceNumber").textContent =
@@ -630,11 +639,12 @@ window.printInvoice = async (id) => {
     docInv.getElementById("clientName").textContent =
       t.partnerName || "-";
 
-    // 🔥 Assistant de vente
-    const assistantEl = docInv.getElementById("assistantName");
-    if (assistantEl) {
-      assistantEl.textContent = t.marketer?.name || "-";
-    }
+    docInv.getElementById("clientPhone").textContent =
+      t.partnerPhone || "-";
+
+    docInv.getElementById("assistantName").textContent =
+      t.marketer?.name || "-";
+
 
     /* ==============================
        PRODUITS
@@ -643,48 +653,59 @@ window.printInvoice = async (id) => {
     const itemsBody = docInv.getElementById("itemsBody");
     itemsBody.innerHTML = "";
 
-    if (t.items && Array.isArray(t.items) && t.items.length > 0) {
+    t.items.forEach((item, index) => {
 
-      t.items.forEach((item, index) => {
-
-        itemsBody.innerHTML += `
-          <tr>
-            <td>${index + 1}</td>
-            <td>${item.productName || "-"}</td>
-            <td>${item.quantity || 0}</td>
-            <td>${convert(item.unitPriceUSD)} ${currency}</td>
-            <td>${convert(item.totalUSD)} ${currency}</td>
-          </tr>
-        `;
-      });
-
-    } else {
-
-      const unit = Number(t.unitPrice || 0);
-      const total = Number(t.total || 0);
-
-      itemsBody.innerHTML = `
+      itemsBody.innerHTML += `
         <tr>
-          <td>1</td>
-          <td>${t.productName || "-"}</td>
-          <td>${t.quantity || 0}</td>
-          <td>${convert(unit)} ${currency}</td>
-          <td>${convert(total)} ${currency}</td>
+          <td>${index + 1}</td>
+          <td>${item.productName}</td>
+          <td>${item.quantity}</td>
+          <td>${convert(item.unitPriceUSD)} ${currency}</td>
+          <td>${convert(item.totalUSD)} ${currency}</td>
         </tr>
       `;
-    }
+    });
+
 
     /* ==============================
        CALCULS
     ============================== */
 
-    const subtotal = Number(t.subtotalUSD || t.total || 0);
+    const subtotal = Number(t.subtotalUSD || 0);
     const discountPercentValue = Number(t.discountPercent || 0);
     const discountAmount = Number(t.discountAmountUSD || 0);
+    const grandTotal = Number(t.grandTotalUSD || 0);
 
-   const grandTotal = Number(t.grandTotalUSD || 0);
+
+    docInv.getElementById("subtotalAmount").textContent =
+      convert(subtotal) + " " + currency;
+
+    docInv.getElementById("discountPercentDisplay").textContent =
+      discountPercentValue;
+
+    docInv.getElementById("discountAmount").textContent =
+      convert(discountAmount) + " " + currency;
+
+    docInv.getElementById("grandTotal").textContent =
+      convert(grandTotal) + " " + currency;
 
 
+    /* ==============================
+       QR CODE
+    ============================== */
+
+    const qrData = `
+Facture: ${t.invoiceNumber}
+Client: ${t.partnerName}
+Total: ${convert(grandTotal)} ${currency}
+`;
+
+    docInv.getElementById("qrCode").src =
+      "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" +
+      encodeURIComponent(qrData);
+
+  };
+};
     /* ==============================
        INJECTION TOTALS
     ============================== */
