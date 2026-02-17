@@ -21,10 +21,35 @@ const SIDEBAR_STATE_KEY = "fkm_sidebar_collapsed";
         : "index.html";
     }
   });
+// ===================================================
 
-  // ===================================================
+  // ================= INACTIVITY TIMER =================
 
+  let inactivityTimeout;
+  const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 minutes
 
+  function resetInactivityTimer() {
+    clearTimeout(inactivityTimeout);
+
+    inactivityTimeout = setTimeout(() => {
+      firebase.auth().signOut().then(() => {
+        window.location.href = window.location.pathname.includes("/admin/") ||
+          window.location.pathname.includes("/pages/")
+          ? "../index.html"
+          : "index.html";
+      });
+    }, INACTIVITY_LIMIT);
+  }
+
+  // Événements à surveiller
+  ["click", "mousemove", "keydown", "scroll", "touchstart"].forEach(event => {
+    document.addEventListener(event, resetInactivityTimer, true);
+  });
+
+  // Démarrage initial du timer
+  resetInactivityTimer();
+
+  // ====================================================
 document.addEventListener("DOMContentLoaded", async () => {
   const sidebarContainer = document.getElementById("sidebar-container");
   if (!sidebarContainer) return;
