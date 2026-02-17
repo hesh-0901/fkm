@@ -1,57 +1,6 @@
 const SIDEBAR_STATE_KEY = "fkm_sidebar_collapsed";
 
 document.addEventListener("DOMContentLoaded", async () => {
-    // ================= AUTH PROTECTION =================
-
-  firebase.auth().onAuthStateChanged((user) => {
-    const currentPage = window.location.pathname;
-
-    // Si on est déjà sur index.html ou login.html, on ne redirige pas
-    if (
-      currentPage.includes("index.html") ||
-      currentPage.includes("login.html")
-    ) {
-      return;
-    }
-
-    // Si aucun utilisateur connecté → redirection vers index.html
-    if (!user) {
-      window.location.href = currentPage.includes("/admin/")
-        ? "../index.html"
-        : currentPage.includes("/pages/")
-        ? "../index.html"
-        : "index.html";
-    }
-  });
-    // ===================================================
-
-  // ================= INACTIVITY TIMER =================
-
-  let inactivityTimeout;
-  const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 minutes
-
-  function resetInactivityTimer() {
-    clearTimeout(inactivityTimeout);
-
-    inactivityTimeout = setTimeout(() => {
-      firebase.auth().signOut().then(() => {
-        window.location.href = window.location.pathname.includes("/admin/") ||
-          window.location.pathname.includes("/pages/")
-          ? "../index.html"
-          : "index.html";
-      });
-    }, INACTIVITY_LIMIT);
-  }
-
-  // Événements à surveiller
-  ["click", "mousemove", "keydown", "scroll", "touchstart"].forEach(event => {
-    document.addEventListener(event, resetInactivityTimer, true);
-  });
-
-  // Démarrage initial du timer
-  resetInactivityTimer();
-
-  // ====================================================
   const sidebarContainer = document.getElementById("sidebar-container");
   if (!sidebarContainer) return;
 
