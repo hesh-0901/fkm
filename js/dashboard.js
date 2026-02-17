@@ -41,29 +41,37 @@ let auditData = [];
 ========================================================== */
 onAuthStateChanged(auth, async (user) => {
 
-  if (!user) return location.replace("./index.html");
+  // ❌ Pas connecté → retour à index
+  if (!user) {
+    return location.replace("./index.html");
+  }
 
-  const snap = await getDoc(doc(db, "users", user.uid));
-  if (!snap.exists()) return;
+  try {
+    const snap = await getDoc(doc(db, "users", user.uid));
 
-  const data = snap.data();
-  userNameEl.textContent = data.name || "—";
-  userRoleEl.textContent = data.fonction || data.role || "";
+    // ❌ Utilisateur supprimé de Firestore → logout forcé
+    if (!snap.exists()) {
+      await signOut(auth);
+      return location.replace("./index.html");
+    }
 
-  initRealtimeDashboard();
+    const data = snap.data();
+
+    // Injection UI
+    userNameEl.textContent = data.name || "—";
+    userRoleEl.textContent = data.fonction || data.role || "";
+
+    // Init dashboard temps réel
+    initRealtimeDashboard();
+
+  } catch (error) {
+    console.error("Erreur Auth:", error);
+    await signOut(auth);
+    location.replace("./index.html");
+  }
+
 });
 
-logoutBtn.onclick = async () => {
-  await signOut(auth);
-  location.replace("index.html");
-};
-
-periodFilter.addEventListener("change", () => {
-  selectedPeriod = periodFilter.value;
-  activities = [];
-  renderTransactions();
-  renderAudit();
-});
 
 /* ==========================================================
    INIT SNAPSHOTS (1 seule fois)
