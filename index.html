@@ -10,13 +10,12 @@
 
   <meta name="theme-color" content="#0B5C6B">
   <link rel="manifest" href="manifest.json">
-  <!-- iOS PWA Support -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="FKM ERP">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="apple-touch-startup-image" href="icons/icon-512.png">
 
+  <!-- iOS PWA Support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FKM ERP">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -38,11 +37,11 @@
 
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-
 </head>
 
 <body class="bg-dark text-white overflow-x-hidden">
-  <!-- ================= SIDEBAR ================= -->
+
+<!-- ================= SIDEBAR ================= -->
 <div id="sidebarOverlay"
      class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-40"></div>
 
@@ -63,11 +62,6 @@
     </a>
 
     <a href="#" class="flex items-center gap-3 hover:text-white transition">
-      <i data-lucide="info" class="w-5 h-5"></i>
-      À propos
-    </a>
-
-    <a href="#" class="flex items-center gap-3 hover:text-white transition">
       <i data-lucide="headset" class="w-5 h-5"></i>
       IT Support
     </a>
@@ -78,7 +72,7 @@
     </a>
 
     <button id="installBtnSidebar"
-            class="flex items-center gap-3 hover:text-white transition text-left">
+            class="flex items-center gap-3 hover:text-white transition text-left hidden">
       <i data-lucide="download" class="w-5 h-5"></i>
       Installer l'application
     </button>
@@ -87,26 +81,10 @@
 
   <div class="mt-auto text-xs text-white/40 pt-10">
     Version 1.0.0<br>
-    Système sécurisé
+    Enterprise Secure Platform
   </div>
 
 </aside>
-
-
-<!-- ================= BACKGROUND STRUCTURE ================= -->
-<div class="absolute inset-0 pointer-events-none">
-
-  <div class="absolute top-0 left-0 w-full h-full opacity-[0.04]"
-       style="background-image: linear-gradient(to right, white 1px, transparent 1px),
-                              linear-gradient(to bottom, white 1px, transparent 1px);
-              background-size: 80px 80px;">
-  </div>
-
-  <div class="absolute -top-40 -left-40 w-[600px] h-[600px]
-              bg-primary/30 rounded-full blur-[160px]">
-  </div>
-
-</div>
 
 <!-- ================= NAVBAR ================= -->
 <header class="relative z-10 border-b border-white/10 bg-white/5 backdrop-blur-xl">
@@ -117,20 +95,19 @@
       FKM ENERGY ERP
     </div>
 
-<div class="flex items-center gap-4">
+    <div class="flex items-center gap-4">
 
-  <button id="menuBtn"
-          class="md:hidden p-2 rounded-lg hover:bg-white/10 transition">
-    <i data-lucide="menu" class="w-6 h-6"></i>
-  </button>
+      <button id="menuBtn"
+              class="md:hidden p-2 rounded-lg hover:bg-white/10 transition">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+      </button>
 
-  <a href="login.html"
-     class="px-4 py-2 bg-primary rounded-lg text-white font-medium hover:bg-accent transition">
-     Connexion
-  </a>
+      <a href="login.html"
+         class="px-4 py-2 bg-primary rounded-lg text-white font-medium hover:bg-accent transition">
+         Connexion
+      </a>
 
-</div>
-
+    </div>
 
   </div>
 </header>
@@ -140,9 +117,7 @@
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
-    <!-- LEFT CONTENT -->
     <div>
-
       <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
         Système ERP intégré<br>
         pour gestion énergétique avancée
@@ -150,8 +125,7 @@
 
       <p class="mt-6 text-white/70 text-lg leading-relaxed">
         Plateforme centralisée de gestion des transactions,
-        inventaire, opérations commerciales et pilotage financier
-        pour FKM ENERGY.
+        inventaire, opérations commerciales et pilotage financier.
       </p>
 
       <div class="mt-10 flex flex-col sm:flex-row gap-4">
@@ -163,128 +137,17 @@
           Accéder à la plateforme
         </a>
 
-          <button id="installBtn"
-                  class="hidden px-8 py-4 border border-white/20
-                         rounded-xl font-semibold text-white/80
-                         hover:bg-white/10 transition">
-            Télécharger l'application
-          </button>
-
-
-      </div>
-
-    </div>
-
-    <!-- RIGHT METRICS PANEL -->
-    <div class="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-xl">
-
-      <div class="grid grid-cols-2 gap-8 text-center">
-
-        <div>
-          <div class="text-3xl font-bold text-primary">24/7</div>
-          <div class="text-sm text-white/60 uppercase tracking-wider">
-            Monitoring
-          </div>
-        </div>
-
-        <div>
-          <div class="text-3xl font-bold text-primary">100%</div>
-          <div class="text-sm text-white/60 uppercase tracking-wider">
-            Traçabilité
-          </div>
-        </div>
-
-        <div>
-          <div class="text-3xl font-bold text-primary">Multi</div>
-          <div class="text-sm text-white/60 uppercase tracking-wider">
-            Devises
-          </div>
-        </div>
-
-        <div>
-          <div class="text-3xl font-bold text-primary">ERP</div>
-          <div class="text-sm text-white/60 uppercase tracking-wider">
-            Intégré
-          </div>
-        </div>
+        <button id="installBtn"
+                class="hidden px-8 py-4 border border-white/20
+                       rounded-xl font-semibold text-white/80
+                       hover:bg-white/10 transition">
+          Télécharger l'application
+        </button>
 
       </div>
-
     </div>
 
   </div>
-
-</section>
-
-<!-- ================= MODULES ================= -->
-<section class="relative z-10 bg-soft text-slate-900 py-20">
-
-  <div class="max-w-7xl mx-auto px-6">
-
-    <h2 class="text-3xl font-bold mb-16 text-center">
-      Modules ERP
-    </h2>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-
-      <!-- INVENTORY -->
-      <div class="bg-white rounded-2xl p-8 shadow-lg border hover:shadow-2xl transition">
-
-        <div class="mb-6 text-primary">
-          <i data-lucide="boxes" class="w-8 h-8"></i>
-        </div>
-
-        <h3 class="font-semibold text-lg mb-3">
-          Gestion d'inventaire
-        </h3>
-
-        <p class="text-sm text-slate-600">
-          Suivi en temps réel des stocks, traçabilité des produits,
-          gestion des entrées et sorties.
-        </p>
-
-      </div>
-
-      <!-- TRANSACTIONS -->
-      <div class="bg-white rounded-2xl p-8 shadow-lg border hover:shadow-2xl transition">
-
-        <div class="mb-6 text-primary">
-          <i data-lucide="receipt" class="w-8 h-8"></i>
-        </div>
-
-        <h3 class="font-semibold text-lg mb-3">
-          Transactions & Facturation
-        </h3>
-
-        <p class="text-sm text-slate-600">
-          Facturation multi-devise, validation hiérarchique,
-          génération PDF professionnelle.
-        </p>
-
-      </div>
-
-      <!-- AUDIT -->
-      <div class="bg-white rounded-2xl p-8 shadow-lg border hover:shadow-2xl transition">
-
-        <div class="mb-6 text-primary">
-          <i data-lucide="shield-check" class="w-8 h-8"></i>
-        </div>
-
-        <h3 class="font-semibold text-lg mb-3">
-          Sécurité & Audit
-        </h3>
-
-        <p class="text-sm text-slate-600">
-          Journal d’actions, contrôle des rôles,
-          validation administrateur et traçabilité complète.
-        </p>
-
-      </div>
-
-    </div>
-
-  </div>
-
 </section>
 
 <!-- ================= FOOTER ================= -->
@@ -301,33 +164,28 @@ lucide.createIcons();
 <script>
 let deferredPrompt;
 const installBtn = document.getElementById("installBtn");
+const installBtnSidebar = document.getElementById("installBtnSidebar");
 
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
   installBtn.classList.remove("hidden");
+  installBtnSidebar.classList.remove("hidden");
 });
 
-installBtn.addEventListener("click", async () => {
+async function installApp() {
   if (!deferredPrompt) return;
 
   deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-
-  if (outcome === "accepted") {
-    installBtn.classList.add("hidden");
-  }
-
+  await deferredPrompt.userChoice;
   deferredPrompt = null;
-});
 
-document.getElementById("installBtn").addEventListener("click", async () => {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    deferredPrompt = null;
-  }
-});
+  installBtn.classList.add("hidden");
+  installBtnSidebar.classList.add("hidden");
+}
+
+installBtn.addEventListener("click", installApp);
+installBtnSidebar.addEventListener("click", installApp);
 </script>
 
 <script>
@@ -337,7 +195,8 @@ if ("serviceWorker" in navigator) {
   });
 }
 </script>
-  <script>
+
+<script>
 const menuBtn = document.getElementById("menuBtn");
 const sidebar = document.getElementById("sidebar");
 const overlay = document.getElementById("sidebarOverlay");
@@ -345,14 +204,15 @@ const overlay = document.getElementById("sidebarOverlay");
 menuBtn.addEventListener("click", () => {
   sidebar.classList.remove("-translate-x-full");
   overlay.classList.remove("hidden");
+  document.body.classList.add("overflow-hidden");
 });
 
 overlay.addEventListener("click", () => {
   sidebar.classList.add("-translate-x-full");
   overlay.classList.add("hidden");
+  document.body.classList.remove("overflow-hidden");
 });
 </script>
-
 
 </body>
 </html>
