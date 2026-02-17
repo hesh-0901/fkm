@@ -1,0 +1,22 @@
+{
+  "name": "FKM ENERGY ERP",
+  "short_name": "FKM ERP",
+  "description": "Système ERP FKM ENERGY",
+  "start_url": "/fkm/",
+  "scope": "/fkm/",
+  "display": "standalone",
+  "background_color": "#F5F7FA",
+  "theme_color": "#0B5C6B",
+  "icons": [
+    {
+      "src": "/fkm/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/fkm/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
