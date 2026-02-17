@@ -10,6 +10,13 @@
 
   <meta name="theme-color" content="#0B5C6B">
   <link rel="manifest" href="manifest.json">
+  <!-- iOS PWA Support -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FKM ERP">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="apple-touch-startup-image" href="icons/icon-512.png">
+
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -101,12 +108,13 @@
           Accéder à la plateforme
         </a>
 
-        <button id="installBtn"
-                class="px-8 py-4 border border-white/20
-                       rounded-xl font-semibold text-white/80
-                       hover:bg-white/10 transition">
-          Télécharger l'application
-        </button>
+          <button id="installBtn"
+                  class="hidden px-8 py-4 border border-white/20
+                         rounded-xl font-semibold text-white/80
+                         hover:bg-white/10 transition">
+            Télécharger l'application
+          </button>
+
 
       </div>
 
@@ -237,10 +245,25 @@ lucide.createIcons();
 
 <script>
 let deferredPrompt;
+const installBtn = document.getElementById("installBtn");
 
-window.addEventListener('beforeinstallprompt', (e) => {
+window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
+  installBtn.classList.remove("hidden");
+});
+
+installBtn.addEventListener("click", async () => {
+  if (!deferredPrompt) return;
+
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+
+  if (outcome === "accepted") {
+    installBtn.classList.add("hidden");
+  }
+
+  deferredPrompt = null;
 });
 
 document.getElementById("installBtn").addEventListener("click", async () => {
