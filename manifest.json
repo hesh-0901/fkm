@@ -1,11 +1,13 @@
 {
-  "name": "FKM ENERGY ERP",
+  "name": "FKM ENERGY ERP Platform",
   "short_name": "FKM ERP",
+  "description": "Enterprise Resource Planning for FKM ENERGY",
   "start_url": "/fkm/index.html",
+  "scope": "/fkm/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#0F172A",
   "theme_color": "#0B5C6B",
-  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "icons/icon-192.png",
@@ -16,6 +18,12 @@
       "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
