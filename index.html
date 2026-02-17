@@ -56,6 +56,42 @@ transform:translateY(0);
 </head>
 
 <body class="relative bg-gradient-to-br from-[#0F172A] via-[#0b1f2e] to-[#0f2c3d] text-white overflow-x-hidden">
+<!-- ================= SIDEBAR ================= -->
+
+<div id="sidebarOverlay"
+     class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-40"></div>
+
+<aside id="sidebar"
+       class="fixed top-0 left-0 h-full w-72
+              bg-[#0E1A28]
+              border-r border-white/10
+              shadow-2xl
+              transform -translate-x-full
+              transition-transform duration-300
+              z-50 p-6 flex flex-col">
+
+  <button id="closeSidebar"
+          class="absolute top-5 right-5 text-white/50 hover:text-white transition">
+    <i data-lucide="x" class="w-6 h-6"></i>
+  </button>
+
+  <div class="mt-10 space-y-6 text-sm text-white/80">
+
+    <a href="#" class="block hover:text-white transition">Accueil</a>
+    <a href="#" class="block hover:text-white transition">À propos</a>
+    <a href="#" class="block hover:text-white transition">IT Support</a>
+    <a href="#" class="block hover:text-white transition">Sécurité</a>
+
+    <div class="border-t border-white/10 pt-6">
+      <a href="login.html"
+         class="block text-center px-4 py-2 bg-primary rounded-lg hover:bg-accent transition">
+        Connexion
+      </a>
+    </div>
+
+  </div>
+
+</aside>
 
 <div class="absolute inset-0 bg-grid pointer-events-none"></div>
 
