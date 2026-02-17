@@ -374,7 +374,19 @@ window.addEventListener("resize", () => {
     closeSidebarFunc();
   }
 });
-</script>      
+</script>
+      <script type="module">
+import { auth } from "./js/firebase.config.js";
+import { onAuthStateChanged } from 
+"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // 🔥 Si déjà connecté → redirige vers dashboard
+    window.location.replace("dashboard.html");
+  }
+});
+</script>
 
 </body>
 </html>
