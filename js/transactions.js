@@ -710,20 +710,6 @@ Total: ${convert(grandTotal)} ${currency}
        INJECTION TOTALS
     ============================== */
 
-    docInv.getElementById("subtotalAmount").textContent =
-      convert(subtotal) + " " + currency;
-
-    docInv.getElementById("discountPercentDisplay").textContent =
-      discountPercentValue;
-
-    docInv.getElementById("discountAmount").textContent =
-      convert(discountAmount) + " " + currency;
-
-    docInv.getElementById("grandTotal").textContent =
-      convert(grandTotal) + " " + currency;
-  };
-};
-
 /*ajout*/
 
 /*2*/
