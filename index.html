@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="scroll-smooth">
+
 <head>
 <meta charset="UTF-8" />
 <title>FKM ENERGY | ERP Platform</title>
@@ -43,72 +44,111 @@ tailwind.config = {
 
 <aside id="sidebar"
        class="fixed top-0 left-0 h-full w-72
-              bg-[#0E1A28]
+              bg-gradient-to-b from-[#0E1A28] to-[#0b2435]
               border-r border-white/10
-              shadow-2xl
+              shadow-[0_40px_120px_rgba(0,0,0,0.8)]
               transform -translate-x-full
-              transition-transform duration-300
+              transition-transform duration-500 ease-out
               z-50 p-6 flex flex-col">
 
+  <!-- CLOSE BUTTON -->
+  <button id="closeSidebar"
+          class="absolute top-5 right-5 text-white/50 hover:text-white transition">
+    <i data-lucide="x" class="w-6 h-6"></i>
+  </button>
+
+  <!-- LOGO SECTION -->
   <div class="flex items-center gap-3 mb-10">
 
-    <!-- 🔥 LOGO (à ajouter) -->
-    <!-- <img src="assets/logo-fkm.svg" class="h-8 w-auto"> -->
+    <img src="icons/logo-fkm.png"
+         alt="FKM ENERGY"
+         class="h-9 w-auto object-contain drop-shadow-md">
 
     <div class="text-lg font-semibold tracking-wide text-primary">
       FKM ENERGY ERP
     </div>
+
   </div>
 
+  <!-- SECTION LABEL -->
   <div class="text-xs uppercase tracking-widest text-white/40 mb-4">
     Navigation
   </div>
 
-  <nav class="flex flex-col gap-5 text-white/80 text-sm">
+  <!-- NAVIGATION -->
+  <nav class="flex flex-col gap-3 text-white/80 text-sm">
 
-    <a href="#" class="flex items-center gap-3 hover:text-white transition">
+    <a href="#"
+       class="flex items-center gap-3 px-3 py-2 rounded-lg
+              hover:bg-white/5 hover:text-white
+              transition-all duration-300">
       <i data-lucide="home" class="w-5 h-5"></i>
       Accueil
     </a>
 
-    <a href="#" class="flex items-center gap-3 hover:text-white transition">
+    <a href="#"
+       class="flex items-center gap-3 px-3 py-2 rounded-lg
+              hover:bg-white/5 hover:text-white
+              transition-all duration-300">
       <i data-lucide="info" class="w-5 h-5"></i>
       À propos
     </a>
 
-    <a href="#" class="flex items-center gap-3 hover:text-white transition">
+    <a href="#"
+       class="flex items-center gap-3 px-3 py-2 rounded-lg
+              hover:bg-white/5 hover:text-white
+              transition-all duration-300">
       <i data-lucide="headset" class="w-5 h-5"></i>
       IT Support
     </a>
 
-    <a href="#" class="flex items-center gap-3 hover:text-white transition">
+    <a href="#"
+       class="flex items-center gap-3 px-3 py-2 rounded-lg
+              hover:bg-white/5 hover:text-white
+              transition-all duration-300">
       <i data-lucide="shield" class="w-5 h-5"></i>
       Sécurité
     </a>
 
-    <!-- 🔐 BOUTON CONNEXION AJOUTÉ -->
+    <!-- SEPARATOR -->
+    <div class="border-t border-white/10 my-4"></div>
+
+    <!-- LOGIN BUTTON -->
     <a href="login.html"
-       class="flex items-center gap-3 mt-4 px-4 py-2
-              bg-primary rounded-lg
-              hover:bg-accent transition text-white">
+       class="flex items-center justify-center gap-3
+              px-4 py-2 rounded-lg
+              bg-primary
+              hover:bg-accent
+              transition-all duration-300
+              text-white font-medium
+              shadow-md hover:shadow-lg">
       <i data-lucide="log-in" class="w-5 h-5"></i>
       Connexion
     </a>
 
+    <!-- INSTALL BUTTON -->
     <button id="installBtnSidebar"
-            class="flex items-center gap-3 hover:text-white transition text-left mt-3 hidden">
+            class="flex items-center justify-center gap-3
+                   px-4 py-2 rounded-lg
+                   border border-white/20
+                   text-white/80
+                   hover:bg-white/10 hover:border-white/40
+                   transition-all duration-300
+                   mt-3 hidden">
       <i data-lucide="download" class="w-5 h-5"></i>
       Installer l'application
     </button>
 
   </nav>
 
-  <div class="mt-auto text-xs text-white/40 pt-10 border-t border-white/10">
+  <!-- FOOTER -->
+  <div class="mt-auto text-xs text-white/40 pt-6 border-t border-white/10">
     Version 1.0.0<br>
     Système sécurisé
   </div>
 
 </aside>
+
 
 <!-- ================= NAVBAR ================= -->
 <header class="relative z-10 border-b border-white/10 bg-black/30 backdrop-blur-xl">
@@ -122,12 +162,10 @@ tailwind.config = {
       <i data-lucide="menu" class="w-6 h-6"></i>
     </button>
 
-    <!-- 🔥 LOGO ICI -->
-    <!-- <img src="assets/logo-fkm.svg" class="h-8 md:h-9 w-auto"> -->
+<img src="icons/logo-fkm.png"
+     alt="FKM ENERGY"
+     class="h-8 md:h-10 w-auto object-contain">
 
-    <div class="text-xl font-semibold tracking-wide text-primary">
-      FKM ENERGY ERP
-    </div>
   </div>
 
   <a href="login.html"
@@ -141,14 +179,14 @@ tailwind.config = {
 </header>
 
 <!-- ================= HERO ================= -->
-<section class="relative z-10 max-w-7xl mx-auto px-6 py-24">
+<section class="relative z-10 max-w-7xl mx-auto px-6 py-28">
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
 
     <!-- LEFT CONTENT -->
-    <div class="space-y-8">
+    <div class="space-y-10 opacity-0 translate-y-10 transition-all duration-1000 scroll-animate">
 
-      <h1 class="text-4xl md:text-5xl font-extrabold leading-tight tracking-tight">
+      <h1 class="text-4xl md:text-6xl font-extrabold leading-tight tracking-tight">
         Système ERP intégré<br>
         pour gestion énergétique avancée
       </h1>
@@ -159,24 +197,26 @@ tailwind.config = {
         pour FKM ENERGY.
       </p>
 
-      <div class="flex flex-col sm:flex-row gap-5 pt-4">
+      <div class="flex flex-col sm:flex-row gap-6 pt-6">
 
         <a href="login.html"
-           class="px-8 py-4
-                  bg-gradient-to-r from-primary to-accent
+           class="px-10 py-4
+                  bg-gradient-to-r from-primary via-accent to-cyan-400
                   hover:brightness-110
-                  active:scale-[0.98]
+                  active:scale-[0.97]
                   transition-all duration-300
-                  rounded-xl font-semibold text-white text-center
-                  shadow-[0_15px_50px_rgba(11,92,107,0.6)]">
+                  rounded-2xl font-semibold text-white text-center
+                  shadow-[0_20px_60px_rgba(14,165,233,0.5)]
+                  hover:shadow-[0_25px_80px_rgba(14,165,233,0.8)]">
           Accéder à la plateforme
         </a>
 
         <button id="installBtn"
-                class="hidden px-8 py-4
+                class="hidden px-10 py-4
                        border border-white/20
-                       rounded-xl font-semibold text-white/80
-                       hover:bg-white/10 transition backdrop-blur-md">
+                       rounded-2xl font-semibold text-white/80
+                       hover:bg-white/10 hover:border-white/40
+                       transition backdrop-blur-md">
           Télécharger l'application
         </button>
 
@@ -185,37 +225,40 @@ tailwind.config = {
     </div>
 
     <!-- RIGHT METRICS PANEL -->
-    <div class="relative">
+    <div class="relative opacity-0 translate-y-10 transition-all duration-1000 delay-200 scroll-animate">
 
-      <div class="absolute inset-0 bg-primary/10 blur-3xl rounded-3xl"></div>
+      <div class="absolute inset-0 bg-primary/20 blur-[120px] rounded-3xl"></div>
 
-      <div class="relative bg-white/5 border border-white/10 rounded-3xl p-10 backdrop-blur-2xl shadow-2xl">
+      <div class="relative bg-white/10 border border-white/20
+                  rounded-3xl p-14 backdrop-blur-3xl
+                  shadow-[0_30px_90px_rgba(0,0,0,0.6)]
+                  hover:scale-[1.02] transition-all duration-500">
 
-        <div class="grid grid-cols-2 gap-10 text-center">
+        <div class="grid grid-cols-2 gap-14 text-center">
 
           <div>
-            <div class="text-3xl font-bold text-primary">24/7</div>
+            <div class="text-4xl font-extrabold text-cyan-400">24/7</div>
             <div class="text-sm text-white/60 uppercase tracking-wider">
               Monitoring
             </div>
           </div>
 
           <div>
-            <div class="text-3xl font-bold text-primary">100%</div>
+            <div class="text-4xl font-extrabold text-emerald-400">100%</div>
             <div class="text-sm text-white/60 uppercase tracking-wider">
               Traçabilité
             </div>
           </div>
 
           <div>
-            <div class="text-3xl font-bold text-primary">Multi</div>
+            <div class="text-4xl font-extrabold text-indigo-400">Multi</div>
             <div class="text-sm text-white/60 uppercase tracking-wider">
               Devises
             </div>
           </div>
 
           <div>
-            <div class="text-3xl font-bold text-primary">ERP</div>
+            <div class="text-4xl font-extrabold text-primary">ERP</div>
             <div class="text-sm text-white/60 uppercase tracking-wider">
               Intégré
             </div>
@@ -233,28 +276,35 @@ tailwind.config = {
 
 
 <!-- ================= MODULES ================= -->
-<section class="relative z-10 bg-soft text-slate-900 py-24">
+<section class="relative z-10 bg-soft text-slate-900 py-28">
 
   <div class="max-w-7xl mx-auto px-6">
 
-    <h2 class="text-3xl font-bold mb-20 text-center tracking-tight">
+    <h2 class="text-4xl font-bold mb-24 text-center tracking-tight">
       Modules ERP
     </h2>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-16">
 
       <!-- INVENTORY -->
-      <div class="bg-white rounded-3xl p-10 shadow-lg border hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+      <div class="group relative rounded-3xl p-12
+                  bg-gradient-to-br from-primary/10 to-primary/5
+                  border border-primary/20
+                  shadow-xl
+                  transition-all duration-500
+                  hover:-translate-y-3 hover:shadow-2xl
+                  opacity-0 translate-y-10 scroll-animate">
 
-        <div class="mb-8 text-primary">
-          <i data-lucide="boxes" class="w-9 h-9"></i>
+        <div class="mb-10 text-primary">
+          <i data-lucide="boxes"
+             class="w-16 h-16 transition-all duration-500 group-hover:scale-110"></i>
         </div>
 
-        <h3 class="font-semibold text-lg mb-4">
+        <h3 class="font-semibold text-xl mb-5">
           Gestion d'inventaire
         </h3>
 
-        <p class="text-sm text-slate-600 leading-relaxed">
+        <p class="text-base text-slate-600 leading-relaxed">
           Suivi en temps réel des stocks, traçabilité des produits,
           gestion des entrées et sorties.
         </p>
@@ -262,17 +312,24 @@ tailwind.config = {
       </div>
 
       <!-- TRANSACTIONS -->
-      <div class="bg-white rounded-3xl p-10 shadow-lg border hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+      <div class="group relative rounded-3xl p-12
+                  bg-gradient-to-br from-accent/10 to-cyan-400/5
+                  border border-accent/20
+                  shadow-xl
+                  transition-all duration-500
+                  hover:-translate-y-3 hover:shadow-2xl
+                  opacity-0 translate-y-10 scroll-animate">
 
-        <div class="mb-8 text-primary">
-          <i data-lucide="receipt" class="w-9 h-9"></i>
+        <div class="mb-10 text-accent">
+          <i data-lucide="receipt"
+             class="w-16 h-16 transition-all duration-500 group-hover:scale-110"></i>
         </div>
 
-        <h3 class="font-semibold text-lg mb-4">
+        <h3 class="font-semibold text-xl mb-5">
           Transactions & Facturation
         </h3>
 
-        <p class="text-sm text-slate-600 leading-relaxed">
+        <p class="text-base text-slate-600 leading-relaxed">
           Facturation multi-devise, validation hiérarchique,
           génération PDF professionnelle.
         </p>
@@ -280,17 +337,24 @@ tailwind.config = {
       </div>
 
       <!-- AUDIT -->
-      <div class="bg-white rounded-3xl p-10 shadow-lg border hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+      <div class="group relative rounded-3xl p-12
+                  bg-gradient-to-br from-indigo-400/10 to-indigo-400/5
+                  border border-indigo-400/20
+                  shadow-xl
+                  transition-all duration-500
+                  hover:-translate-y-3 hover:shadow-2xl
+                  opacity-0 translate-y-10 scroll-animate">
 
-        <div class="mb-8 text-primary">
-          <i data-lucide="shield-check" class="w-9 h-9"></i>
+        <div class="mb-10 text-indigo-500">
+          <i data-lucide="shield-check"
+             class="w-16 h-16 transition-all duration-500 group-hover:scale-110"></i>
         </div>
 
-        <h3 class="font-semibold text-lg mb-4">
+        <h3 class="font-semibold text-xl mb-5">
           Sécurité & Audit
         </h3>
 
-        <p class="text-sm text-slate-600 leading-relaxed">
+        <p class="text-base text-slate-600 leading-relaxed">
           Journal d’actions, contrôle des rôles,
           validation administrateur et traçabilité complète.
         </p>
@@ -305,7 +369,65 @@ tailwind.config = {
 
 
 <!-- ================= FOOTER ================= -->
-<footer class="bg-dark border-t border-white/10 py-12 text-center text-white/50 text-sm">
+<footer class="bg-dark border-t border-white/10 py-14 text-center text-white/50 text-sm">
   © 2026 FKM ENERGY — Enterprise Resource Planning Platform
 </footer>
+
+<!-- ================= SCROLL ANIMATION SCRIPT ================= -->
+<script>
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.remove("opacity-0", "translate-y-10");
+      entry.target.classList.add("opacity-100", "translate-y-0");
+    }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll(".scroll-animate").forEach(el => {
+  observer.observe(el);
+});
+</script>
+
+      <script>
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("sidebarOverlay");
+const closeSidebar = document.getElementById("closeSidebar");
+
+function openSidebar() {
+  sidebar.classList.remove("-translate-x-full");
+  overlay.classList.remove("hidden");
+  document.body.classList.add("overflow-hidden"); // bloque scroll
+}
+
+function closeSidebarFunc() {
+  sidebar.classList.add("-translate-x-full");
+  overlay.classList.add("hidden");
+  document.body.classList.remove("overflow-hidden");
+}
+
+/* OPEN */
+menuBtn.addEventListener("click", openSidebar);
+
+/* CLOSE */
+overlay.addEventListener("click", closeSidebarFunc);
+closeSidebar.addEventListener("click", closeSidebarFunc);
+
+/* ESC KEY CLOSE */
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    closeSidebarFunc();
+  }
+});
+
+/* Auto close si écran devient desktop */
+window.addEventListener("resize", () => {
+  if (window.innerWidth >= 768) {
+    closeSidebarFunc();
+  }
+});
+</script>
+
+
 
