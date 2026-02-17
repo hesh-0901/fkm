@@ -67,6 +67,13 @@ const startDate = document.getElementById("startDate");
 const endDate = document.getElementById("endDate");
 const resetFilters = document.getElementById("resetFilters");
 
+/* ===== EVENTS CALCUL AUTO ===== */
+discountPercent.addEventListener("input", calculateTotals);
+invoiceCurrency.addEventListener("change", () => {
+  renderCart();     // met à jour les prix du panier
+  calculateTotals(); // met à jour les totaux
+});
+
 /* ============================================================
    STATE VARIABLES
 ============================================================ */
@@ -286,9 +293,23 @@ function renderTable(data) {
       ? t.items.reduce((sum, i) => sum + i.quantity, 0)
       : t.quantity;
 
-    const totalAmount = t.grandTotalUSD
-      ? t.grandTotalUSD.toFixed(2)
-      : t.total;
+let totalAmountUSD = Number(t.grandTotalUSD || t.total || 0);
+let currency = t.invoiceCurrency || "USD";
+
+let displayAmount;
+
+if (currency === "CDF") {
+  displayAmount = (totalAmountUSD * exchangeRate).toLocaleString("fr-FR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+} else {
+  displayAmount = totalAmountUSD.toLocaleString("fr-FR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+;
 
     return `
       <tr class="text-sm">
