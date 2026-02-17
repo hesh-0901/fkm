@@ -51,13 +51,12 @@ onAuthStateChanged(auth, async (user) => {
   userRoleEl.textContent = data.fonction || data.role || "";
 
   initRealtimeDashboard();
-});
+})
 
 logoutBtn.onclick = async () => {
   await signOut(auth);
-  location.replace("../login.html");
+  location.replace("../index.html");
 };
-
 periodFilter.addEventListener("change", () => {
   selectedPeriod = periodFilter.value;
   activities = [];
