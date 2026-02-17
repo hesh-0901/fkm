@@ -41,7 +41,7 @@ let auditData = [];
 ========================================================== */
 onAuthStateChanged(auth, async (user) => {
 
-  if (!user) return location.replace("../login.html");
+  if (!user) return location.replace("index.html");
 
   const snap = await getDoc(doc(db, "users", user.uid));
   if (!snap.exists()) return;
@@ -55,7 +55,7 @@ onAuthStateChanged(auth, async (user) => {
 
 logoutBtn.onclick = async () => {
   await signOut(auth);
-  location.replace("../login.html");
+  location.replace("index.html");
 };
 
 periodFilter.addEventListener("change", () => {
