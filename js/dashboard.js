@@ -69,6 +69,17 @@ onAuthStateChanged(auth, async (user) => {
   }
 
 });
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", async () => {
+    try {
+      await signOut(auth);
+      location.replace("../index.html");
+    } catch (error) {
+      console.error("Erreur logout :", error);
+    }
+  });
+}
+
 /* ==========================================================
    INIT SNAPSHOTS (1 seule fois)
 ========================================================== */
