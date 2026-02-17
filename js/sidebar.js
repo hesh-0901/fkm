@@ -1,5 +1,7 @@
 const SIDEBAR_STATE_KEY = "fkm_sidebar_collapsed";
-  // ================= AUTH PROTECTION =================
+
+document.addEventListener("DOMContentLoaded", async () => {
+    // ================= AUTH PROTECTION =================
 
   firebase.auth().onAuthStateChanged((user) => {
     const currentPage = window.location.pathname;
@@ -21,7 +23,7 @@ const SIDEBAR_STATE_KEY = "fkm_sidebar_collapsed";
         : "index.html";
     }
   });
-// ===================================================
+    // ===================================================
 
   // ================= INACTIVITY TIMER =================
 
@@ -50,7 +52,6 @@ const SIDEBAR_STATE_KEY = "fkm_sidebar_collapsed";
   resetInactivityTimer();
 
   // ====================================================
-document.addEventListener("DOMContentLoaded", async () => {
   const sidebarContainer = document.getElementById("sidebar-container");
   if (!sidebarContainer) return;
 
