@@ -63,78 +63,38 @@ tailwind.config = {
 
       <div class="flex items-center gap-6">
         <div class="text-right">
-          <div id="userName" class="font-semibold">Hénoch SHUNGU</div>
-          <div id="userRole" class="text-sm text-muted">Directeur Général</div>
+          <div id="userName" class="font-semibold">—</div>
+          <div id="userRole" class="text-sm text-muted">—</div>
         </div>
 
-        <button class="px-4 py-2 rounded-lg border border-red-200 text-danger hover:bg-red-50 transition">
+        <button id="logoutBtn"
+          class="px-4 py-2 rounded-lg border border-red-200 text-danger hover:bg-red-50 transition">
           <i class="bi bi-box-arrow-right text-lg"></i>
         </button>
       </div>
     </div>
 
-    <!-- FILTRE PREMIUM -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-wrap items-center justify-between gap-4">
-
-      <div class="flex items-center gap-4">
-        <div class="text-primary text-3xl">
-          <i class="bi bi-funnel-fill"></i>
-        </div>
-        <div>
-          <h3 class="font-semibold">Filtre de période</h3>
-          <p class="text-xs text-muted">Impacte l'ensemble des indicateurs</p>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <button class="px-4 py-2 rounded-xl bg-primary text-white shadow hover:bg-primaryDark transition">Journalier</button>
-        <button class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition">Mensuel</button>
-        <button class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition">Personnalisé</button>
-      </div>
-
-    </div>
-
-    <!-- KPI ULTRA PREMIUM -->
+    <!-- KPI -->
     <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
 
-      <div class="relative bg-gradient-to-br from-primary to-primaryDark text-white rounded-3xl p-8 shadow-xl overflow-hidden">
-        <div class="absolute -top-8 -right-8 text-white/10 text-9xl">
-          <i class="bi bi-currency-dollar"></i>
-        </div>
-        <div class="space-y-2">
-          <p class="text-sm opacity-80">Chiffre d'affaire USD</p>
-          <h2 class="text-4xl font-extrabold">$ 128,450</h2>
-        </div>
+      <div class="relative bg-gradient-to-br from-primary to-primaryDark text-white rounded-3xl p-8 shadow-xl">
+        <p class="text-sm opacity-80">Chiffre d'affaire USD</p>
+        <h2 id="caUSD" class="text-4xl font-extrabold">0.00 USD</h2>
       </div>
 
-      <div class="relative bg-gradient-to-br from-emerald-500 to-emerald-700 text-white rounded-3xl p-8 shadow-xl overflow-hidden">
-        <div class="absolute -top-8 -right-8 text-white/10 text-9xl">
-          <i class="bi bi-graph-up-arrow"></i>
-        </div>
-        <div class="space-y-2">
-          <p class="text-sm opacity-80">Chiffre d'affaire CDF</p>
-          <h2 class="text-4xl font-extrabold">356,000,000 CDF</h2>
-        </div>
+      <div class="relative bg-gradient-to-br from-emerald-500 to-emerald-700 text-white rounded-3xl p-8 shadow-xl">
+        <p class="text-sm opacity-80">Chiffre d'affaire CDF</p>
+        <h2 id="caCDF" class="text-4xl font-extrabold">0.00 CDF</h2>
       </div>
 
-      <div class="relative bg-gradient-to-br from-amber-400 to-amber-600 text-white rounded-3xl p-8 shadow-xl overflow-hidden">
-        <div class="absolute -top-8 -right-8 text-white/10 text-9xl">
-          <i class="bi bi-box-seam"></i>
-        </div>
-        <div class="space-y-2">
-          <p class="text-sm opacity-80">Valeur Stock USD</p>
-          <h2 class="text-4xl font-extrabold">$ 74,200</h2>
-        </div>
+      <div class="relative bg-gradient-to-br from-amber-400 to-amber-600 text-white rounded-3xl p-8 shadow-xl">
+        <p class="text-sm opacity-80">Valeur Stock USD</p>
+        <h2 id="stockUSD" class="text-4xl font-extrabold">0.00 USD</h2>
       </div>
 
-      <div class="relative bg-gradient-to-br from-indigo-500 to-indigo-700 text-white rounded-3xl p-8 shadow-xl overflow-hidden">
-        <div class="absolute -top-8 -right-8 text-white/10 text-9xl">
-          <i class="bi bi-boxes"></i>
-        </div>
-        <div class="space-y-2">
-          <p class="text-sm opacity-80">Valeur Stock CDF</p>
-          <h2 class="text-4xl font-extrabold">214,000,000 CDF</h2>
-        </div>
+      <div class="relative bg-gradient-to-br from-indigo-500 to-indigo-700 text-white rounded-3xl p-8 shadow-xl">
+        <p class="text-sm opacity-80">Valeur Stock CDF</p>
+        <h2 id="stockCDF" class="text-4xl font-extrabold">0.00 CDF</h2>
       </div>
 
     </div>
@@ -143,124 +103,31 @@ tailwind.config = {
     <div class="grid lg:grid-cols-2 gap-6">
 
       <div class="bg-white rounded-3xl shadow-xl p-8 border border-slate-100">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="font-semibold text-lg">Évolution des ventes</h3>
-          <i class="bi bi-activity text-primary text-3xl"></i>
-        </div>
+        <h3 class="font-semibold text-lg mb-6">Évolution des ventes</h3>
         <div id="salesChart"></div>
       </div>
 
       <div class="bg-white rounded-3xl shadow-xl p-8 border border-slate-100">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="font-semibold text-lg">Top produits</h3>
-          <i class="bi bi-bar-chart-fill text-success text-3xl"></i>
-        </div>
+        <h3 class="font-semibold text-lg mb-6">Top produits</h3>
         <div id="productsChart"></div>
       </div>
 
     </div>
 
-    <!-- VENDEURS + EXPORT -->
-    <div class="grid lg:grid-cols-2 gap-6">
-
-      <div class="bg-white rounded-3xl shadow-xl p-8 border border-slate-100">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="font-semibold text-lg">Top vendeurs</h3>
-          <i class="bi bi-person-badge-fill text-warning text-3xl"></i>
-        </div>
-        <div id="sellersChart"></div>
-      </div>
-
-      <div class="bg-gradient-to-br from-primary to-primaryDark text-white rounded-3xl p-8 shadow-xl">
-        <div class="flex items-center gap-4 mb-6">
-          <i class="bi bi-cloud-arrow-down-fill text-4xl"></i>
-          <div>
-            <h3 class="font-semibold text-lg">Export des rapports</h3>
-            <p class="text-xs opacity-80">Téléchargement stratégique</p>
-          </div>
-        </div>
-
-        <div class="space-y-3">
-          <button class="w-full py-3 rounded-xl bg-white text-primary font-semibold hover:scale-105 transition">
-            Télécharger PDF
-          </button>
-          <button class="w-full py-3 rounded-xl bg-emerald-400 text-white font-semibold hover:scale-105 transition">
-            Télécharger Excel
-          </button>
-          <button class="w-full py-3 rounded-xl bg-amber-400 text-white font-semibold hover:scale-105 transition">
-            Clients sous contrat actif
-          </button>
-        </div>
-      </div>
-
+    <!-- VENDEURS -->
+    <div class="bg-white rounded-3xl shadow-xl p-8 border border-slate-100">
+      <h3 class="font-semibold text-lg mb-6">Top vendeurs</h3>
+      <div id="sellersChart"></div>
     </div>
 
   </main>
 </div>
 
-<script>
-new ApexCharts(document.querySelector("#salesChart"), {
-  series: [{ name: "Ventes", data: [12000, 18000, 14000, 22000, 26000, 30000] }],
-  chart: { type: "area", height: 300 },
-  stroke: { curve: "smooth", width: 3 },
-  fill: { type: "gradient", gradient: { opacityFrom: 0.6, opacityTo: 0.1 } },
-  colors: ["#0B5C6B"]
-}).render();
+<!-- Sidebar -->
+<script type="module" src="../js/sidebar.js"></script>
 
-new ApexCharts(document.querySelector("#productsChart"), {
-  series: [{ data: [42000, 35000, 28000, 19000, 12000] }],
-  chart: { type: "bar", height: 300 },
-  colors: ["#10B981"],
-  xaxis: { categories: ["Panneaux", "Batteries", "Onduleurs", "Câbles", "Régulateurs"] },
-  plotOptions: { bar: { borderRadius: 10 } }
-}).render();
-
-new ApexCharts(document.querySelector("#sellersChart"), {
-  series: [{ data: [52000, 43000, 30000] }],
-  chart: { type: "bar", height: 300 },
-  colors: ["#F59E0B"],
-  xaxis: { categories: ["Paul", "Sarah", "Marc"] },
-  plotOptions: { bar: { borderRadius: 10 } }
-}).render();
-</script>
-
-  <script type="module">
-  import { auth } from "../js/firebase.config.js";
-  import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-  /* ================================
-     SIDEBAR TOGGLE
-  ================================= */
-
-  const toggleBtn = document.getElementById("toggleSidebar");
-  const sidebar = document.getElementById("sidebar-container");
-  const mainContent = document.getElementById("mainContent");
-
-  toggleBtn.addEventListener("click", () => {
-
-    sidebar.classList.toggle("collapsed");
-
-    /* Ajustement marge si sidebar gère largeur fixe */
-    if (sidebar.classList.contains("collapsed")) {
-      mainContent.classList.remove("ml-64");
-    } else {
-      mainContent.classList.add("ml-64");
-    }
-  });
-
-  /* ================================
-     LOGOUT
-  ================================= */
-
-  const logoutBtn = document.querySelector(".bi-box-arrow-right").closest("button");
-
-  logoutBtn.addEventListener("click", async () => {
-    await signOut(auth);
-    window.location.href = "../login.html";
-  });
-
-</script>
-
+<!-- Rapport Financier -->
+<script type="module" src="../js/rapports-financiers.js"></script>
 
 </body>
 </html>
