@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>Facture FKM ENERGY</title>
+
 <style>
 
 /* ============================= */
-/* FORMAT A4 PROPRE */
+/* FORMAT A4 */
 /* ============================= */
 
 @page {
@@ -27,7 +28,6 @@ body {
 
 .invoice-wrapper {
   width: 100%;
-  max-width: 100%;
   background: #fff;
   padding: 20px;
   box-sizing: border-box;
@@ -229,8 +229,8 @@ tbody tr:nth-child(even) {
         <th>#</th>
         <th>Produit</th>
         <th>Qté</th>
-        <th>PU (USD)</th>
-        <th>Total (USD)</th>
+        <th>PU</th>
+        <th>Total</th>
       </tr>
     </thead>
     <tbody id="itemsBody"></tbody>
@@ -245,10 +245,6 @@ tbody tr:nth-child(even) {
     <tr>
       <td>Remise (<span id="discountPercentDisplay"></span>%) :</td>
       <td id="discountAmount"></td>
-    </tr>
-    <tr>
-      <td>TVA (16%) :</td>
-      <td id="tvaAmount"></td>
     </tr>
     <tr>
       <td>Total Final :</td>
