@@ -82,13 +82,13 @@ async function logAudit(action, documentId, extraData = {}) {
    AUTH
 ========================= */
 onAuthStateChanged(auth, async (user) => {
-  if (!user) return location.replace("../login.html");
+  if (!user) return location.replace("index.html");
 
 const snap = await getDoc(doc(db, "users", user.uid));
 
 if (!snap.exists()) {
   alert("Utilisateur non trouvé.");
-  return location.replace("../login.html");
+  return location.replace("index.html");
 }
 
 const data = snap.data();
