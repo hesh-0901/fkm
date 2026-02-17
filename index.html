@@ -63,37 +63,99 @@ transform:translateY(0);
 
 <aside id="sidebar"
        class="fixed top-0 left-0 h-full w-72
-              bg-[#0E1A28]
+              bg-gradient-to-b from-[#0E1A28] to-[#0b2435]
               border-r border-white/10
               shadow-2xl
               transform -translate-x-full
-              transition-transform duration-300
+              transition-transform duration-300 ease-out
               z-50 p-6 flex flex-col">
 
+  <!-- ================= CLOSE BUTTON ================= -->
   <button id="closeSidebar"
           class="absolute top-5 right-5 text-white/50 hover:text-white transition">
     <i data-lucide="x" class="w-6 h-6"></i>
   </button>
 
-  <div class="mt-10 space-y-6 text-sm text-white/80">
+  <!-- ================= LOGO SECTION ================= -->
+  <div class="flex items-center gap-3 mb-10">
 
-    <a href="#" class="block hover:text-white transition">Accueil</a>
-    <a href="#" class="block hover:text-white transition">À propos</a>
-    <a href="#" class="block hover:text-white transition">IT Support</a>
-    <a href="#" class="block hover:text-white transition">Sécurité</a>
+    <img src="icons/logo-fkm.png"
+         alt="FKM ENERGY"
+         class="h-9 w-auto object-contain">
 
-    <div class="border-t border-white/10 pt-6">
-      <a href="login.html"
-         class="block text-center px-4 py-2 bg-primary rounded-lg hover:bg-accent transition">
-        Connexion
-      </a>
+    <div class="text-lg font-semibold tracking-wide text-primary">
+      FKM ENERGY ERP
     </div>
 
   </div>
 
-</aside>
+  <!-- ================= NAVIGATION TITLE ================= -->
+  <div class="text-xs uppercase tracking-widest text-white/40 mb-4">
+    Navigation
+  </div>
 
-<div class="absolute inset-0 bg-grid pointer-events-none"></div>
+  <!-- ================= MAIN NAVIGATION ================= -->
+  <nav class="flex flex-col gap-3 text-white/80 text-sm">
+
+    <!-- Accueil -->
+    <a href="#"
+       class="flex items-center gap-3 px-3 py-2 rounded-lg
+              hover:bg-white/5 hover:text-white
+              transition-all duration-200">
+      <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+      Accueil
+    </a>
+
+    <!-- Profil -->
+    <a href="#"
+       class="flex items-center gap-3 px-3 py-2 rounded-lg
+              hover:bg-white/5 hover:text-white
+              transition-all duration-200">
+      <i data-lucide="user-cog" class="w-5 h-5"></i>
+      Profil
+    </a>
+
+    <!-- Sécurité -->
+    <a href="#"
+       class="flex items-center gap-3 px-3 py-2 rounded-lg
+              hover:bg-white/5 hover:text-white
+              transition-all duration-200">
+      <i data-lucide="shield-check" class="w-5 h-5"></i>
+      Sécurité
+    </a>
+
+    <!-- IT Support -->
+    <a href="#"
+       class="flex items-center gap-3 px-3 py-2 rounded-lg
+              hover:bg-white/5 hover:text-white
+              transition-all duration-200">
+      <i data-lucide="headset" class="w-5 h-5"></i>
+      IT Support
+    </a>
+
+    <!-- Separator -->
+    <div class="border-t border-white/10 my-4"></div>
+
+    <!-- Connexion -->
+    <a href="login.html"
+       class="flex items-center justify-center gap-3
+              px-4 py-2 rounded-lg
+              bg-primary hover:bg-accent
+              transition-all duration-300
+              text-white font-medium shadow-md">
+      <i data-lucide="log-in" class="w-5 h-5"></i>
+      Connexion
+    </a>
+
+  </nav>
+
+  <!-- ================= FOOTER ================= -->
+  <div class="mt-auto pt-6 border-t border-white/10 text-xs text-white/40">
+    Version 1.0.0<br>
+    Système sécurisé
+  </div>
+
+</aside>
 
 <!-- ================= NAVBAR ================= -->
 
