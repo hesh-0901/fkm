@@ -329,7 +329,10 @@ if (currency === "CDF") {
         </td>
 
          <td class="px-6 py-4 font-semibold">
-           ${totalAmount} ${t.invoiceCurrency || "USD"}
+           <td class="px-6 py-4 font-semibold">
+           ${displayAmount} ${currency}
+         </td>
+
          </td>
 
         <td class="px-6 py-4">
