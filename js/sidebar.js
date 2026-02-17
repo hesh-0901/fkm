@@ -1,4 +1,29 @@
 const SIDEBAR_STATE_KEY = "fkm_sidebar_collapsed";
+  // ================= AUTH PROTECTION =================
+
+  firebase.auth().onAuthStateChanged((user) => {
+    const currentPage = window.location.pathname;
+
+    // Si on est déjà sur index.html ou login.html, on ne redirige pas
+    if (
+      currentPage.includes("index.html") ||
+      currentPage.includes("login.html")
+    ) {
+      return;
+    }
+
+    // Si aucun utilisateur connecté → redirection vers index.html
+    if (!user) {
+      window.location.href = currentPage.includes("/admin/")
+        ? "../index.html"
+        : currentPage.includes("/pages/")
+        ? "../index.html"
+        : "index.html";
+    }
+  });
+
+  // ===================================================
+
 
 document.addEventListener("DOMContentLoaded", async () => {
   const sidebarContainer = document.getElementById("sidebar-container");
