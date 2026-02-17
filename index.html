@@ -25,7 +25,6 @@ tailwind.config = {
       colors: {
         primary: '#0B5C6B',
         dark: '#0F172A',
-        soft: '#F1F5F9',
         accent: '#14B8A6'
       }
     }
@@ -33,173 +32,289 @@ tailwind.config = {
 }
 </script>
 
-<!-- Lucide -->
 <script src="https://unpkg.com/lucide@latest"></script>
 
 </head>
 
-<body class="bg-gradient-to-br from-dark via-[#0b1f2e] to-[#0f2c3d] text-white overflow-x-hidden">
+<body class="bg-gradient-to-br from-[#0F172A] via-[#0b1f2e] to-[#0f2c3d] text-white overflow-x-hidden">
 
 <!-- ================= SIDEBAR ================= -->
+
 <div id="sidebarOverlay"
      class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-40"></div>
 
 <aside id="sidebar"
-       class="fixed top-0 left-0 h-full w-72
+       class="fixed top-0 left-0 h-full w-80
               bg-gradient-to-b from-[#0E1A28] to-[#0b2435]
               border-r border-white/10
               shadow-[0_40px_120px_rgba(0,0,0,0.8)]
               transform -translate-x-full
               transition-transform duration-500 ease-out
-              z-50 p-6 flex flex-col">
+              z-50 p-8 flex flex-col">
 
-  <button id="closeSidebar"
-          class="absolute top-5 right-5 text-white/50 hover:text-white transition">
-    <i data-lucide="x" class="w-6 h-6"></i>
-  </button>
+<button id="closeSidebar"
+        class="absolute top-6 right-6 text-white/50 hover:text-white transition">
+<i data-lucide="x" class="w-6 h-6"></i>
+</button>
 
-  <div class="flex items-center gap-3 mb-10">
-    <img src="icons/logo-fkm.png"
-         alt="FKM ENERGY"
-         class="h-9 w-auto object-contain drop-shadow-md">
-    <div class="text-lg font-semibold tracking-wide text-primary">
-      FKM ENERGY ERP
-    </div>
-  </div>
+<div class="flex items-center gap-4 mb-12">
+<img src="icons/logo-fkm.png"
+     class="h-10 w-auto object-contain drop-shadow-xl">
+<div class="text-xl font-semibold text-primary tracking-wide">
+FKM ENERGY ERP
+</div>
+</div>
 
-  <div class="text-xs uppercase tracking-widest text-white/40 mb-4">
-    Navigation
-  </div>
+<nav class="flex flex-col gap-4 text-white/80">
 
-  <nav class="flex flex-col gap-3 text-white/80 text-sm">
+<a href="#" class="sidebar-link">
+<i data-lucide="home"></i> Accueil
+</a>
 
-    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 hover:text-white transition">
-      <i data-lucide="home" class="w-5 h-5"></i>
-      Accueil
-    </a>
+<a href="#" class="sidebar-link">
+<i data-lucide="headset"></i> IT Support
+</a>
 
-    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 hover:text-white transition">
-      <i data-lucide="info" class="w-5 h-5"></i>
-      À propos
-    </a>
+<a href="#" class="sidebar-link">
+<i data-lucide="shield"></i> Sécurité
+</a>
 
-    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 hover:text-white transition">
-      <i data-lucide="headset" class="w-5 h-5"></i>
-      IT Support
-    </a>
+<div class="border-t border-white/10 my-6"></div>
 
-    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 hover:text-white transition">
-      <i data-lucide="shield" class="w-5 h-5"></i>
-      Sécurité
-    </a>
+<a href="login.html" class="sidebar-login">
+<i data-lucide="log-in"></i> Connexion
+</a>
 
-    <div class="border-t border-white/10 my-4"></div>
+</nav>
 
-    <a href="login.html"
-       class="flex items-center justify-center gap-3 px-4 py-2 rounded-lg bg-primary hover:bg-accent transition text-white font-medium shadow-md">
-      <i data-lucide="log-in" class="w-5 h-5"></i>
-      Connexion
-    </a>
-
-  </nav>
-
-  <div class="mt-auto text-xs text-white/40 pt-6 border-t border-white/10">
-    Version 1.0.0<br>
-    Système sécurisé
-  </div>
+<div class="mt-auto text-xs text-white/40 pt-8 border-t border-white/10">
+Version 1.0.0<br>
+Secure ERP Platform
+</div>
 
 </aside>
 
+<style>
+.sidebar-link{
+display:flex;
+align-items:center;
+gap:12px;
+padding:12px;
+border-radius:12px;
+transition:all .3s;
+}
+.sidebar-link:hover{
+background:rgba(255,255,255,0.05);
+color:white;
+}
+.sidebar-login{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:10px;
+padding:12px;
+border-radius:12px;
+background:#0B5C6B;
+transition:.3s;
+}
+.sidebar-login:hover{
+background:#14B8A6;
+}
+</style>
+
 <!-- ================= NAVBAR ================= -->
+
 <header class="relative z-10 border-b border-white/10 bg-black/30 backdrop-blur-xl">
 
-<div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+<div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
 
-  <div class="flex items-center gap-4">
+<div class="flex items-center gap-4">
+<button id="menuBtn" class="md:hidden p-2 rounded-lg hover:bg-white/10 transition">
+<i data-lucide="menu" class="w-7 h-7"></i>
+</button>
 
-    <button id="menuBtn"
-            class="p-2 rounded-lg hover:bg-white/10 transition">
-      <i data-lucide="menu" class="w-6 h-6"></i>
-    </button>
+<img src="icons/logo-fkm.png"
+     class="h-9 md:h-11 w-auto object-contain drop-shadow-md">
+</div>
 
-    <img src="icons/logo-fkm.png"
-         alt="FKM ENERGY"
-         class="h-8 md:h-10 w-auto object-contain">
-
-  </div>
-
-  <a href="login.html"
-     class="px-4 py-2 bg-primary rounded-lg text-white font-medium hover:bg-accent transition shadow-md">
-     Connexion
-  </a>
+<a href="login.html"
+   class="px-6 py-2 bg-primary rounded-xl
+          hover:bg-accent transition font-medium shadow-lg">
+Connexion
+</a>
 
 </div>
 </header>
 
 <!-- ================= HERO ================= -->
-<section class="relative z-10 max-w-7xl mx-auto px-6 py-28">
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+<section class="relative max-w-7xl mx-auto px-6 py-32">
 
-    <div class="space-y-10 opacity-0 translate-y-10 transition-all duration-1000 scroll-animate">
-      <h1 class="text-4xl md:text-6xl font-extrabold leading-tight tracking-tight">
-        Système ERP intégré<br>
-        pour gestion énergétique avancée
-      </h1>
+<div class="grid lg:grid-cols-2 gap-24 items-center">
 
-      <p class="text-white/70 text-lg leading-relaxed max-w-xl">
-        Plateforme centralisée de gestion des transactions,
-        inventaire, opérations commerciales et pilotage financier
-        pour FKM ENERGY.
-      </p>
+<div class="space-y-10 opacity-0 translate-y-10 scroll-animate">
 
-      <a href="login.html"
-         class="px-10 py-4 bg-gradient-to-r from-primary via-accent to-cyan-400 hover:brightness-110 transition-all duration-300 rounded-2xl font-semibold text-white shadow-xl inline-block">
-        Accéder à la plateforme
-      </a>
-    </div>
+<h1 class="text-5xl md:text-6xl font-extrabold leading-tight">
+Système ERP intégré<br>
+pour gestion énergétique avancée
+</h1>
 
-  </div>
+<p class="text-white/70 text-lg max-w-xl">
+Plateforme centralisée de gestion des transactions,
+inventaire, opérations commerciales et pilotage financier.
+</p>
+
+<a href="login.html"
+   class="inline-block px-12 py-4 rounded-2xl
+          bg-gradient-to-r from-primary via-accent to-cyan-400
+          shadow-[0_20px_60px_rgba(20,184,166,0.5)]
+          hover:scale-105 transition-all duration-500">
+Accéder à la plateforme
+</a>
+
+</div>
+
+<div class="relative opacity-0 translate-y-10 scroll-animate">
+
+<div class="absolute inset-0 bg-primary/20 blur-[140px] rounded-3xl"></div>
+
+<div class="relative bg-white/10 backdrop-blur-3xl
+            rounded-3xl p-16 border border-white/20
+            shadow-[0_40px_120px_rgba(0,0,0,0.6)]">
+
+<div class="grid grid-cols-2 gap-12 text-center">
+
+<div>
+<div class="text-4xl font-bold text-cyan-400">24/7</div>
+<div class="text-sm text-white/60 uppercase">Monitoring</div>
+</div>
+
+<div>
+<div class="text-4xl font-bold text-emerald-400">100%</div>
+<div class="text-sm text-white/60 uppercase">Traçabilité</div>
+</div>
+
+<div>
+<div class="text-4xl font-bold text-indigo-400">Multi</div>
+<div class="text-sm text-white/60 uppercase">Devises</div>
+</div>
+
+<div>
+<div class="text-4xl font-bold text-primary">ERP</div>
+<div class="text-sm text-white/60 uppercase">Intégré</div>
+</div>
+
+</div>
+</div>
+</div>
+
+</div>
 </section>
 
-<!-- ================= FOOTER ================= -->
-<footer class="bg-dark border-t border-white/10 py-14 text-center text-white/50 text-sm">
-  © 2026 FKM ENERGY — Enterprise Resource Planning Platform
+<!-- ================= MODULES ================= -->
+
+<section class="bg-white text-slate-900 py-32">
+
+<div class="max-w-7xl mx-auto px-6">
+
+<h2 class="text-4xl font-bold text-center mb-24">
+Modules ERP
+</h2>
+
+<div class="grid md:grid-cols-3 gap-16">
+
+<div class="module-card scroll-animate">
+<i data-lucide="boxes" class="module-icon text-primary"></i>
+<h3>Gestion d'inventaire</h3>
+<p>Suivi temps réel des stocks et traçabilité complète.</p>
+</div>
+
+<div class="module-card scroll-animate">
+<i data-lucide="receipt" class="module-icon text-accent"></i>
+<h3>Transactions & Facturation</h3>
+<p>Facturation multi-devise et validation hiérarchique.</p>
+</div>
+
+<div class="module-card scroll-animate">
+<i data-lucide="shield-check" class="module-icon text-indigo-500"></i>
+<h3>Sécurité & Audit</h3>
+<p>Contrôle des rôles et journal d’actions sécurisé.</p>
+</div>
+
+</div>
+</div>
+
+</section>
+
+<style>
+.module-card{
+padding:40px;
+border-radius:24px;
+box-shadow:0 20px 50px rgba(0,0,0,0.08);
+transition:.5s;
+background:white;
+}
+.module-card:hover{
+transform:translateY(-12px);
+box-shadow:0 40px 80px rgba(0,0,0,0.15);
+}
+.module-icon{
+width:70px;
+height:70px;
+margin-bottom:25px;
+transition:.4s;
+}
+.module-card:hover .module-icon{
+transform:scale(1.1);
+}
+.module-card h3{
+font-size:20px;
+font-weight:600;
+margin-bottom:12px;
+}
+.module-card p{
+color:#64748b;
+}
+</style>
+
+<footer class="bg-[#0F172A] text-white/50 text-center py-12">
+© 2026 FKM ENERGY — Enterprise ERP Platform
 </footer>
 
-<!-- ================= SCRIPTS ================= -->
-
 <script>
-/* Activate Lucide Icons */
 lucide.createIcons();
 </script>
 
 <script>
-/* Sidebar Logic */
-const menuBtn = document.getElementById("menuBtn");
-const sidebar = document.getElementById("sidebar");
-const overlay = document.getElementById("sidebarOverlay");
-const closeSidebar = document.getElementById("closeSidebar");
-
-function openSidebar() {
-  sidebar.classList.remove("-translate-x-full");
-  overlay.classList.remove("hidden");
-  document.body.classList.add("overflow-hidden");
+const observer=new IntersectionObserver(entries=>{
+entries.forEach(entry=>{
+if(entry.isIntersecting){
+entry.target.classList.remove("opacity-0","translate-y-10");
+entry.target.classList.add("opacity-100","translate-y-0");
 }
-
-function closeSidebarFunc() {
-  sidebar.classList.add("-translate-x-full");
-  overlay.classList.add("hidden");
-  document.body.classList.remove("overflow-hidden");
-}
-
-menuBtn.addEventListener("click", openSidebar);
-overlay.addEventListener("click", closeSidebarFunc);
-closeSidebar.addEventListener("click", closeSidebarFunc);
-
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closeSidebarFunc();
 });
+},{threshold:.2});
+document.querySelectorAll(".scroll-animate").forEach(el=>observer.observe(el));
+</script>
+
+<script>
+const menuBtn=document.getElementById("menuBtn");
+const sidebar=document.getElementById("sidebar");
+const overlay=document.getElementById("sidebarOverlay");
+const closeBtn=document.getElementById("closeSidebar");
+
+menuBtn.addEventListener("click",()=>{
+sidebar.classList.remove("-translate-x-full");
+overlay.classList.remove("hidden");
+});
+
+overlay.addEventListener("click",closeSidebar);
+closeBtn.addEventListener("click",closeSidebar);
+
+function closeSidebar(){
+sidebar.classList.add("-translate-x-full");
+overlay.classList.add("hidden");
+}
 </script>
 
 </body>
