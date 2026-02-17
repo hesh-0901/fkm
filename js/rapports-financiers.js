@@ -28,6 +28,22 @@ let exchangeRate = 1;
 let salesChart;
 let productsChart;
 let sellersChart;
+import { signOut } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+/* ================================
+   LOGOUT
+================================ */
+
+const logoutBtn = document.getElementById("logoutBtn");
+
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", async () => {
+    await signOut(auth);
+    window.location.href = "../index.html";
+  });
+}
+
 
 /* ============================================================
    AUTH + ROLE PROTECTION
