@@ -59,20 +59,20 @@ transform:translateY(0);
 <!-- ================= SIDEBAR ================= -->
 
 <div id="sidebarOverlay"
-     class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-40"></div>
+     class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-40 transition-opacity duration-300"></div>
 
 <aside id="sidebar"
        class="fixed top-0 left-0 h-full w-72
               bg-gradient-to-b from-[#0E1A28] to-[#0b2435]
               border-r border-white/10
-              shadow-2xl
+              shadow-[0_30px_80px_rgba(0,0,0,0.8)]
               transform -translate-x-full
               transition-transform duration-300 ease-out
               z-50 p-6 flex flex-col">
 
   <!-- ================= CLOSE BUTTON ================= -->
   <button id="closeSidebar"
-          class="absolute top-5 right-5 text-white/50 hover:text-white transition">
+          class="absolute top-5 right-5 text-white/40 hover:text-white transition-colors duration-200">
     <i data-lucide="x" class="w-6 h-6"></i>
   </button>
 
@@ -81,7 +81,7 @@ transform:translateY(0);
 
     <img src="icons/logo-fkm.png"
          alt="FKM ENERGY"
-         class="h-9 w-auto object-contain">
+         class="h-10 w-auto object-contain drop-shadow-md">
 
     <div class="text-lg font-semibold tracking-wide text-primary">
       FKM ENERGY ERP
@@ -95,41 +95,45 @@ transform:translateY(0);
   </div>
 
   <!-- ================= MAIN NAVIGATION ================= -->
-  <nav class="flex flex-col gap-3 text-white/80 text-sm">
+  <nav class="flex flex-col gap-2 text-white/80 text-sm">
 
     <!-- Accueil -->
     <a href="#"
-       class="flex items-center gap-3 px-3 py-2 rounded-lg
+       class="group flex items-center gap-3 px-3 py-2.5 rounded-lg
               hover:bg-white/5 hover:text-white
               transition-all duration-200">
-      <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+      <i data-lucide="layout-dashboard"
+         class="w-5 h-5 text-white/60 group-hover:text-primary transition-colors"></i>
       Accueil
     </a>
 
     <!-- Profil -->
     <a href="#"
-       class="flex items-center gap-3 px-3 py-2 rounded-lg
+       class="group flex items-center gap-3 px-3 py-2.5 rounded-lg
               hover:bg-white/5 hover:text-white
               transition-all duration-200">
-      <i data-lucide="user-cog" class="w-5 h-5"></i>
+      <i data-lucide="user-cog"
+         class="w-5 h-5 text-white/60 group-hover:text-primary transition-colors"></i>
       Profil
     </a>
 
     <!-- Sécurité -->
     <a href="#"
-       class="flex items-center gap-3 px-3 py-2 rounded-lg
+       class="group flex items-center gap-3 px-3 py-2.5 rounded-lg
               hover:bg-white/5 hover:text-white
               transition-all duration-200">
-      <i data-lucide="shield-check" class="w-5 h-5"></i>
+      <i data-lucide="shield-check"
+         class="w-5 h-5 text-white/60 group-hover:text-primary transition-colors"></i>
       Sécurité
     </a>
 
     <!-- IT Support -->
     <a href="#"
-       class="flex items-center gap-3 px-3 py-2 rounded-lg
+       class="group flex items-center gap-3 px-3 py-2.5 rounded-lg
               hover:bg-white/5 hover:text-white
               transition-all duration-200">
-      <i data-lucide="headset" class="w-5 h-5"></i>
+      <i data-lucide="headset"
+         class="w-5 h-5 text-white/60 group-hover:text-primary transition-colors"></i>
       IT Support
     </a>
 
@@ -139,10 +143,10 @@ transform:translateY(0);
     <!-- Connexion -->
     <a href="login.html"
        class="flex items-center justify-center gap-3
-              px-4 py-2 rounded-lg
+              px-4 py-2.5 rounded-lg
               bg-primary hover:bg-accent
               transition-all duration-300
-              text-white font-medium shadow-md">
+              text-white font-medium shadow-md hover:shadow-lg">
       <i data-lucide="log-in" class="w-5 h-5"></i>
       Connexion
     </a>
@@ -156,8 +160,6 @@ transform:translateY(0);
   </div>
 
 </aside>
-
-<!-- ================= NAVBAR ================= -->
 
 <!-- ================= NAVBAR ================= -->
 <header class="border-b border-white/10 bg-black/30 backdrop-blur-xl sticky top-0 z-50">
