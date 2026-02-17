@@ -368,5 +368,28 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 </script>
+      <script>
+let deferredPrompt;
+const installBtn = document.querySelectorAll("a, button");
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+
+  installBtn.forEach(btn => {
+    if (btn.textContent.includes("Télécharger")) {
+      btn.addEventListener("click", async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          console.log("User response:", outcome);
+          deferredPrompt = null;
+        }
+      });
+    }
+  });
+});
+</script>
+
 </body>
 </html>
