@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <title>FKM ENERGY</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+      <!-- PWA SERVICES -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0B5C6B">
+
 
   <!-- Redirection immédiate vers le login okay -->
   <meta http-equiv="refresh" content="0; url=login.html">
@@ -30,4 +34,15 @@
     </p>
   </noscript>
 </body>
+  <script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("sw.js")
+      .then(() => console.log("Service Worker enregistré"))
+      .catch(err => console.error("Erreur SW:", err));
+  });
+}
+</script>
+
 </html>
