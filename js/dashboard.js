@@ -41,44 +41,29 @@ let auditData = [];
 ========================================================== */
 onAuthStateChanged(auth, async (user) => {
 
-  // ❌ Pas connecté → retour à index principal
-  if (!user) {
-    return location.replace("../index.html");
-  }
+  if (!user) return location.replace("../login.html");
 
-  try {
-    const snap = await getDoc(doc(db, "users", user.uid));
+  const snap = await getDoc(doc(db, "users", user.uid));
+  if (!snap.exists()) return;
 
-    // ❌ Utilisateur supprimé de Firestore
-    if (!snap.exists()) {
-      await signOut(auth);
-      return location.replace("../index.html");
-    }
+  const data = snap.data();
+  userNameEl.textContent = data.name || "—";
+  userRoleEl.textContent = data.fonction || data.role || "";
 
-    const data = snap.data();
-
-    userNameEl.textContent = data.name || "—";
-    userRoleEl.textContent = data.fonction || data.role || "";
-
-    initRealtimeDashboard();
-
-  } catch (error) {
-    console.error("Erreur Auth:", error);
-    await signOut(auth);
-    location.replace("../index.html");
-  }
-
+  initRealtimeDashboard();
 });
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", async () => {
-    try {
-      await signOut(auth);
-      location.replace("../index.html");
-    } catch (error) {
-      console.error("Erreur logout :", error);
-    }
-  });
-}
+
+logoutBtn.onclick = async () => {
+  await signOut(auth);
+  location.replace("../login.html");
+};
+
+periodFilter.addEventListener("change", () => {
+  selectedPeriod = periodFilter.value;
+  activities = [];
+  renderTransactions();
+  renderAudit();
+});
 
 /* ==========================================================
    INIT SNAPSHOTS (1 seule fois)
