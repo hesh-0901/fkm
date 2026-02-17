@@ -1,161 +1,223 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<title>FKM ENERGY | ERP Platform</title>
+  <meta charset="UTF-8" />
+  <title>FKM ENERGY | ERP Platform</title>
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <!-- VIEWPORT STRICT -->
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 
-<meta name="theme-color" content="#0f766e">
-<link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0B5C6B">
+  <link rel="manifest" href="manifest.json">
 
-<script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-<script>
-tailwind.config = {
-  theme: {
-    extend: {
-      colors: {
-        primary: '#0f766e',
-        secondary: '#0ea5e9'
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#0B5C6B',
+            dark: '#0F172A',
+            soft: '#F1F5F9',
+            accent: '#0EA5E9'
+          }
+        }
       }
     }
-  }
-}
-</script>
+  </script>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 
-<style>
-body { font-family: Inter, system-ui; }
-html { scroll-behavior: smooth; }
-</style>
 </head>
 
-<body class="min-h-screen bg-[#0b1220] relative overflow-x-hidden text-white">
+<body class="bg-dark text-white overflow-x-hidden">
 
-<!-- ================= BACKGROUND GLOW ================= -->
-<div class="absolute inset-0 overflow-hidden pointer-events-none">
+<!-- ================= BACKGROUND STRUCTURE ================= -->
+<div class="absolute inset-0 pointer-events-none">
 
-  <div class="absolute top-[-250px] left-[-250px] w-[600px] h-[600px]
-              bg-gradient-to-br from-yellow-400/20 via-primary/20 to-secondary/20
-              rounded-full blur-[160px] animate-pulse">
-  </div>
-
-  <div class="absolute bottom-[-250px] right-[-250px] w-[600px] h-[600px]
-              bg-gradient-to-tr from-secondary/30 via-primary/20 to-cyan-400/20
-              rounded-full blur-[160px]">
-  </div>
-
-  <div class="absolute inset-0 opacity-[0.03]"
+  <div class="absolute top-0 left-0 w-full h-full opacity-[0.04]"
        style="background-image: linear-gradient(to right, white 1px, transparent 1px),
                               linear-gradient(to bottom, white 1px, transparent 1px);
-              background-size: 60px 60px;">
+              background-size: 80px 80px;">
+  </div>
+
+  <div class="absolute -top-40 -left-40 w-[600px] h-[600px]
+              bg-primary/30 rounded-full blur-[160px]">
   </div>
 
 </div>
 
 <!-- ================= NAVBAR ================= -->
-<header class="relative z-50 flex justify-between items-center px-6 py-6 max-w-7xl mx-auto">
+<header class="relative z-10 border-b border-white/10 bg-white/5 backdrop-blur-xl">
 
-  <div class="text-xl font-extrabold tracking-[0.25em]
-              bg-gradient-to-r from-yellow-300 via-primary to-secondary
-              bg-clip-text text-transparent">
-    FKM ENERGY
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+
+    <div class="text-xl font-bold tracking-wide text-primary">
+      FKM ENERGY ERP
+    </div>
+
+    <nav class="hidden md:flex items-center gap-8 text-sm text-white/70">
+      <a href="#" class="hover:text-white transition">Plateforme</a>
+      <a href="#" class="hover:text-white transition">Sécurité</a>
+      <a href="#" class="hover:text-white transition">Modules</a>
+      <a href="login.html"
+         class="px-4 py-2 bg-primary rounded-lg text-white font-medium hover:bg-accent transition">
+         Connexion
+      </a>
+    </nav>
+
   </div>
-
-  <a href="login.html"
-     class="px-6 py-2 rounded-xl border border-white/20
-            bg-white/10 backdrop-blur-xl
-            hover:bg-white/20 transition text-sm font-medium">
-    Connexion
-  </a>
-
 </header>
 
 <!-- ================= HERO ================= -->
-<section class="relative z-40 flex flex-col items-center justify-center text-center px-6 pt-20 pb-28">
+<section class="relative z-10 max-w-7xl mx-auto px-6 py-20">
 
-  <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight max-w-4xl
-             bg-gradient-to-r from-yellow-300 via-primary to-secondary
-             bg-clip-text text-transparent animate-pulse">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
-    ERP Intelligent pour  
-    <br>Solutions Énergétiques Modernes
-  </h1>
+    <!-- LEFT CONTENT -->
+    <div>
 
-  <p class="mt-8 text-white/70 text-lg max-w-2xl leading-relaxed">
-    Gestion des ventes, facturation, inventaire, employés et contrôle financier
-    dans une plateforme centralisée, sécurisée et installable.
-  </p>
+      <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
+        Système ERP intégré<br>
+        pour gestion énergétique avancée
+      </h1>
 
-  <!-- CTA -->
-  <div class="mt-12 flex flex-col sm:flex-row gap-6">
+      <p class="mt-6 text-white/70 text-lg leading-relaxed">
+        Plateforme centralisée de gestion des transactions,
+        inventaire, opérations commerciales et pilotage financier
+        pour FKM ENERGY.
+      </p>
 
-    <button id="installBtn"
-      class="hidden px-12 py-5 rounded-2xl
-             bg-gradient-to-r from-primary via-secondary to-cyan-400
-             shadow-[0_20px_60px_rgba(14,165,233,0.4)]
-             hover:brightness-110
-             active:scale-[0.97]
-             transition-all duration-300
-             font-bold text-lg">
-      📲 Installer l'application
-    </button>
+      <div class="mt-10 flex flex-col sm:flex-row gap-4">
 
-    <a href="login.html"
-       class="px-12 py-5 rounded-2xl
-              border border-white/20
-              bg-white/10 backdrop-blur-xl
-              hover:bg-white/20 transition
-              font-semibold text-lg">
-       Accéder à l’ERP
-    </a>
+        <a href="login.html"
+           class="px-8 py-4 bg-primary hover:bg-accent transition
+                  rounded-xl font-semibold text-white text-center
+                  shadow-[0_10px_40px_rgba(11,92,107,0.6)]">
+          Accéder à la plateforme
+        </a>
+
+        <button id="installBtn"
+                class="px-8 py-4 border border-white/20
+                       rounded-xl font-semibold text-white/80
+                       hover:bg-white/10 transition">
+          Télécharger l'application
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- RIGHT METRICS PANEL -->
+    <div class="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-xl">
+
+      <div class="grid grid-cols-2 gap-8 text-center">
+
+        <div>
+          <div class="text-3xl font-bold text-primary">24/7</div>
+          <div class="text-sm text-white/60 uppercase tracking-wider">
+            Monitoring
+          </div>
+        </div>
+
+        <div>
+          <div class="text-3xl font-bold text-primary">100%</div>
+          <div class="text-sm text-white/60 uppercase tracking-wider">
+            Traçabilité
+          </div>
+        </div>
+
+        <div>
+          <div class="text-3xl font-bold text-primary">Multi</div>
+          <div class="text-sm text-white/60 uppercase tracking-wider">
+            Devises
+          </div>
+        </div>
+
+        <div>
+          <div class="text-3xl font-bold text-primary">ERP</div>
+          <div class="text-sm text-white/60 uppercase tracking-wider">
+            Intégré
+          </div>
+        </div>
+
+      </div>
+
+    </div>
 
   </div>
 
 </section>
 
-<!-- ================= FEATURES ================= -->
-<section class="relative z-40 max-w-6xl mx-auto px-6 pb-32">
+<!-- ================= MODULES ================= -->
+<section class="relative z-10 bg-soft text-slate-900 py-20">
 
-  <div class="grid md:grid-cols-3 gap-8">
+  <div class="max-w-7xl mx-auto px-6">
 
-    <!-- CARD -->
-    <div class="bg-white/10 backdrop-blur-2xl border border-white/20
-                rounded-3xl p-8 shadow-[0_20px_60px_rgba(0,0,0,0.6)]
-                hover:scale-[1.03] transition duration-500">
+    <h2 class="text-3xl font-bold mb-16 text-center">
+      Modules ERP
+    </h2>
 
-      <div class="text-4xl mb-4">📊</div>
-      <h3 class="text-xl font-semibold mb-3">Gestion Centralisée</h3>
-      <p class="text-white/60 text-sm leading-relaxed">
-        Ventes, stocks, factures et employés dans une seule plateforme.
-      </p>
-    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
 
-    <!-- CARD -->
-    <div class="bg-white/10 backdrop-blur-2xl border border-white/20
-                rounded-3xl p-8 shadow-[0_20px_60px_rgba(0,0,0,0.6)]
-                hover:scale-[1.03] transition duration-500">
+      <!-- INVENTORY -->
+      <div class="bg-white rounded-2xl p-8 shadow-lg border hover:shadow-2xl transition">
 
-      <div class="text-4xl mb-4">🔐</div>
-      <h3 class="text-xl font-semibold mb-3">Sécurité & Rôles</h3>
-      <p class="text-white/60 text-sm leading-relaxed">
-        Accès contrôlé par rôle : Admin, Directeur, Opérateur.
-      </p>
-    </div>
+        <div class="mb-6 text-primary">
+          <i data-lucide="boxes" class="w-8 h-8"></i>
+        </div>
 
-    <!-- CARD -->
-    <div class="bg-white/10 backdrop-blur-2xl border border-white/20
-                rounded-3xl p-8 shadow-[0_20px_60px_rgba(0,0,0,0.6)]
-                hover:scale-[1.03] transition duration-500">
+        <h3 class="font-semibold text-lg mb-3">
+          Gestion d'inventaire
+        </h3>
 
-      <div class="text-4xl mb-4">⚡</div>
-      <h3 class="text-xl font-semibold mb-3">Facturation Premium</h3>
-      <p class="text-white/60 text-sm leading-relaxed">
-        Factures professionnelles avec QR code et suivi automatisé.
-      </p>
+        <p class="text-sm text-slate-600">
+          Suivi en temps réel des stocks, traçabilité des produits,
+          gestion des entrées et sorties.
+        </p>
+
+      </div>
+
+      <!-- TRANSACTIONS -->
+      <div class="bg-white rounded-2xl p-8 shadow-lg border hover:shadow-2xl transition">
+
+        <div class="mb-6 text-primary">
+          <i data-lucide="receipt" class="w-8 h-8"></i>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-3">
+          Transactions & Facturation
+        </h3>
+
+        <p class="text-sm text-slate-600">
+          Facturation multi-devise, validation hiérarchique,
+          génération PDF professionnelle.
+        </p>
+
+      </div>
+
+      <!-- AUDIT -->
+      <div class="bg-white rounded-2xl p-8 shadow-lg border hover:shadow-2xl transition">
+
+        <div class="mb-6 text-primary">
+          <i data-lucide="shield-check" class="w-8 h-8"></i>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-3">
+          Sécurité & Audit
+        </h3>
+
+        <p class="text-sm text-slate-600">
+          Journal d’actions, contrôle des rôles,
+          validation administrateur et traçabilité complète.
+        </p>
+
+      </div>
+
     </div>
 
   </div>
@@ -163,33 +225,39 @@ html { scroll-behavior: smooth; }
 </section>
 
 <!-- ================= FOOTER ================= -->
-<footer class="relative z-40 text-center pb-10 text-white/40 text-sm">
-  © 2026 FKM ENERGY · Solar Intelligence ERP
+<footer class="bg-dark border-t border-white/10 py-10 text-center text-white/50 text-sm">
+  © 2026 FKM ENERGY — Enterprise Resource Planning Platform
 </footer>
 
-<!-- ================= PWA ================= -->
+<!-- ================= SCRIPTS ================= -->
+
+<script>
+lucide.createIcons();
+</script>
+
+<script>
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+
+document.getElementById("installBtn").addEventListener("click", async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  }
+});
+</script>
+
 <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("sw.js");
   });
 }
-
-let deferredPrompt;
-const installBtn = document.getElementById("installBtn");
-
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  installBtn.classList.remove("hidden");
-});
-
-installBtn?.addEventListener("click", async () => {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt = null;
-  installBtn.classList.add("hidden");
-});
 </script>
 
 </body>
