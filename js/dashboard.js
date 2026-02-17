@@ -41,7 +41,7 @@ let auditData = [];
 ========================================================== */
 onAuthStateChanged(auth, async (user) => {
 
-  if (!user) return location.replace("index.html");
+  if (!user) return location.replace("./index.html");
 
   const snap = await getDoc(doc(db, "users", user.uid));
   if (!snap.exists()) return;
