@@ -41,38 +41,34 @@ let auditData = [];
 ========================================================== */
 onAuthStateChanged(auth, async (user) => {
 
-  // ❌ Pas connecté → retour à index
+  // ❌ Pas connecté → retour à index principal
   if (!user) {
-    return location.replace("./index.html");
+    return location.replace("../index.html");
   }
 
   try {
     const snap = await getDoc(doc(db, "users", user.uid));
 
-    // ❌ Utilisateur supprimé de Firestore → logout forcé
+    // ❌ Utilisateur supprimé de Firestore
     if (!snap.exists()) {
       await signOut(auth);
-      return location.replace("./index.html");
+      return location.replace("../index.html");
     }
 
     const data = snap.data();
 
-    // Injection UI
     userNameEl.textContent = data.name || "—";
     userRoleEl.textContent = data.fonction || data.role || "";
 
-    // Init dashboard temps réel
     initRealtimeDashboard();
 
   } catch (error) {
     console.error("Erreur Auth:", error);
     await signOut(auth);
-    location.replace("./index.html");
+    location.replace("../index.html");
   }
 
 });
-
-
 /* ==========================================================
    INIT SNAPSHOTS (1 seule fois)
 ========================================================== */
