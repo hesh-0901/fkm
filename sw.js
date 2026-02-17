@@ -3,7 +3,7 @@ const CACHE_NAME = "fkm-erp-v1";
 const urlsToCache = [
   "/fkm/",
   "/fkm/index.html",
-  "/fkm/transactions.html"
+  "/fkm/login.html"
 ];
 
 self.addEventListener("install", event => {
