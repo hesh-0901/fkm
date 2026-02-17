@@ -22,10 +22,6 @@ body {
   background: #f5f5f5;
 }
 
-/* ============================= */
-/* CONTENEUR */
-/* ============================= */
-
 .invoice-wrapper {
   width: 100%;
   background: #fff;
@@ -33,15 +29,12 @@ body {
   box-sizing: border-box;
 }
 
-/* ============================= */
-/* HEADER */
-/* ============================= */
+/* ================= HEADER ================= */
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
 }
 
 .logo img {
@@ -65,9 +58,7 @@ body {
   letter-spacing: 2px;
 }
 
-/* ============================= */
-/* META INFO */
-/* ============================= */
+/* ================= META ================= */
 
 .meta {
   display: flex;
@@ -75,41 +66,34 @@ body {
   margin-bottom: 20px;
 }
 
-.meta strong {
-  font-size: 13px;
+.meta-block {
+  width: 48%;
+  line-height: 1.7;
 }
 
-/* ============================= */
-/* TABLE PRODUITS */
-/* ============================= */
+/* ================= TABLE ================= */
 
 table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
-  table-layout: fixed;
 }
 
 table th, table td {
   border: 1px solid #000;
   padding: 8px;
   text-align: center;
-  word-wrap: break-word;
 }
 
 table th {
   background: #f0f0f0;
-  font-weight: bold;
-  font-size: 13px;
 }
 
 tbody tr:nth-child(even) {
   background: #fafafa;
 }
 
-/* ============================= */
-/* TOTAL SECTION */
-/* ============================= */
+/* ================= TOTAL ================= */
 
 .total-section {
   width: 45%;
@@ -127,9 +111,38 @@ tbody tr:nth-child(even) {
   background: #eaeaea;
 }
 
-/* ============================= */
-/* FOOTER */
-/* ============================= */
+/* ================= SIGNATURE ================= */
+
+.signature-section {
+  margin-top: 50px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.signature-box {
+  width: 45%;
+  text-align: center;
+}
+
+.signature-line {
+  margin-top: 60px;
+  border-top: 1px solid #000;
+  padding-top: 5px;
+  font-size: 12px;
+}
+
+/* ================= QR ================= */
+
+.qr-box {
+  text-align: center;
+}
+
+.qr-box img {
+  width: 120px;
+}
+
+/* ================= FOOTER ================= */
 
 .footer {
   margin-top: 40px;
@@ -137,12 +150,9 @@ tbody tr:nth-child(even) {
   text-align: center;
   border-top: 1px solid #ccc;
   padding-top: 15px;
-  line-height: 1.6;
 }
 
-/* ============================= */
-/* PRINT BUTTON */
-/* ============================= */
+/* ================= PRINT ================= */
 
 .print-btn {
   text-align: center;
@@ -156,31 +166,15 @@ tbody tr:nth-child(even) {
   color: #fff;
   cursor: pointer;
   border-radius: 6px;
-  font-size: 14px;
 }
 
-/* ============================= */
-/* MODE IMPRESSION */
-/* ============================= */
-
 @media print {
-
-  body {
-    background: #fff;
-  }
-
-  .print-btn {
-    display: none !important;
-  }
-
-  .invoice-wrapper {
-    padding: 0;
-  }
-
+  body { background: #fff; }
+  .print-btn { display: none; }
+  .invoice-wrapper { padding: 0; }
 }
 
 </style>
-
 </head>
 
 <body>
@@ -205,20 +199,20 @@ tbody tr:nth-child(even) {
     </div>
   </div>
 
-  <!-- TITLE -->
-  <div class="invoice-title">
-    FACTURE
-  </div>
+  <div class="invoice-title">FACTURE</div>
 
   <!-- META -->
   <div class="meta">
-    <div>
+    <div class="meta-block">
       <strong>Facture N° :</strong> <span id="invoiceNumber"></span><br>
-      <strong>Date :</strong> <span id="invoiceDate"></span>
+      <strong>Date :</strong> <span id="invoiceDate"></span><br>
+      <strong>Assistant :</strong> <span id="assistantName"></span>
     </div>
-    <div>
+
+    <div class="meta-block">
       <strong>Client :</strong><br>
-      <span id="clientName"></span>
+      <span id="clientName"></span><br>
+      <strong>Téléphone :</strong> <span id="clientPhone"></span>
     </div>
   </div>
 
@@ -251,6 +245,24 @@ tbody tr:nth-child(even) {
       <td id="grandTotal"></td>
     </tr>
   </table>
+
+  <!-- SIGNATURE + QR -->
+  <div class="signature-section">
+
+    <div class="signature-box">
+      <div class="signature-line">
+        Signature & Cachet Entreprise
+      </div>
+    </div>
+
+    <div class="qr-box">
+      <img id="qrCode" src="">
+      <div style="font-size:11px;margin-top:5px;">
+        Vérification facture
+      </div>
+    </div>
+
+  </div>
 
   <!-- FOOTER -->
   <div class="footer">
