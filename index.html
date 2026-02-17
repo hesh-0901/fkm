@@ -1,20 +1,12 @@
 <!DOCTYPE html>
-<html lang="fr" class="scroll-smooth">
-
+<html lang="fr">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>FKM ENERGY | Portail ERP</title>
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <meta name="theme-color" content="#0B5C6B">
-<link rel="manifest" href="manifest.json">
-
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="FKM ERP">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
 
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -37,7 +29,6 @@ tailwind.config = {
 <style>
 body{
 -webkit-font-smoothing:antialiased;
-text-rendering:optimizeLegibility;
 }
 
 .bg-grid{
@@ -46,310 +37,116 @@ linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
 linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
 background-size:60px 60px;
 }
-
-.glow{
-position:absolute;
-width:500px;
-height:500px;
-background:radial-gradient(circle, rgba(20,184,166,0.25), transparent 70%);
-filter:blur(140px);
-z-index:-1;
-}
-
-.scroll-animate{
-opacity:0;
-transform:translateY(30px);
-transition:all .8s ease;
-}
-.scroll-animate.visible{
-opacity:1;
-transform:translateY(0);
-}
 </style>
-
 </head>
 
-<body class="relative bg-gradient-to-br from-dark via-[#0b1f2e] to-[#0f2c3d] text-white overflow-x-hidden">
+<body class="bg-gradient-to-br from-dark via-[#0b1f2e] to-[#0f2c3d] text-white overflow-x-hidden relative">
 
 <div class="absolute inset-0 bg-grid pointer-events-none"></div>
-<div class="glow top-[-200px] left-[-200px]"></div>
-<div class="glow bottom-[-200px] right-[-200px]"></div>
-
-<!-- ================= SIDEBAR ================= -->
-
-<div id="sidebarOverlay"
-     class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-40 transition-opacity"></div>
-
-<aside id="sidebar"
-       class="fixed top-0 left-0 h-full w-72
-              bg-gradient-to-b from-[#0E1A28] to-[#0b2435]
-              border-r border-white/10
-              shadow-2xl
-              transform -translate-x-full
-              transition-transform duration-300 ease-out
-              z-50 p-6 flex flex-col">
-
-<button id="closeSidebar"
-        class="absolute top-5 right-5 text-white/40 hover:text-white transition">
-<i data-lucide="x" class="w-6 h-6"></i>
-</button>
-
-<div class="flex items-center gap-3 mb-10">
-<img src="icons/logo-fkm.png"
-     class="h-9 w-auto object-contain">
-<div class="text-sm font-semibold tracking-wider text-primary">
-FKM ENERGY ERP
-</div>
-</div>
-
-<div class="text-[11px] uppercase tracking-widest text-white/40 mb-4">
-Navigation
-</div>
-
-<nav class="flex flex-col gap-2 text-sm text-white/80">
-
-<a href="#"
-class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition">
-<i data-lucide="layout-dashboard" class="w-5 h-5 text-primary"></i>
-Accueil
-</a>
-
-<a href="login.html"
-class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition">
-<i data-lucide="user" class="w-5 h-5 text-accent"></i>
-Mon profil
-</a>
-
-<a href="#"
-class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition">
-<i data-lucide="shield-check" class="w-5 h-5 text-emerald-400"></i>
-Sécurité
-</a>
-
-<a href="#"
-class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition">
-<i data-lucide="headset" class="w-5 h-5 text-indigo-400"></i>
-IT Support
-</a>
-
-<div class="border-t border-white/10 my-4"></div>
-
-<a href="login.html"
-class="flex items-center justify-center gap-2
-px-4 py-2 rounded-lg
-bg-primary hover:bg-accent transition
-text-white text-sm font-medium shadow">
-Connexion
-</a>
-
-</nav>
-
-<div class="mt-auto text-[11px] text-white/40 pt-6 border-t border-white/10">
-Version 1.0.0<br>
-Système sécurisé
-</div>
-
-</aside>
 
 <!-- ================= HEADER ================= -->
 
-<header class="border-b border-white/10 bg-black/30 backdrop-blur-xl sticky top-0 z-30">
+<header class="border-b border-white/10 bg-black/30 backdrop-blur-xl">
 
-<div class="max-w-7xl mx-auto px-5 sm:px-6 py-4 flex items-center justify-between">
-
-<div class="flex items-center gap-4">
-
-<button id="menuBtn"
-class="md:hidden p-2 rounded-lg hover:bg-white/10 transition">
-<i data-lucide="menu" class="w-6 h-6"></i>
-</button>
+<div class="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
 
 <img src="icons/logo-fkm.png"
-class="h-8 md:h-9 w-auto object-contain">
+     class="h-8 w-auto object-contain">
+
+<!-- Burger -->
+<button id="menuBtn"
+        class="p-2 rounded-lg hover:bg-white/10 transition">
+<i data-lucide="menu" class="w-5 h-5"></i>
+</button>
 
 </div>
 
-<a href="login.html"
-class="px-4 sm:px-5 py-2
-bg-primary hover:bg-accent
-rounded-lg text-xs sm:text-sm font-medium shadow transition">
-Connexion
+<!-- DROPDOWN -->
+<div id="dropdownMenu"
+     class="hidden border-t border-white/10 bg-[#0f1c2b] backdrop-blur-xl">
+
+<div class="px-6 py-6 space-y-4 text-sm text-white/80">
+
+<a href="#" class="flex items-center gap-3 hover:text-white transition">
+<i data-lucide="info" class="w-4 h-4 text-primary"></i>
+À propos de nous
+</a>
+
+<a href="login.html" class="flex items-center gap-3 hover:text-white transition">
+<i data-lucide="user" class="w-4 h-4 text-accent"></i>
+Mon profil
+</a>
+
+<a href="#" class="flex items-center gap-3 hover:text-white transition">
+<i data-lucide="download" class="w-4 h-4 text-emerald-400"></i>
+Installer l'application
+</a>
+
+<a href="#" class="flex items-center gap-3 hover:text-white transition">
+<i data-lucide="alert-circle" class="w-4 h-4 text-amber-400"></i>
+Signaler un incident
+</a>
+
+<a href="#" class="flex items-center gap-3 hover:text-white transition">
+<i data-lucide="headset" class="w-4 h-4 text-indigo-400"></i>
+Assistance Technique
 </a>
 
 </div>
+</div>
+
 </header>
 
 <!-- ================= HERO ================= -->
 
-<section class="max-w-7xl mx-auto px-6 py-20 md:py-28">
+<section class="max-w-5xl mx-auto px-6 py-20 text-center">
 
-<div class="grid lg:grid-cols-2 gap-14 lg:gap-24 items-center">
-
-<div class="space-y-7 scroll-animate">
-
-<p class="text-xs uppercase tracking-[0.25em] text-white/50">
-PORTAIL INTERNE
-</p>
-
-<h1 class="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
-Système ERP intégré<br>
-<span class="text-accent">gestion énergétique avancée</span>
+<h1 class="text-2xl sm:text-3xl md:text-4xl font-semibold leading-tight">
+Portail ERP Interne
 </h1>
 
-<p class="text-white/70 text-sm sm:text-base md:text-lg leading-relaxed max-w-xl">
-Plateforme centralisée permettant le pilotage,
-la traçabilité et la sécurisation des opérations
-énergétiques et commerciales.
+<p class="mt-6 text-sm sm:text-base text-white/70 leading-relaxed max-w-xl mx-auto">
+Notre ERP centralise les opérations, sécurise les données et améliore la performance globale de l’entreprise.
 </p>
 
-<div class="flex flex-col sm:flex-row gap-4 pt-4">
+<div class="mt-8 space-y-3 text-xs sm:text-sm text-white/60 max-w-lg mx-auto">
+<p>✔ Centralisation des données</p>
+<p>✔ Traçabilité complète</p>
+<p>✔ Sécurité renforcée</p>
+<p>✔ Optimisation des processus</p>
+</div>
+
+<div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
 
 <a href="login.html"
-class="px-7 py-3 rounded-xl text-sm font-medium
-bg-gradient-to-r from-primary to-accent
-shadow-lg hover:brightness-110 transition">
+   class="px-6 py-3 rounded-lg text-sm font-medium
+          bg-primary hover:bg-accent transition shadow">
 Accéder au système
 </a>
 
-<button class="px-7 py-3 rounded-xl text-sm font-medium
-border border-white/20 hover:bg-white/10 transition">
+<button class="px-6 py-3 rounded-lg text-sm font-medium
+               border border-white/20 hover:bg-white/10 transition">
 Télécharger l'application
 </button>
 
 </div>
 
-</div>
-
-<div class="scroll-animate">
-
-<div class="bg-white/10 backdrop-blur-xl
-rounded-3xl p-8 md:p-12
-border border-white/20 shadow-xl">
-
-<div class="grid grid-cols-2 gap-8 text-center">
-
-<div>
-<div class="text-2xl md:text-3xl font-bold text-cyan-400">24/7</div>
-<div class="text-[11px] uppercase tracking-widest text-white/60 mt-2">
-Monitoring
-</div>
-</div>
-
-<div>
-<div class="text-2xl md:text-3xl font-bold text-emerald-400">100%</div>
-<div class="text-[11px] uppercase tracking-widest text-white/60 mt-2">
-Traçabilité
-</div>
-</div>
-
-<div>
-<div class="text-2xl md:text-3xl font-bold text-indigo-400">Multi</div>
-<div class="text-[11px] uppercase tracking-widest text-white/60 mt-2">
-Devises
-</div>
-</div>
-
-<div>
-<div class="text-2xl md:text-3xl font-bold text-primary">ERP</div>
-<div class="text-[11px] uppercase tracking-widest text-white/60 mt-2">
-Intégré
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-</div>
 </section>
 
-<!-- ================= MODULES ================= -->
+<!-- ================= FOOTER ================= -->
 
-<section class="bg-white text-slate-900 py-20 md:py-28">
-
-<div class="max-w-7xl mx-auto px-6">
-
-<h2 class="text-2xl md:text-3xl font-semibold text-center mb-16">
-Modules ERP
-</h2>
-
-<div class="grid md:grid-cols-3 gap-8">
-
-<div class="p-8 rounded-2xl shadow-lg hover:shadow-xl transition bg-white border">
-<i data-lucide="boxes" class="w-12 h-12 text-primary mb-6"></i>
-<h3 class="text-lg font-semibold mb-3">Inventaire</h3>
-<p class="text-sm text-slate-600 leading-relaxed">
-Suivi intelligent des stocks et gestion automatisée.
-</p>
-</div>
-
-<div class="p-8 rounded-2xl shadow-lg hover:shadow-xl transition bg-white border">
-<i data-lucide="receipt" class="w-12 h-12 text-accent mb-6"></i>
-<h3 class="text-lg font-semibold mb-3">Transactions</h3>
-<p class="text-sm text-slate-600 leading-relaxed">
-Facturation multi-devise et validation hiérarchique.
-</p>
-</div>
-
-<div class="p-8 rounded-2xl shadow-lg hover:shadow-xl transition bg-white border">
-<i data-lucide="shield-check" class="w-12 h-12 text-indigo-500 mb-6"></i>
-<h3 class="text-lg font-semibold mb-3">Sécurité</h3>
-<p class="text-sm text-slate-600 leading-relaxed">
-Contrôle d'accès et audit complet des actions.
-</p>
-</div>
-
-</div>
-</div>
-</section>
-
-<footer class="bg-dark text-white/40 text-center py-10 text-[11px] tracking-wide">
-© 2026 FKM ENERGY — Enterprise ERP Platform
+<footer class="text-center text-[11px] text-white/40 py-10 border-t border-white/10">
+© 2026 FKM ENERGY — Plateforme ERP sécurisée
 </footer>
 
 <script>
 lucide.createIcons();
 
-const observer=new IntersectionObserver(entries=>{
-entries.forEach(entry=>{
-if(entry.isIntersecting){
-entry.target.classList.add("visible");
-}
-});
-},{threshold:.2});
-document.querySelectorAll(".scroll-animate").forEach(el=>observer.observe(el));
+const menuBtn = document.getElementById("menuBtn");
+const dropdown = document.getElementById("dropdownMenu");
 
-const menuBtn=document.getElementById("menuBtn");
-const sidebar=document.getElementById("sidebar");
-const overlay=document.getElementById("sidebarOverlay");
-const closeSidebar=document.getElementById("closeSidebar");
-
-function openSidebar(){
-sidebar.classList.remove("-translate-x-full");
-overlay.classList.remove("hidden");
-document.body.classList.add("overflow-hidden");
-}
-
-function closeSidebarFunc(){
-sidebar.classList.add("-translate-x-full");
-overlay.classList.add("hidden");
-document.body.classList.remove("overflow-hidden");
-}
-
-menuBtn.addEventListener("click",openSidebar);
-overlay.addEventListener("click",closeSidebarFunc);
-closeSidebar.addEventListener("click",closeSidebarFunc);
-</script>
-
-<script type="module">
-import { auth } from "./js/firebase.config.js";
-import { onAuthStateChanged } from 
-"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-onAuthStateChanged(auth, (user) => {
-if (user) {
-window.location.replace("dashboard.html");
-}
+menuBtn.addEventListener("click", () => {
+  dropdown.classList.toggle("hidden");
 });
 </script>
 
