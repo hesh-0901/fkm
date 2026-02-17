@@ -231,6 +231,52 @@ entry.target.classList.add("visible");
 
 document.querySelectorAll(".scroll-animate").forEach(el=>observer.observe(el));
 </script>
+<script>
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("sidebarOverlay");
+const closeSidebar = document.getElementById("closeSidebar");
+
+function openSidebar() {
+  sidebar.classList.remove("-translate-x-full");
+  overlay.classList.remove("hidden");
+  document.body.classList.add("overflow-hidden");
+}
+
+function closeSidebarFunc() {
+  sidebar.classList.add("-translate-x-full");
+  overlay.classList.add("hidden");
+  document.body.classList.remove("overflow-hidden");
+}
+
+/* OPEN */
+if(menuBtn){
+  menuBtn.addEventListener("click", openSidebar);
+}
+
+/* CLOSE */
+if(overlay){
+  overlay.addEventListener("click", closeSidebarFunc);
+}
+
+if(closeSidebar){
+  closeSidebar.addEventListener("click", closeSidebarFunc);
+}
+
+/* ESC KEY */
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    closeSidebarFunc();
+  }
+});
+
+/* Auto close on desktop */
+window.addEventListener("resize", () => {
+  if (window.innerWidth >= 768) {
+    closeSidebarFunc();
+  }
+});
+</script>      
 
 </body>
 </html>
