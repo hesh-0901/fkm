@@ -26,14 +26,16 @@ tailwind.config = {
         primary: '#0B5C6B',
         dark: '#0F172A',
         soft: '#F1F5F9',
-        accent: '#14B8A6' // plus lumineux mais cohérent
+        accent: '#14B8A6'
       }
     }
   }
 }
 </script>
 
+<!-- Lucide -->
 <script src="https://unpkg.com/lucide@latest"></script>
+
 </head>
 
 <body class="bg-gradient-to-br from-dark via-[#0b1f2e] to-[#0f2c3d] text-white overflow-x-hidden">
@@ -51,104 +53,62 @@ tailwind.config = {
               transition-transform duration-500 ease-out
               z-50 p-6 flex flex-col">
 
-  <!-- CLOSE BUTTON -->
   <button id="closeSidebar"
           class="absolute top-5 right-5 text-white/50 hover:text-white transition">
     <i data-lucide="x" class="w-6 h-6"></i>
   </button>
 
-  <!-- LOGO SECTION -->
   <div class="flex items-center gap-3 mb-10">
-
     <img src="icons/logo-fkm.png"
          alt="FKM ENERGY"
          class="h-9 w-auto object-contain drop-shadow-md">
-
     <div class="text-lg font-semibold tracking-wide text-primary">
       FKM ENERGY ERP
     </div>
-
   </div>
 
-  <!-- SECTION LABEL -->
   <div class="text-xs uppercase tracking-widest text-white/40 mb-4">
     Navigation
   </div>
 
-  <!-- NAVIGATION -->
   <nav class="flex flex-col gap-3 text-white/80 text-sm">
 
-    <a href="#"
-       class="flex items-center gap-3 px-3 py-2 rounded-lg
-              hover:bg-white/5 hover:text-white
-              transition-all duration-300">
+    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 hover:text-white transition">
       <i data-lucide="home" class="w-5 h-5"></i>
       Accueil
     </a>
 
-    <a href="#"
-       class="flex items-center gap-3 px-3 py-2 rounded-lg
-              hover:bg-white/5 hover:text-white
-              transition-all duration-300">
+    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 hover:text-white transition">
       <i data-lucide="info" class="w-5 h-5"></i>
       À propos
     </a>
 
-    <a href="#"
-       class="flex items-center gap-3 px-3 py-2 rounded-lg
-              hover:bg-white/5 hover:text-white
-              transition-all duration-300">
+    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 hover:text-white transition">
       <i data-lucide="headset" class="w-5 h-5"></i>
       IT Support
     </a>
 
-    <a href="#"
-       class="flex items-center gap-3 px-3 py-2 rounded-lg
-              hover:bg-white/5 hover:text-white
-              transition-all duration-300">
+    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 hover:text-white transition">
       <i data-lucide="shield" class="w-5 h-5"></i>
       Sécurité
     </a>
 
-    <!-- SEPARATOR -->
     <div class="border-t border-white/10 my-4"></div>
 
-    <!-- LOGIN BUTTON -->
     <a href="login.html"
-       class="flex items-center justify-center gap-3
-              px-4 py-2 rounded-lg
-              bg-primary
-              hover:bg-accent
-              transition-all duration-300
-              text-white font-medium
-              shadow-md hover:shadow-lg">
+       class="flex items-center justify-center gap-3 px-4 py-2 rounded-lg bg-primary hover:bg-accent transition text-white font-medium shadow-md">
       <i data-lucide="log-in" class="w-5 h-5"></i>
       Connexion
     </a>
 
-    <!-- INSTALL BUTTON -->
-    <button id="installBtnSidebar"
-            class="flex items-center justify-center gap-3
-                   px-4 py-2 rounded-lg
-                   border border-white/20
-                   text-white/80
-                   hover:bg-white/10 hover:border-white/40
-                   transition-all duration-300
-                   mt-3 hidden">
-      <i data-lucide="download" class="w-5 h-5"></i>
-      Installer l'application
-    </button>
-
   </nav>
 
-  <!-- FOOTER -->
   <div class="mt-auto text-xs text-white/40 pt-6 border-t border-white/10">
     Version 1.0.0<br>
     Système sécurisé
   </div>
 
 </aside>
-
 
 <!-- ================= NAVBAR ================= -->
 <header class="relative z-10 border-b border-white/10 bg-black/30 backdrop-blur-xl">
@@ -158,20 +118,18 @@ tailwind.config = {
   <div class="flex items-center gap-4">
 
     <button id="menuBtn"
-            class="md:hidden p-2 rounded-lg hover:bg-white/10 transition">
+            class="p-2 rounded-lg hover:bg-white/10 transition">
       <i data-lucide="menu" class="w-6 h-6"></i>
     </button>
 
-<img src="icons/logo-fkm.png"
-     alt="FKM ENERGY"
-     class="h-8 md:h-10 w-auto object-contain">
+    <img src="icons/logo-fkm.png"
+         alt="FKM ENERGY"
+         class="h-8 md:h-10 w-auto object-contain">
 
   </div>
 
   <a href="login.html"
-     class="px-4 py-2 bg-primary rounded-lg
-            text-white font-medium
-            hover:bg-accent transition shadow-md">
+     class="px-4 py-2 bg-primary rounded-lg text-white font-medium hover:bg-accent transition shadow-md">
      Connexion
   </a>
 
@@ -183,9 +141,7 @@ tailwind.config = {
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
 
-    <!-- LEFT CONTENT -->
     <div class="space-y-10 opacity-0 translate-y-10 transition-all duration-1000 scroll-animate">
-
       <h1 class="text-4xl md:text-6xl font-extrabold leading-tight tracking-tight">
         Système ERP intégré<br>
         pour gestion énergétique avancée
@@ -197,199 +153,29 @@ tailwind.config = {
         pour FKM ENERGY.
       </p>
 
-      <div class="flex flex-col sm:flex-row gap-6 pt-6">
-
-        <a href="login.html"
-           class="px-10 py-4
-                  bg-gradient-to-r from-primary via-accent to-cyan-400
-                  hover:brightness-110
-                  active:scale-[0.97]
-                  transition-all duration-300
-                  rounded-2xl font-semibold text-white text-center
-                  shadow-[0_20px_60px_rgba(14,165,233,0.5)]
-                  hover:shadow-[0_25px_80px_rgba(14,165,233,0.8)]">
-          Accéder à la plateforme
-        </a>
-
-        <button id="installBtn"
-                class="hidden px-10 py-4
-                       border border-white/20
-                       rounded-2xl font-semibold text-white/80
-                       hover:bg-white/10 hover:border-white/40
-                       transition backdrop-blur-md">
-          Télécharger l'application
-        </button>
-
-      </div>
-
-    </div>
-
-    <!-- RIGHT METRICS PANEL -->
-    <div class="relative opacity-0 translate-y-10 transition-all duration-1000 delay-200 scroll-animate">
-
-      <div class="absolute inset-0 bg-primary/20 blur-[120px] rounded-3xl"></div>
-
-      <div class="relative bg-white/10 border border-white/20
-                  rounded-3xl p-14 backdrop-blur-3xl
-                  shadow-[0_30px_90px_rgba(0,0,0,0.6)]
-                  hover:scale-[1.02] transition-all duration-500">
-
-        <div class="grid grid-cols-2 gap-14 text-center">
-
-          <div>
-            <div class="text-4xl font-extrabold text-cyan-400">24/7</div>
-            <div class="text-sm text-white/60 uppercase tracking-wider">
-              Monitoring
-            </div>
-          </div>
-
-          <div>
-            <div class="text-4xl font-extrabold text-emerald-400">100%</div>
-            <div class="text-sm text-white/60 uppercase tracking-wider">
-              Traçabilité
-            </div>
-          </div>
-
-          <div>
-            <div class="text-4xl font-extrabold text-indigo-400">Multi</div>
-            <div class="text-sm text-white/60 uppercase tracking-wider">
-              Devises
-            </div>
-          </div>
-
-          <div>
-            <div class="text-4xl font-extrabold text-primary">ERP</div>
-            <div class="text-sm text-white/60 uppercase tracking-wider">
-              Intégré
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
+      <a href="login.html"
+         class="px-10 py-4 bg-gradient-to-r from-primary via-accent to-cyan-400 hover:brightness-110 transition-all duration-300 rounded-2xl font-semibold text-white shadow-xl inline-block">
+        Accéder à la plateforme
+      </a>
     </div>
 
   </div>
-
 </section>
-
-
-<!-- ================= MODULES ================= -->
-<section class="relative z-10 bg-soft text-slate-900 py-28">
-
-  <div class="max-w-7xl mx-auto px-6">
-
-    <h2 class="text-4xl font-bold mb-24 text-center tracking-tight">
-      Modules ERP
-    </h2>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-16">
-
-      <!-- INVENTORY -->
-      <div class="group relative rounded-3xl p-12
-                  bg-gradient-to-br from-primary/10 to-primary/5
-                  border border-primary/20
-                  shadow-xl
-                  transition-all duration-500
-                  hover:-translate-y-3 hover:shadow-2xl
-                  opacity-0 translate-y-10 scroll-animate">
-
-        <div class="mb-10 text-primary">
-          <i data-lucide="boxes"
-             class="w-16 h-16 transition-all duration-500 group-hover:scale-110"></i>
-        </div>
-
-        <h3 class="font-semibold text-xl mb-5">
-          Gestion d'inventaire
-        </h3>
-
-        <p class="text-base text-slate-600 leading-relaxed">
-          Suivi en temps réel des stocks, traçabilité des produits,
-          gestion des entrées et sorties.
-        </p>
-
-      </div>
-
-      <!-- TRANSACTIONS -->
-      <div class="group relative rounded-3xl p-12
-                  bg-gradient-to-br from-accent/10 to-cyan-400/5
-                  border border-accent/20
-                  shadow-xl
-                  transition-all duration-500
-                  hover:-translate-y-3 hover:shadow-2xl
-                  opacity-0 translate-y-10 scroll-animate">
-
-        <div class="mb-10 text-accent">
-          <i data-lucide="receipt"
-             class="w-16 h-16 transition-all duration-500 group-hover:scale-110"></i>
-        </div>
-
-        <h3 class="font-semibold text-xl mb-5">
-          Transactions & Facturation
-        </h3>
-
-        <p class="text-base text-slate-600 leading-relaxed">
-          Facturation multi-devise, validation hiérarchique,
-          génération PDF professionnelle.
-        </p>
-
-      </div>
-
-      <!-- AUDIT -->
-      <div class="group relative rounded-3xl p-12
-                  bg-gradient-to-br from-indigo-400/10 to-indigo-400/5
-                  border border-indigo-400/20
-                  shadow-xl
-                  transition-all duration-500
-                  hover:-translate-y-3 hover:shadow-2xl
-                  opacity-0 translate-y-10 scroll-animate">
-
-        <div class="mb-10 text-indigo-500">
-          <i data-lucide="shield-check"
-             class="w-16 h-16 transition-all duration-500 group-hover:scale-110"></i>
-        </div>
-
-        <h3 class="font-semibold text-xl mb-5">
-          Sécurité & Audit
-        </h3>
-
-        <p class="text-base text-slate-600 leading-relaxed">
-          Journal d’actions, contrôle des rôles,
-          validation administrateur et traçabilité complète.
-        </p>
-
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
 
 <!-- ================= FOOTER ================= -->
 <footer class="bg-dark border-t border-white/10 py-14 text-center text-white/50 text-sm">
   © 2026 FKM ENERGY — Enterprise Resource Planning Platform
 </footer>
 
-<!-- ================= SCROLL ANIMATION SCRIPT ================= -->
-<script>
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.remove("opacity-0", "translate-y-10");
-      entry.target.classList.add("opacity-100", "translate-y-0");
-    }
-  });
-}, { threshold: 0.15 });
+<!-- ================= SCRIPTS ================= -->
 
-document.querySelectorAll(".scroll-animate").forEach(el => {
-  observer.observe(el);
-});
+<script>
+/* Activate Lucide Icons */
+lucide.createIcons();
 </script>
 
-      <script>
+<script>
+/* Sidebar Logic */
 const menuBtn = document.getElementById("menuBtn");
 const sidebar = document.getElementById("sidebar");
 const overlay = document.getElementById("sidebarOverlay");
@@ -398,7 +184,7 @@ const closeSidebar = document.getElementById("closeSidebar");
 function openSidebar() {
   sidebar.classList.remove("-translate-x-full");
   overlay.classList.remove("hidden");
-  document.body.classList.add("overflow-hidden"); // bloque scroll
+  document.body.classList.add("overflow-hidden");
 }
 
 function closeSidebarFunc() {
@@ -407,27 +193,14 @@ function closeSidebarFunc() {
   document.body.classList.remove("overflow-hidden");
 }
 
-/* OPEN */
 menuBtn.addEventListener("click", openSidebar);
-
-/* CLOSE */
 overlay.addEventListener("click", closeSidebarFunc);
 closeSidebar.addEventListener("click", closeSidebarFunc);
 
-/* ESC KEY CLOSE */
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    closeSidebarFunc();
-  }
-});
-
-/* Auto close si écran devient desktop */
-window.addEventListener("resize", () => {
-  if (window.innerWidth >= 768) {
-    closeSidebarFunc();
-  }
+  if (e.key === "Escape") closeSidebarFunc();
 });
 </script>
 
-
-
+</body>
+</html>
