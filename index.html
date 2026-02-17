@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="fr" class="scroll-smooth">
-
 <head>
 <meta charset="UTF-8" />
-<title>FKM ENERGY | ERP Platform</title>
+<title>FKM ENERGY | Portail Interne</title>
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <meta name="theme-color" content="#0B5C6B">
+
 <link rel="manifest" href="manifest.json">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,8 +22,8 @@ tailwind.config = {
     extend: {
       colors: {
         primary: '#0B5C6B',
-        dark: '#0F172A',
-        accent: '#14B8A6'
+        accent: '#14B8A6',
+        dark: '#0F172A'
       }
     }
   }
@@ -37,373 +35,159 @@ tailwind.config = {
 <style>
 .bg-grid{
 background-image:
-linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
-linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
-background-size:60px 60px;
+linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
+linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
+background-size:70px 70px;
 }
-
-.scroll-animate{
-opacity:0;
-transform:translateY(30px);
-transition:all .8s ease;
-}
-.scroll-animate.visible{
-opacity:1;
-transform:translateY(0);
+.glow{
+position:absolute;
+width:500px;
+height:500px;
+background:radial-gradient(circle, rgba(20,184,166,0.25), transparent 70%);
+filter:blur(120px);
+z-index:-1;
 }
 </style>
-
 </head>
 
 <body class="relative bg-gradient-to-br from-[#0F172A] via-[#0b1f2e] to-[#0f2c3d] text-white overflow-x-hidden">
-<!-- ================= SIDEBAR ================= -->
 
-<div id="sidebarOverlay"
-     class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-40 transition-opacity duration-300"></div>
+<div class="absolute inset-0 bg-grid pointer-events-none"></div>
+<div class="glow top-[-150px] left-[-150px]"></div>
+<div class="glow bottom-[-200px] right-[-200px]"></div>
 
-<aside id="sidebar"
-       class="fixed top-0 left-0 h-full w-72
-              bg-gradient-to-b from-[#0E1A28] to-[#0b2435]
-              border-r border-white/10
-              shadow-[0_30px_80px_rgba(0,0,0,0.8)]
-              transform -translate-x-full
-              transition-transform duration-300 ease-out
-              z-50 p-6 flex flex-col">
+<!-- ================= HEADER ================= -->
 
-  <!-- ================= CLOSE BUTTON ================= -->
-  <button id="closeSidebar"
-          class="absolute top-5 right-5 text-white/40 hover:text-white transition-colors duration-200">
-    <i data-lucide="x" class="w-6 h-6"></i>
-  </button>
+<header class="border-b border-white/10 bg-black/30 backdrop-blur-xl">
 
-  <!-- ================= LOGO SECTION ================= -->
-  <div class="flex items-center gap-3 mb-10">
+<div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
 
-    <img src="icons/logo-fkm.png"
-         alt="FKM ENERGY"
-         class="h-10 w-auto object-contain drop-shadow-md">
+<div class="flex items-center gap-4">
+<img src="icons/logo-fkm.png"
+     class="h-9 md:h-10 w-auto object-contain">
+</div>
 
-    <div class="text-lg font-semibold tracking-wide text-primary">
-      FKM ENERGY ERP
-    </div>
+<nav class="hidden md:flex items-center gap-8 text-sm text-white/70">
+<a href="#" class="hover:text-white transition">Signaler un problème</a>
+<a href="login.html" class="hover:text-white transition">Mon Profil</a>
+<a href="#" class="hover:text-white transition">IT Support</a>
+<a href="#" class="hover:text-white transition">À propos</a>
+</nav>
 
-  </div>
+<button id="menuBtn" class="md:hidden p-2 rounded-lg hover:bg-white/10 transition">
+<i data-lucide="menu" class="w-6 h-6"></i>
+</button>
 
-  <!-- ================= NAVIGATION TITLE ================= -->
-  <div class="text-xs uppercase tracking-widest text-white/40 mb-4">
-    Navigation
-  </div>
-
-  <!-- ================= MAIN NAVIGATION ================= -->
-  <nav class="flex flex-col gap-2 text-white/80 text-sm">
-
-    <!-- Accueil -->
-    <a href="#"
-       class="group flex items-center gap-3 px-3 py-2.5 rounded-lg
-              hover:bg-white/5 hover:text-white
-              transition-all duration-200">
-      <i data-lucide="layout-dashboard"
-         class="w-5 h-5 text-white/60 group-hover:text-primary transition-colors"></i>
-      Accueil
-    </a>
-
-    <!-- Profil -->
-    <a href="#"
-       class="group flex items-center gap-3 px-3 py-2.5 rounded-lg
-              hover:bg-white/5 hover:text-white
-              transition-all duration-200">
-      <i data-lucide="user-cog"
-         class="w-5 h-5 text-white/60 group-hover:text-primary transition-colors"></i>
-      Profil
-    </a>
-
-    <!-- Sécurité -->
-    <a href="#"
-       class="group flex items-center gap-3 px-3 py-2.5 rounded-lg
-              hover:bg-white/5 hover:text-white
-              transition-all duration-200">
-      <i data-lucide="shield-check"
-         class="w-5 h-5 text-white/60 group-hover:text-primary transition-colors"></i>
-      Sécurité
-    </a>
-
-    <!-- IT Support -->
-    <a href="#"
-       class="group flex items-center gap-3 px-3 py-2.5 rounded-lg
-              hover:bg-white/5 hover:text-white
-              transition-all duration-200">
-      <i data-lucide="headset"
-         class="w-5 h-5 text-white/60 group-hover:text-primary transition-colors"></i>
-      IT Support
-    </a>
-
-    <!-- Separator -->
-    <div class="border-t border-white/10 my-4"></div>
-
-    <!-- Connexion -->
-    <a href="login.html"
-       class="flex items-center justify-center gap-3
-              px-4 py-2.5 rounded-lg
-              bg-primary hover:bg-accent
-              transition-all duration-300
-              text-white font-medium shadow-md hover:shadow-lg">
-      <i data-lucide="log-in" class="w-5 h-5"></i>
-      Connexion
-    </a>
-
-  </nav>
-
-  <!-- ================= FOOTER ================= -->
-  <div class="mt-auto pt-6 border-t border-white/10 text-xs text-white/40">
-    Version 1.0.0<br>
-    Système sécurisé
-  </div>
-
-</aside>
-
-<!-- ================= NAVBAR ================= -->
-<header class="border-b border-white/10 bg-black/30 backdrop-blur-xl sticky top-0 z-50">
-
-  <div class="max-w-7xl mx-auto px-5 sm:px-6 py-4 flex items-center justify-between">
-
-    <!-- LEFT SIDE -->
-    <div class="flex items-center gap-4">
-
-      <!-- MENU BUTTON (mobile only) -->
-      <button id="menuBtn"
-              class="md:hidden p-2 rounded-lg hover:bg-white/10 transition">
-        <i data-lucide="menu" class="w-6 h-6"></i>
-      </button>
-
-      <!-- LOGO -->
-      <img src="icons/logo-fkm.png"
-           alt="FKM ENERGY"
-           class="h-8 sm:h-9 md:h-10 w-auto object-contain select-none">
-
-    </div>
-
-    <!-- RIGHT SIDE -->
-    <a href="login.html"
-       class="px-5 sm:px-6 py-2.5
-              bg-primary hover:bg-accent
-              rounded-lg
-              text-sm sm:text-base
-              font-medium
-              shadow-md hover:shadow-lg
-              transition-all duration-300">
-      Connexion
-    </a>
-
-  </div>
-
+</div>
 </header>
-
 
 <!-- ================= HERO ================= -->
 
-<section class="max-w-7xl mx-auto px-6 py-24 md:py-32">
+<section class="max-w-7xl mx-auto px-6 py-28 text-center">
 
-<div class="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-
-<div class="space-y-8 scroll-animate">
-
-<h1 class="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight">
-Système ERP intégré<br>
-<span class="text-accent">gestion énergétique avancée</span>
+<h1 class="text-4xl md:text-6xl font-bold leading-tight tracking-tight">
+Portail Interne ERP<br>
+<span class="text-accent">Sécurisé • Moderne • Centralisé</span>
 </h1>
 
-<p class="text-white/70 text-base sm:text-lg leading-relaxed max-w-xl">
-Plateforme centralisée de gestion des transactions,
-inventaire, opérations commerciales et pilotage financier.
+<p class="mt-8 text-white/70 text-lg max-w-2xl mx-auto leading-relaxed">
+Plateforme interne de gestion énergétique avancée.
+Système intégré conçu pour assurer performance,
+traçabilité et sécurité de l'ensemble des opérations.
 </p>
 
+<div class="mt-12 flex flex-col sm:flex-row gap-6 justify-center">
+
 <a href="login.html"
-   class="inline-block px-8 py-3 rounded-xl
-          text-sm sm:text-base font-medium
+   class="px-10 py-4 rounded-2xl font-medium
           bg-gradient-to-r from-primary to-accent
-          shadow-lg hover:brightness-110 transition">
-Accéder à la plateforme
+          hover:brightness-110 transition shadow-xl">
+Accéder au système
+</a>
+
+<button class="px-10 py-4 rounded-2xl font-medium
+               border border-white/20 hover:bg-white/10 transition">
+Télécharger l'application
+</button>
+
+</div>
+
+</section>
+
+<!-- ================= FEATURES ================= -->
+
+<section class="max-w-7xl mx-auto px-6 pb-28">
+
+<h2 class="text-3xl font-semibold text-center mb-20">
+Pourquoi un ERP ?
+</h2>
+
+<div class="grid md:grid-cols-3 gap-10">
+
+<div class="bg-white/5 backdrop-blur-xl rounded-3xl p-10 border border-white/10 hover:-translate-y-2 transition shadow-xl">
+<i data-lucide="database" class="w-14 h-14 text-primary mb-6"></i>
+<h3 class="text-xl font-semibold mb-4">Centralisation</h3>
+<p class="text-white/70 text-sm leading-relaxed">
+Toutes les données regroupées dans un système unique,
+sécurisé et structuré.
+</p>
+</div>
+
+<div class="bg-white/5 backdrop-blur-xl rounded-3xl p-10 border border-white/10 hover:-translate-y-2 transition shadow-xl">
+<i data-lucide="shield-check" class="w-14 h-14 text-emerald-400 mb-6"></i>
+<h3 class="text-xl font-semibold mb-4">Sécurité Avancée</h3>
+<p class="text-white/70 text-sm leading-relaxed">
+Contrôle des accès, audit des actions et protection
+des données sensibles.
+</p>
+</div>
+
+<div class="bg-white/5 backdrop-blur-xl rounded-3xl p-10 border border-white/10 hover:-translate-y-2 transition shadow-xl">
+<i data-lucide="cpu" class="w-14 h-14 text-indigo-400 mb-6"></i>
+<h3 class="text-xl font-semibold mb-4">Performance</h3>
+<p class="text-white/70 text-sm leading-relaxed">
+Optimisation des flux opérationnels et
+automatisation des processus clés.
+</p>
+</div>
+
+</div>
+</section>
+
+<!-- ================= SUPPORT ================= -->
+
+<section class="bg-white text-slate-900 py-24">
+
+<div class="max-w-4xl mx-auto text-center px-6">
+
+<i data-lucide="headset" class="w-16 h-16 mx-auto text-primary mb-8"></i>
+
+<h2 class="text-3xl font-semibold mb-6">
+Besoin d'assistance ?
+</h2>
+
+<p class="text-slate-600 mb-10">
+Si votre session a expiré ou si vous rencontrez un problème,
+contactez immédiatement l’IT Support.
+</p>
+
+<a href="#"
+   class="px-8 py-3 rounded-xl bg-primary text-white
+          hover:bg-accent transition shadow-lg">
+Contacter l'IT Support
 </a>
 
 </div>
-
-<div class="scroll-animate">
-
-<div class="bg-white/10 backdrop-blur-xl
-            rounded-2xl p-10 md:p-14
-            border border-white/15
-            shadow-xl">
-
-<div class="grid grid-cols-2 gap-10 text-center">
-
-<div>
-<div class="text-3xl md:text-4xl font-semibold text-cyan-400">24/7</div>
-<div class="text-xs md:text-sm text-white/60 uppercase tracking-widest mt-2">
-Monitoring
-</div>
-</div>
-
-<div>
-<div class="text-3xl md:text-4xl font-semibold text-emerald-400">100%</div>
-<div class="text-xs md:text-sm text-white/60 uppercase tracking-widest mt-2">
-Traçabilité
-</div>
-</div>
-
-<div>
-<div class="text-3xl md:text-4xl font-semibold text-indigo-400">Multi</div>
-<div class="text-xs md:text-sm text-white/60 uppercase tracking-widest mt-2">
-Devises
-</div>
-</div>
-
-<div>
-<div class="text-3xl md:text-4xl font-semibold text-primary">ERP</div>
-<div class="text-xs md:text-sm text-white/60 uppercase tracking-widest mt-2">
-Intégré
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-
-</div>
 </section>
 
-<!-- ================= MODULES ================= -->
+<!-- ================= FOOTER ================= -->
 
-<section class="bg-white text-slate-900 py-24 md:py-32">
-
-<div class="max-w-7xl mx-auto px-6">
-
-<h2 class="text-2xl md:text-3xl font-semibold text-center mb-16">
-Modules ERP
-</h2>
-
-<div class="grid md:grid-cols-3 gap-10 md:gap-12">
-
-<div class="p-8 md:p-10 rounded-2xl shadow-lg hover:shadow-xl transition bg-white border">
-
-<i data-lucide="boxes" class="w-10 h-10 text-primary mb-6"></i>
-
-<h3 class="text-lg font-semibold mb-3">
-Gestion d'inventaire
-</h3>
-
-<p class="text-sm text-slate-600 leading-relaxed">
-Suivi temps réel des stocks et traçabilité complète.
-</p>
-
-</div>
-
-<div class="p-8 md:p-10 rounded-2xl shadow-lg hover:shadow-xl transition bg-white border">
-
-<i data-lucide="receipt" class="w-10 h-10 text-accent mb-6"></i>
-
-<h3 class="text-lg font-semibold mb-3">
-Transactions & Facturation
-</h3>
-
-<p class="text-sm text-slate-600 leading-relaxed">
-Facturation multi-devise et validation hiérarchique.
-</p>
-
-</div>
-
-<div class="p-8 md:p-10 rounded-2xl shadow-lg hover:shadow-xl transition bg-white border">
-
-<i data-lucide="shield-check" class="w-10 h-10 text-indigo-500 mb-6"></i>
-
-<h3 class="text-lg font-semibold mb-3">
-Sécurité & Audit
-</h3>
-
-<p class="text-sm text-slate-600 leading-relaxed">
-Contrôle des rôles et journal d’actions sécurisé.
-</p>
-
-</div>
-
-</div>
-</div>
-</section>
-
-<footer class="bg-[#0F172A] text-white/40 text-center py-10 text-xs tracking-wide">
-© 2026 FKM ENERGY — Enterprise ERP Platform
+<footer class="bg-[#0F172A] text-white/40 text-center py-12 text-xs tracking-wide">
+© 2026 FKM ENERGY — Enterprise Resource Planning Platform
 </footer>
 
 <script>
 lucide.createIcons();
-
-const observer=new IntersectionObserver(entries=>{
-entries.forEach(entry=>{
-if(entry.isIntersecting){
-entry.target.classList.add("visible");
-}
-});
-},{threshold:.2});
-
-document.querySelectorAll(".scroll-animate").forEach(el=>observer.observe(el));
-</script>
-<script>
-const menuBtn = document.getElementById("menuBtn");
-const sidebar = document.getElementById("sidebar");
-const overlay = document.getElementById("sidebarOverlay");
-const closeSidebar = document.getElementById("closeSidebar");
-
-function openSidebar() {
-  sidebar.classList.remove("-translate-x-full");
-  overlay.classList.remove("hidden");
-  document.body.classList.add("overflow-hidden");
-}
-
-function closeSidebarFunc() {
-  sidebar.classList.add("-translate-x-full");
-  overlay.classList.add("hidden");
-  document.body.classList.remove("overflow-hidden");
-}
-
-/* OPEN */
-if(menuBtn){
-  menuBtn.addEventListener("click", openSidebar);
-}
-
-/* CLOSE */
-if(overlay){
-  overlay.addEventListener("click", closeSidebarFunc);
-}
-
-if(closeSidebar){
-  closeSidebar.addEventListener("click", closeSidebarFunc);
-}
-
-/* ESC KEY */
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    closeSidebarFunc();
-  }
-});
-
-/* Auto close on desktop */
-window.addEventListener("resize", () => {
-  if (window.innerWidth >= 768) {
-    closeSidebarFunc();
-  }
-});
-</script>
-      <script type="module">
-import { auth } from "./js/firebase.config.js";
-import { onAuthStateChanged } from 
-"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // 🔥 Si déjà connecté → redirige vers dashboard
-    window.location.replace("dashboard.html");
-  }
-});
 </script>
 
 </body>
