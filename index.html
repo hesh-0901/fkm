@@ -189,6 +189,27 @@ Contacter l'IT Support
 <script>
 lucide.createIcons();
 </script>
+  <script>
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("sidebarOverlay");
+const closeSidebar = document.getElementById("closeSidebar");
+
+function openSidebar() {
+  sidebar.classList.remove("-translate-x-full");
+  overlay.classList.remove("hidden");
+}
+
+function closeSidebarFunc() {
+  sidebar.classList.add("-translate-x-full");
+  overlay.classList.add("hidden");
+}
+
+menuBtn.addEventListener("click", openSidebar);
+overlay.addEventListener("click", closeSidebarFunc);
+closeSidebar.addEventListener("click", closeSidebarFunc);
+</script>
+
 
 </body>
 </html>
